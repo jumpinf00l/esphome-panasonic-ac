@@ -33,6 +33,7 @@ enum class ACType {
 class PanasonicAC : public Component, public uart::UARTDevice, public climate::Climate {
  public:
   void set_outside_temperature_sensor(sensor::Sensor *outside_temperature_sensor);
+  void set_inside_temperature_sensor(sensor::Sensor *inside_temperature_sensor);
   void set_vertical_swing_select(select::Select *vertical_swing_select);
   void set_horizontal_swing_select(select::Select *horizontal_swing_select);
   void set_nanoex_switch(switch_::Switch *nanoex_switch);
@@ -48,6 +49,7 @@ class PanasonicAC : public Component, public uart::UARTDevice, public climate::C
 
  protected:
   sensor::Sensor *outside_temperature_sensor_ = nullptr;        // Sensor to store outside temperature from queries
+  sensor::Sensor *inside_temperature_sensor_ = nullptr;         // Sensor to store inside temperature from queries
   select::Select *vertical_swing_select_ = nullptr;             // Select to store manual position of vertical swing
   select::Select *horizontal_swing_select_ = nullptr;           // Select to store manual position of horizontal swing
   switch_::Switch *nanoex_switch_ = nullptr;                    // Switch to toggle nanoeX on/off
@@ -82,6 +84,7 @@ class PanasonicAC : public Component, public uart::UARTDevice, public climate::C
   void read_data();
 
   void update_outside_temperature(int8_t temperature);
+  void update_inside_temperature(int8_t temperature);
   void update_current_temperature(int8_t temperature);
   void update_target_temperature(uint8_t raw_value);
   void update_swing_horizontal(const std::string &swing);

@@ -20,14 +20,12 @@ climate::ClimateTraits PanasonicAC::traits() {
 
   traits.set_supported_modes({climate::CLIMATE_MODE_OFF, climate::CLIMATE_MODE_HEAT_COOL, climate::CLIMATE_MODE_COOL,
                               climate::CLIMATE_MODE_HEAT, climate::CLIMATE_MODE_FAN_ONLY, climate::CLIMATE_MODE_DRY});
-
-  traits.set_supported_custom_fan_modes({"Automatic", "1", "2", "3", "4", "5"});
-
-  traits.set_supported_swing_modes({climate::CLIMATE_SWING_OFF, climate::CLIMATE_SWING_BOTH,
-                                    climate::CLIMATE_SWING_VERTICAL, climate::CLIMATE_SWING_HORIZONTAL});
+  
+  traits.set_supported_custom_fan_modes({"Auto", "1", "2", "3", "4", "5"});
 
   traits.set_supported_custom_presets({"Normal", "Powerful", "Quiet"});
 
+  
   return traits;
 }
 
@@ -68,6 +66,17 @@ void PanasonicAC::update_outside_temperature(int8_t temperature) {
   if (this->outside_temperature_sensor_ != nullptr && this->outside_temperature_sensor_->state != temperature)
     this->outside_temperature_sensor_->publish_state(
         temperature);  // Set current (outside) temperature; no temperature steps
+}
+
+void PanasonicAC::update_inside_temperature(int8_t temperature) {
+  if (temperature > TEMPERATURE_THRESHOLD) {
+    ESP_LOGW(TAG, "Received out of range inside temperature: %d", temperature);
+    return;
+  }
+
+  if (this->inside_temperature_sensor_ != nullptr && this->inside_temperature_sensor_->state != temperature)
+    this->inside_temperature_sensor_->publish_state(
+        temperature);  // Set current (inside) temperature; no temperature steps
 }
 
 void PanasonicAC::update_current_temperature(int8_t temperature) {
@@ -166,6 +175,10 @@ void PanasonicAC::update_current_power_consumption(int16_t power) {
 
 void PanasonicAC::set_outside_temperature_sensor(sensor::Sensor *outside_temperature_sensor) {
   this->outside_temperature_sensor_ = outside_temperature_sensor;
+}
+
+void PanasonicAC::set_inside_temperature_sensor(sensor::Sensor *inside_temperature_sensor) {
+  this->inside_temperature_sensor_ = inside_temperature_sensor;
 }
 
 void PanasonicAC::set_current_temperature_sensor(sensor::Sensor *current_temperature_sensor)

@@ -33,6 +33,7 @@ PanasonicACSelect = panasonic_ac_ns.class_(
 CONF_HORIZONTAL_SWING_SELECT = "horizontal_swing_select"
 CONF_VERTICAL_SWING_SELECT = "vertical_swing_select"
 CONF_OUTSIDE_TEMPERATURE = "outside_temperature"
+CONF_INSIDE_TEMPERATURE = "inside_temperature"
 CONF_CURRENT_TEMPERATURE_SENSOR = "current_temperature_sensor"
 CONF_NANOEX_SWITCH = "nanoex_switch"
 CONF_ECO_SWITCH = "eco_switch"
@@ -42,17 +43,9 @@ CONF_CURRENT_POWER_CONSUMPTION = "current_power_consumption"
 CONF_WLAN = "wlan"
 CONF_CNT = "cnt"
 
-HORIZONTAL_SWING_OPTIONS = [
-    "auto",
-    "left",
-    "left_center",
-    "center",
-    "right_center",
-    "right",
-]
+HORIZONTAL_SWING_OPTIONS = ["auto", "left", "left_center", "center", "right_center", "right",]
 
-
-VERTICAL_SWING_OPTIONS = ["swing", "auto", "up", "up_center", "center", "down_center", "down"]
+VERTICAL_SWING_OPTIONS = ["Swing", "Auto", "Top", "Top Middle", "Middle", "Bottom Middle", "Bottom"]
 
 SWITCH_SCHEMA = switch.SWITCH_SCHEMA.extend(cv.COMPONENT_SCHEMA).extend(
     {cv.GenerateID(): cv.declare_id(PanasonicACSwitch)}
@@ -66,6 +59,12 @@ SCHEMA = climate.CLIMATE_SCHEMA.extend(
         cv.Optional(CONF_HORIZONTAL_SWING_SELECT): SELECT_SCHEMA,
         cv.Optional(CONF_VERTICAL_SWING_SELECT): SELECT_SCHEMA,
         cv.Optional(CONF_OUTSIDE_TEMPERATURE): sensor.sensor_schema(
+            unit_of_measurement=UNIT_CELSIUS,
+            accuracy_decimals=0,
+            device_class=DEVICE_CLASS_TEMPERATURE,
+            state_class=STATE_CLASS_MEASUREMENT,
+        ),
+        cv.Optional(CONF_INSIDE_TEMPERATURE): sensor.sensor_schema(
             unit_of_measurement=UNIT_CELSIUS,
             accuracy_decimals=0,
             device_class=DEVICE_CLASS_TEMPERATURE,
@@ -123,6 +122,14 @@ async def to_code(config):
         sens = await sensor.new_sensor(config[CONF_OUTSIDE_TEMPERATURE])
         cg.add(var.set_outside_temperature_sensor(sens))
 
+    if CONF_INSIDE_TEMPERATURE in config:
+        sens = await sensor.new_sensor(config[CONF_INSIDE_TEMPERATURE])
+        cg.add(var.set_inside_temperature_sensor(sens))
+
+    if CONF_CURRENT_TEMPERATURE_SENSOR in config:
+        sens = await cg.get_variable(config[CONF_CURRENT_TEMPERATURE_SENSOR])
+        cg.add(var.set_current_temperature_sensor(sens))
+    
     for s in [CONF_ECO_SWITCH, CONF_NANOEX_SWITCH, CONF_MILD_DRY_SWITCH, CONF_ECONAVI_SWITCH]:
         if s in config:
             conf = config[s]
@@ -130,10 +137,6 @@ async def to_code(config):
             await cg.register_component(a_switch, conf)
             await switch.register_switch(a_switch, conf)
             cg.add(getattr(var, f"set_{s}")(a_switch))
-
-    if CONF_CURRENT_TEMPERATURE_SENSOR in config:
-        sens = await cg.get_variable(config[CONF_CURRENT_TEMPERATURE_SENSOR])
-        cg.add(var.set_current_temperature_sensor(sens))
 
     if CONF_CURRENT_POWER_CONSUMPTION in config:
         sens = await sensor.new_sensor(config[CONF_CURRENT_POWER_CONSUMPTION])

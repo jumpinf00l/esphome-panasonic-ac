@@ -91,7 +91,7 @@ void PanasonicACCNT::control(const climate::ClimateCall &call) {
 
     std::string fanMode = *call.get_custom_fan_mode();
 
-    if (fanMode == "Automatic")
+    if (fanMode == "Auto")
       this->cmd[3] = 0xA0;
     else if (fanMode == "1")
       this->cmd[3] = 0x30;
@@ -184,6 +184,16 @@ void PanasonicACCNT::set_data(bool set) {
         this->update_outside_temperature((int8_t)this->rx_buffer_[22]);
       else
         ESP_LOGV(TAG, "Outside temperature is not supported");
+    }
+
+    if (this->inside_temperature_sensor_ != nullptr)
+    {
+      if(this->rx_buffer_[18] != 0x80)
+        this->update_inside_temperature((int8_t)this->rx_buffer_[18]);
+      else if(this->rx_buffer_[21] != 0x80)
+        this->update_inside_temperature((int8_t)this->rx_buffer_[21]);
+      else
+        ESP_LOGV(TAG, "Inside temperature is not supported");
     }
 
     if(this->current_power_consumption_sensor_ != nullptr) {
@@ -347,7 +357,7 @@ climate::ClimateMode PanasonicACCNT::determine_mode(uint8_t mode) {
 std::string PanasonicACCNT::determine_fan_speed(uint8_t speed) {
   switch (speed) {
     case 0xA0:  // Auto
-      return "Automatic";
+      return "Auto";
     case 0x30:  // 1
       return "1";
     case 0x40:  // 2
@@ -369,19 +379,19 @@ std::string PanasonicACCNT::determine_vertical_swing(uint8_t swing) {
 
   switch (nib) {
     case 0x0E:
-      return "swing";
+      return "Swing";
     case 0x0F:
-      return "auto";
+      return "Auto";
     case 0x01:
-      return "up";
+      return "Top";
     case 0x02:
-      return "up_center";
+      return "Top Middle";
     case 0x03:
-      return "center";
+      return "Middle";
     case 0x04:
-      return "down_center";
+      return "Bottom Middle";
     case 0x05:
-      return "down";
+      return "Bottom";
     case 0x00:
       return "unsupported";
     default:
@@ -395,17 +405,17 @@ std::string PanasonicACCNT::determine_horizontal_swing(uint8_t swing) {
 
   switch (nib) {
     case 0x0D:
-      return "auto";
+      return "Auto";
     case 0x09:
-      return "left";
+      return "Left";
     case 0x0A:
-      return "left_center";
+      return "Left Center";
     case 0x06:
-      return "center";
+      return "Center";
     case 0x0B:
-      return "right_center";
+      return "Right Center";
     case 0x0C:
-      return "right";
+      return "Right";
     case 0x00:
       return "unsupported";
     default:
@@ -415,7 +425,7 @@ std::string PanasonicACCNT::determine_horizontal_swing(uint8_t swing) {
 }
 
 std::string PanasonicACCNT::determine_preset(uint8_t preset) {
-  uint8_t nib = (preset >> 0) & 0x0F;  // Right nib for preset (powerful/quiet)
+  uint8_t nib = (preset >> 0) & 0x0F;  // Right nib for preset (Powerful/Quiet)
 
   switch (nib) {
     case 0x02:
@@ -497,19 +507,19 @@ void PanasonicACCNT::on_vertical_swing_change(const std::string &swing) {
     this->cmd = this->data;
   }
 
-  if (swing == "down")
+  if (swing == "Bottom")
     this->cmd[4] = (this->cmd[4] & 0x0F) + 0x50;
-  else if (swing == "down_center")
+  else if (swing == "Bottom Middle")
     this->cmd[4] = (this->cmd[4] & 0x0F) + 0x40;
-  else if (swing == "center")
+  else if (swing == "Middle")
     this->cmd[4] = (this->cmd[4] & 0x0F) + 0x30;
-  else if (swing == "up_center")
+  else if (swing == "Top Middle")
     this->cmd[4] = (this->cmd[4] & 0x0F) + 0x20;
-  else if (swing == "up")
+  else if (swing == "Top")
     this->cmd[4] = (this->cmd[4] & 0x0F) + 0x10;
-  else if (swing == "swing")
+  else if (swing == "Swing")
     this->cmd[4] = (this->cmd[4] & 0x0F) + 0xE0;
-  else if (swing == "auto")
+  else if (swing == "Auto")
     this->cmd[4] = (this->cmd[4] & 0x0F) + 0xF0;
   else {
     ESP_LOGW(TAG, "Unsupported vertical swing position received");
@@ -529,17 +539,17 @@ void PanasonicACCNT::on_horizontal_swing_change(const std::string &swing) {
     this->cmd = this->data;
   }
 
-  if (swing == "left")
+  if (swing == "Left")
     this->cmd[4] = (this->cmd[4] & 0xF0) + 0x09;
-  else if (swing == "left_center")
+  else if (swing == "Left Center")
     this->cmd[4] = (this->cmd[4] & 0xF0) + 0x0A;
-  else if (swing == "center")
+  else if (swing == "Center")
     this->cmd[4] = (this->cmd[4] & 0xF0) + 0x06;
-  else if (swing == "right_center")
+  else if (swing == "Right Center")
     this->cmd[4] = (this->cmd[4] & 0xF0) + 0x0B;
-  else if (swing == "right")
+  else if (swing == "Right")
     this->cmd[4] = (this->cmd[4] & 0xF0) + 0x0C;
-  else if (swing == "auto")
+  else if (swing == "Auto")
     this->cmd[4] = (this->cmd[4] & 0xF0) + 0x0D;
   else {
     ESP_LOGW(TAG, "Unsupported horizontal swing position received");
@@ -581,11 +591,14 @@ void PanasonicACCNT::on_eco_change(bool state) {
 
   if (state) {
     ESP_LOGV(TAG, "Turning eco mode on");
-    this->cmd[8] = 0x40;
+    this->cmd[8] = 0x40;  // Set the byte corresponding to eco mode
   } else {
     ESP_LOGV(TAG, "Turning eco mode off");
-    this->cmd[8] = 0x00;
+    this->cmd[8] = 0x00;  // Clear the byte corresponding to eco mode
   }
+
+  // Optionally, send the modified command immediately
+  send_command(this->cmd, CommandType::Normal, CTRL_HEADER);
 }
 
 void PanasonicACCNT::on_econavi_change(bool state) {
