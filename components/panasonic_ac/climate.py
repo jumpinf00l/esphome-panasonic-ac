@@ -32,8 +32,6 @@ PanasonicACSelect = panasonic_ac_ns.class_(
 
 CONF_HORIZONTAL_SWING_SELECT = "horizontal_swing_select"
 CONF_VERTICAL_SWING_SELECT = "vertical_swing_select"
-CONF_FAN_MODE_SELECT = "fan_mode_select"
-CONF_PRESET_MODE_SELECT = "preset_mode_select"
 CONF_OUTSIDE_TEMPERATURE = "outside_temperature"
 CONF_INSIDE_TEMPERATURE = "inside_temperature"
 CONF_CURRENT_TEMPERATURE_SENSOR = "current_temperature_sensor"
@@ -49,10 +47,6 @@ HORIZONTAL_SWING_OPTIONS = ["auto", "left", "left_center", "center", "right_cent
 
 VERTICAL_SWING_OPTIONS = ["Swing", "Auto", "Top", "Top Middle", "Middle", "Bottom Middle", "Bottom"]
 
-FAN_MODE_OPTIONS = ["Auto", "1", "2", "3", "4", "5"]
-
-PRESET_MODE_OPTIONS = ["Normal", "Powerful", "Quiet"]
-
 SWITCH_SCHEMA = switch.SWITCH_SCHEMA.extend(cv.COMPONENT_SCHEMA).extend(
     {cv.GenerateID(): cv.declare_id(PanasonicACSwitch)}
 )
@@ -64,8 +58,6 @@ SCHEMA = climate.CLIMATE_SCHEMA.extend(
     {
         cv.Optional(CONF_HORIZONTAL_SWING_SELECT): SELECT_SCHEMA,
         cv.Optional(CONF_VERTICAL_SWING_SELECT): SELECT_SCHEMA,
-        cv.Optional(CONF_FAN_MODE_SELECT): SELECT_SCHEMA,
-        cv.Optional(CONF_PRESET_MODE_SELECT): SELECT_SCHEMA,
         cv.Optional(CONF_OUTSIDE_TEMPERATURE): sensor.sensor_schema(
             unit_of_measurement=UNIT_CELSIUS,
             accuracy_decimals=0,
@@ -125,18 +117,6 @@ async def to_code(config):
         swing_select = await select.new_select(conf, options=VERTICAL_SWING_OPTIONS)
         await cg.register_component(swing_select, conf)
         cg.add(var.set_vertical_swing_select(swing_select))
-
-    if CONF_FAN_MODE_SELECT in config:
-        conf = config[CONF_FAN_MODE_SELECT]
-        swing_select = await select.new_select(conf, options=FAN_MODE_OPTIONS)
-        await cg.register_component(fan_select, conf)
-        cg.add(var.set_fan_mode_select(fan_select))
-
-    if CONF_PRESET_MODE_SELECT in config:
-        conf = config[CONF_PRESET_MODE_SELECT]
-        swing_select = await select.new_select(conf, options=PRESET_MODE_OPTIONS)
-        await cg.register_component(preset_select, conf)
-        cg.add(var.set_preset_mode_select(preset_select))
 
     if CONF_OUTSIDE_TEMPERATURE in config:
         sens = await sensor.new_sensor(config[CONF_OUTSIDE_TEMPERATURE])
