@@ -23,8 +23,10 @@ climate::ClimateTraits PanasonicAC::traits() {
   
   traits.set_supported_custom_fan_modes({"auto", "1", "2", "3", "4", "5"});
 
+/*  traits.set_supported_swing_modes({climate::CLIMATE_SWING_OFF, climate::CLIMATE_SWING_BOTH,
+                                    climate::CLIMATE_SWING_VERTICAL, climate::CLIMATE_SWING_HORIZONTAL}); */
+  
   traits.set_supported_custom_presets({"Normal", "Powerful", "Quiet"});
-
   
   return traits;
 }
