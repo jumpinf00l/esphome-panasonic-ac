@@ -91,7 +91,7 @@ void PanasonicACCNT::control(const climate::ClimateCall &call) {
 
     std::string fanMode = *call.get_custom_fan_mode();
 
-    if (fanMode == "auto")
+    if (fanMode == "Automatic")
       this->cmd[3] = 0xA0;
     else if (fanMode == "1")
       this->cmd[3] = 0x30;
@@ -356,8 +356,8 @@ climate::ClimateMode PanasonicACCNT::determine_mode(uint8_t mode) {
 
 std::string PanasonicACCNT::determine_fan_speed(uint8_t speed) {
   switch (speed) {
-    case 0xA0:  // auto
-      return "auto";
+    case 0xA0:  // Automatic
+      return "Automatic";
     case 0x30:  // 1
       return "1";
     case 0x40:  // 2
