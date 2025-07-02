@@ -1,3 +1,214 @@
+# It's a fork
+This is jumpinf00l's super-dodgy hack to add a few nicer sensors and selects, it's only really public so that ESPHome can reach it, but I guess you can use it. No, I don't intend to do a PR because, as previously mentioned, these are super-dodgy hacks and intended only for jumpinf00l. This is specifically to support features of Panasonic CS-Z25XKRW, but these extra selects should be pretty universal
+
+Here's a working cut-down example (add your own substitutions, wifi, etc):
+
+```
+esp32:
+  board: esp32-c3-devkitm-1
+  framework:
+    type: arduino
+
+external_components:
+  - source: github://jumpinf00l/esphome-panasonic-ac
+    components: [panasonic_ac]
+    refresh: 120min # or whatever
+
+uart:
+  tx_pin: GPIO7
+  rx_pin: GPIO6
+  id: ac_uart
+  baud_rate: 9600
+  parity: EVEN
+
+climate:
+  - platform: panasonic_ac
+    id: panasonic_ac_id
+    name: "Climate"
+    icon: mdi:thermostat
+    type: cnt
+    vertical_swing_select:
+      name: "Vertical Swing Mode"
+      icon: mdi:arrow-up-down
+    outside_temperature:
+      name: "Outside Temperature"
+      icon: mdi:thermometer
+    inside_temperature:
+      name: "Inside Temperature"
+      icon: mdi:thermometer
+    nanoex_switch:
+      name: "NanoeX"
+      icon: mdi:shimmer
+    eco_switch:
+      name: "Eco"
+      icon: mdi:leaf
+    current_power_consumption:
+      name: "Current Power"
+      id: power
+      icon: mdi:flash
+
+sensor:
+  - platform: uptime
+    name: "Uptime"
+  - platform: wifi_signal
+    name: "WiFi Signal"
+    icon: mdi:signal
+    update_interval: 120s  
+  - platform: internal_temperature
+    name: "Controller Temperature"
+    icon: mdi:thermometer
+  - platform: total_daily_energy
+    name: "Daily Energy"
+    icon: mdi:lightning-bolt
+    power_id: power
+    id: energy
+    unit_of_measurement: 'kWh'
+    state_class: total_increasing
+    device_class: energy
+    accuracy_decimals: 3
+    filters:
+      # Multiplication factor from W to kW is 0.001
+      - multiply: 0.001
+
+select:
+  - platform: template
+    name: "Fan Mode"
+    icon: mdi:fan
+    id: fan_mode_select
+    options:
+      - "1"
+      - "2"
+      - "3"
+      - "4"
+      - "5"
+      - Automatic
+    initial_option: Automatic
+    optimistic: true
+    set_action:
+      - lambda: |-
+          auto call = id(panasonic_ac_id).make_call();
+          if (x == "Automatic") {
+            call.set_fan_mode("Automatic");
+          } else if (x == "1") {
+            call.set_fan_mode("1");
+          } else if (x == "2") {
+            call.set_fan_mode("2");
+          } else if (x == "3") {
+            call.set_fan_mode("3");
+          } else if (x == "4") {
+            call.set_fan_mode("4");
+          } else if (x == "5") {
+            call.set_fan_mode("5");
+          }
+          call.perform();
+  - platform: template
+    name: "Mode"
+    icon: mdi:order-alphabetical-ascending
+    id: mode_select
+    options:
+      - Heat/Cool
+      - Heat
+      - Cool
+      - Dry
+      - Fan Only
+      - "Off"
+    initial_option: "Off"
+    optimistic: true
+    set_action:
+      - lambda: |-
+          auto call = id(panasonic_ac_id).make_call();
+          if (x == "Heat/Cool") {
+            call.set_mode(climate::CLIMATE_MODE_HEAT_COOL);
+          } else if (x == "Heat") {
+            call.set_mode(climate::CLIMATE_MODE_HEAT);
+          } else if (x == "Cool") {
+            call.set_mode(climate::CLIMATE_MODE_COOL);
+          } else if (x == "Dry") {
+            call.set_mode(climate::CLIMATE_MODE_DRY);
+          } else if (x == "Fan Only") {
+            call.set_mode(climate::CLIMATE_MODE_FAN_ONLY);
+          } else if (x == "Off") {
+            call.set_mode(climate::CLIMATE_MODE_OFF);
+          }
+          call.perform();
+  - platform: template
+    name: "Preset Mode"
+    icon: mdi:format-list-bulleted
+    id: preset_mode_select
+    options:
+      - "Normal"
+      - "Powerful"
+      - "Quiet"
+    initial_option: "Normal"
+    optimistic: true
+    set_action:
+      - lambda: |-
+          auto call = id(panasonic_ac_id).make_call();
+          if (x == "Normal") {
+            call.set_preset("Normal");
+          } else if (x == "Powerful") {
+            call.set_preset("Powerful");
+          } else if (x == "Quiet") {
+            call.set_preset("Quiet");
+          }
+          call.perform();
+
+interval:
+  - interval: 1s
+    then:
+      - lambda: |-
+          auto current_fan_mode = id(panasonic_ac_id);
+          // This is a workaround: Check if custom_fan_mode has a value
+          if (current_fan_mode->custom_fan_mode.has_value()) {
+              std::string fan_mode = current_fan_mode->custom_fan_mode.value();  // Extract string from the optional
+              if (fan_mode == "1") {
+                  id(fan_mode_select).publish_state("1");
+              } else if (fan_mode == "2") {
+                  id(fan_mode_select).publish_state("2");
+              } else if (fan_mode == "3") {
+                  id(fan_mode_select).publish_state("3");
+              } else if (fan_mode == "4") {
+                  id(fan_mode_select).publish_state("4");
+              } else if (fan_mode == "5") {
+                  id(fan_mode_select).publish_state("5");
+              } else if (fan_mode == "Automatic") {
+                  id(fan_mode_select).publish_state("Automatic");
+              }
+          }
+  - interval: 1s
+    then:
+      - lambda: |-
+          auto current_mode = id(panasonic_ac_id).mode;
+          if (current_mode == climate::CLIMATE_MODE_HEAT_COOL) {
+            id(mode_select).publish_state("Heat/Cool");
+          } else if (current_mode == climate::CLIMATE_MODE_HEAT) {
+            id(mode_select).publish_state("Heat");
+          } else if (current_mode == climate::CLIMATE_MODE_COOL) {
+            id(mode_select).publish_state("Cool");
+          } else if (current_mode == climate::CLIMATE_MODE_DRY) {
+            id(mode_select).publish_state("Dry");
+          } else if (current_mode == climate::CLIMATE_MODE_FAN_ONLY) {
+            id(mode_select).publish_state("Fan Only");
+          } else if (current_mode == climate::CLIMATE_MODE_OFF) {
+            id(mode_select).publish_state("Off");
+          }
+  - interval: 1s
+    then:
+      - lambda: |-
+          auto current_climate = id(panasonic_ac_id);
+          // This is a workaround: Check if custom_preset has a value
+          if (current_climate->custom_preset.has_value()) {
+              std::string preset_mode = current_climate->custom_preset.value();  // Extract string from the optional
+              if (preset_mode == "Normal") {
+                  id(preset_mode_select).publish_state("Normal");
+              } else if (preset_mode == "Powerful") {
+                  id(preset_mode_select).publish_state("Powerful");
+              } else if (preset_mode == "Quiet") {
+                  id(preset_mode_select).publish_state("Quiet");
+              }
+          }
+```
+
 # Overview
 
 An open source alternative for the Panasonic wi-fi adapter that works locally without the cloud.
