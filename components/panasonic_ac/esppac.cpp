@@ -28,7 +28,7 @@ climate::ClimateTraits PanasonicAC::traits() {
 /*  traits.set_supported_swing_modes({climate::CLIMATE_SWING_OFF, climate::CLIMATE_SWING_BOTH,
                                     climate::CLIMATE_SWING_VERTICAL, climate::CLIMATE_SWING_HORIZONTAL}); */
   
-  traits.set_supported_custom_presets({"Normal", "Powerful", "Quiet"}); */
+  traits.set_supported_custom_presets({"Normal", "Powerful", "Quiet"});
 
 /*  traits.set_supported_presets({climate::CLIMATE_PRESET_BOOST, climate::CLIMATE_PRESET_SLEEP}); */
   
