@@ -357,22 +357,22 @@ climate::ClimateMode PanasonicACCNT::determine_mode(uint8_t mode) {
 std::string PanasonicACCNT::determine_fan_speed(uint8_t speed) {
   switch (speed) {
     case 0xA0:  // Auto
-      ESP_LOGI(TAG, "Setting fan speed to: Automatic");
+      ESP_LOGI(TAG, "Setting fan speed to: AUTO");
       return "climate::CLIMATE_FAN_AUTO";
     case 0x30:  // 1
-      ESP_LOGI(TAG, "Setting fan speed to: 1");
+      ESP_LOGI(TAG, "Setting fan speed to: DIFFUSE");
       return "climate::CLIMATE_FAN_DIFFUSE";
     case 0x40:  // 2
-      ESP_LOGI(TAG, "Setting fan speed to: 2");
+      ESP_LOGI(TAG, "Setting fan speed to: LOW");
       return "climate::CLIMATE_FAN_LOW";
     case 0x50:  // 3
-      ESP_LOGI(TAG, "Setting fan speed to: 3");
+      ESP_LOGI(TAG, "Setting fan speed to: MEDIUM");
       return "climate::CLIMATE_FAN_MEDIUM";
     case 0x60:  // 4
-      ESP_LOGI(TAG, "Setting fan speed to: 4");
+      ESP_LOGI(TAG, "Setting fan speed to: HIGH");
       return "climate::CLIMATE_FAN_HIGH";
     case 0x70:  // 5
-      ESP_LOGI(TAG, "Setting fan speed to: 5");
+      ESP_LOGI(TAG, "Setting fan speed to: FOCUS");
       return "climate::CLIMATE_FAN_FOCUS";
     default:
       ESP_LOGW(TAG, "Received unknown fan speed");
