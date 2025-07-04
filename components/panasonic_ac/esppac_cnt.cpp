@@ -91,17 +91,17 @@ void PanasonicACCNT::control(const climate::ClimateCall &call) {
 
     std::string fanMode = *call.get_custom_fan_mode();
 
-    if (fanMode == "Automatic")
+    if (fanMode == "AUTO")
       this->cmd[3] = 0xA0;
-    else if (fanMode == "1")
+    else if (fanMode == "DIFFUSE")
       this->cmd[3] = 0x30;
-    else if (fanMode == "2")
+    else if (fanMode == "LOW")
       this->cmd[3] = 0x40;
-    else if (fanMode == "3")
+    else if (fanMode == "MEDIUM")
       this->cmd[3] = 0x50;
-    else if (fanMode == "4")
+    else if (fanMode == "HIGH")
       this->cmd[3] = 0x60;
-    else if (fanMode == "5")
+    else if (fanMode == "FOCUS")
       this->cmd[3] = 0x70;
     else
       ESP_LOGV(TAG, "Unsupported fan mode requested");
@@ -358,22 +358,22 @@ std::string PanasonicACCNT::determine_fan_speed(uint8_t speed) {
   switch (speed) {
     case 0xA0:  // Auto
       ESP_LOGI(TAG, "Setting fan speed to: Automatic");
-      return "Automatic";
+      return "climate::CLIMATE_FAN_AUTO";
     case 0x30:  // 1
       ESP_LOGI(TAG, "Setting fan speed to: 1");
-      return "1";
+      return "climate::CLIMATE_FAN_DIFFUSE";
     case 0x40:  // 2
       ESP_LOGI(TAG, "Setting fan speed to: 2");
-      return "2";
+      return "climate::CLIMATE_FAN_LOW";
     case 0x50:  // 3
       ESP_LOGI(TAG, "Setting fan speed to: 3");
-      return "3";
+      return "climate::CLIMATE_FAN_MEDIUM";
     case 0x60:  // 4
       ESP_LOGI(TAG, "Setting fan speed to: 4");
-      return "4";
+      return "climate::CLIMATE_FAN_HIGH";
     case 0x70:  // 5
       ESP_LOGI(TAG, "Setting fan speed to: 5");
-      return "5";
+      return "climate::CLIMATE_FAN_FOCUS";
     default:
       ESP_LOGW(TAG, "Received unknown fan speed");
       return "Unknown";
