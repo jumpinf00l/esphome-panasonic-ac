@@ -1,10 +1,10 @@
 # It's a fork
 This is jumpinf00l's super-dodgy hack to add a few nicer sensors and selects, it's only really public so that ESPHome can reach it, but I guess you can use it. No, I don't intend to do a PR because, as previously mentioned, these are super-dodgy hacks and intended only for jumpinf00l. This is specifically to support features of Panasonic CS-Z25XKRW, but these extra selects should be pretty universal
 
-#Key changes:
+# Key changes:
  - Fan speed is now a Home Assistant style fan mode. This allows the thermostat entity in Apple Home to show fan speeds. See Fan Mode below for mapping
 
-#Fan Mode:
+# Fan Mode:
 | Home Assistant / ESPHome Fan Mode  | Panasonic AC Speed |
 | ------------- | ------------- |
 | Auto  | Auto  |
