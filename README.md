@@ -47,6 +47,7 @@ There is no ETA on any item on this list, nor an guarantee that these items will
  - Fix deprecation notices when compiling
  - Incorporate fan mode and mode Select components as options under the Climate component
    - This will neaten the code up, neaten the logs up, reduce Wi-Fi/API activity, and improve performance
+   - Investigate an option for adding custom names to the fan modes in the Select component in the case that the user doesn't want "1 - Diffuse" and for example wants "Diffuse" or "1" instead
  - Set Presets as a Home Assistant style list, similar to what was done with the custom fan speed to fan mode change
  - Align presets with the Panasonic IR remote
    - Set Eco as a preset rather than a switch
@@ -303,6 +304,19 @@ interval:
                   id(preset_mode_select).publish_state("Quiet");
               }
           }
+  - interval: 60s
+    then:
+      - if:
+          condition:
+            lambda: |-
+              return id(panasonic_ac_id).mode != CLIMATE_MODE_OFF;
+          then:
+            - lambda: |-
+                id(glob_runtime_minutes) += 1.0f;
+                id(glob_filter_remaining_hours) = std::max(0.0f, id(glob_filter_remaining_hours) - 1.0f / 60.0f);
+                id(glob_filter_remaining_percent) = (id(glob_filter_remaining_hours) / ${initial_filter_remaining_hours}) * 100.0;
+                id(filter_remaining_hours).publish_state(id(glob_filter_remaining_hours));
+                id(filter_remaining_percent).publish_state(id(glob_filter_remaining_percent));
 ```
 
 ---
