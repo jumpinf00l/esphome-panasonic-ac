@@ -62,7 +62,7 @@ class PanasonicACWLAN : public PanasonicAC {
   void send_packet(std::vector<uint8_t> packet, CommandType type = CommandType::Normal);
 
   climate::ClimateMode determine_mode(uint8_t mode);
-  std::string determine_fan_mode(uint8_t fan_mode);
+  climate::ClimateFanMode determine_fan_mode(uint8_t fan_mode);
   std::string determine_preset(uint8_t preset);
   std::string determine_swing_vertical(uint8_t swing);
   std::string determine_swing_horizontal(uint8_t swing);
