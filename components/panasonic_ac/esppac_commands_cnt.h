@@ -29,12 +29,12 @@ static const std::vector<uint8_t> CMD_POLL = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00
         0x00
       };
 
-      static const byte CMD_FAN_SPEED[]
+      static const byte CMD_FAN_MODE[]
       {
         0x34,
         0x34,
         0x00,
-        0xFF, // Fan speed
+        0xFF, // Fan mode
         0x3c,
         0x00,
         0x00,
