@@ -19,7 +19,7 @@ Notes:
  - Google Home will not show fan speeds on the thermostat entity due to Home Assistant exposing a Home Assistant thermostat as a Google Home thermostat rather than a Google Home ac_unit (because ac_unit does not support heating). Thermostats do not support fan speeds in Google Home
  - I'm planning to add an optional fan entity which will appear under the ESPHome device in Home Assistant. Once exposed to Apple Home and Google Home, this will allow selecting all 5 speeds with the Auto speed being a preset which I still don't think will appear in either. No ETA on this
 
-# Example
+## Example
 Here's a working cut-down example (add your own substitutions, esphome, wifi, etc sections):
 
 Notes:
