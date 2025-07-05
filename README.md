@@ -1,7 +1,29 @@
 # It's a fork
 This is jumpinf00l's super-dodgy hack to add a few nicer sensors and selects, it's only really public so that ESPHome can reach it, but I guess you can use it. No, I don't intend to do a PR because, as previously mentioned, these are super-dodgy hacks and intended only for jumpinf00l. This is specifically to support features of Panasonic CS-Z25XKRW, but these extra selects should be pretty universal
 
-Here's a working cut-down example (add your own substitutions, wifi, etc):
+#Key changes:
+ - Fan speed is now a Home Assistant style fan mode. This allows the thermostat entity in Apple Home to show fan speeds. See Fan Mode below for mapping
+
+#Fan Mode:
+| Home Assistant / ESPHome Fan Mode  | Panasonic AC Speed |
+| ------------- | ------------- |
+| Auto  | Auto  |
+| Diffuse  | 1  |
+| Low  | 2  |
+| Medium  | 3  |
+| High  | 4  |
+| Focus  | 5  |
+
+Notes: 
+ - Apple Home will only show three speeds on the thermostat entity: Low, Medium, and High which are speeds 2, 3, and 4
+ - Google Home will not show fan speeds on the thermostat entity due to Home Assistant exposing a Home Assistant thermostat as a Google Home thermostat rather than a Google Home ac_unit (because ac_unit does not support heating). Thermostats do not support fan speeds in Google Home
+ - I'm planning to add an optional fan entity which will appear under the ESPHome device in Home Assistant. Once exposed to Apple Home and Google Home, this will allow selecting all 5 speeds with the Auto speed being a preset which I still don't think will appear in either. No ETA on this
+
+# Example
+Here's a working cut-down example (add your own substitutions, esphome, wifi, etc sections):
+
+Notes:
+ - I'm planning to incorporate the fan speed and mode select components as options on the climate component which will neaten the code up, neaten the logs up, and just be a better way to do it. No ETA on this
 
 ```
 esp32:
@@ -20,6 +42,20 @@ uart:
   id: ac_uart
   baud_rate: 9600
   parity: EVEN
+
+globals:
+  - id: glob_runtime_minutes
+    type: float
+    restore_value: yes
+    initial_value: "0.0"
+  - id: glob_filter_remaining_hours
+    type: float
+    restore_value: yes
+    initial_value: "${initial_filter_remaining_hours}"
+  - id: glob_filter_remaining_percent
+    type: float
+    restore_value: yes
+    initial_value: "100.0"
 
 climate:
   - platform: panasonic_ac
@@ -70,35 +106,54 @@ sensor:
       # Multiplication factor from W to kW is 0.001
       - multiply: 0.001
 
+button:
+  - platform: template
+    name: "Filter Remaining Reset"
+    icon: mdi:air-filter
+    id: filter_remaining_reset
+    web_server:
+      sorting_group_id: maintenance_group
+      sorting_weight: 40
+    on_press:
+      then:
+        - lambda: |-
+            id(glob_filter_remaining_hours) = ${initial_filter_remaining_hours};
+            id(glob_filter_remaining_percent) = 100.0;
+            id(filter_remaining_hours).publish_state(id(glob_filter_remaining_hours));
+            id(filter_remaining_percent).publish_state(id(glob_filter_remaining_percent));
+
 select:
   - platform: template
     name: "Fan Mode"
     icon: mdi:fan
     id: fan_mode_select
+    web_server:
+      sorting_group_id: climate_group
+      sorting_weight: 40
     options:
-      - "1"
-      - "2"
-      - "3"
-      - "4"
-      - "5"
-      - Automatic
-    initial_option: Automatic
+      - "Auto"
+      - "1 - Diffuse"
+      - "2 - Low"
+      - "3 - Medium"
+      - "4 - High"
+      - "5 - Focus"
+    initial_option: "Auto"
     optimistic: true
     set_action:
       - lambda: |-
           auto call = id(panasonic_ac_id).make_call();
-          if (x == "Automatic") {
-            call.set_fan_mode("Automatic");
-          } else if (x == "1") {
-            call.set_fan_mode("1");
-          } else if (x == "2") {
-            call.set_fan_mode("2");
-          } else if (x == "3") {
-            call.set_fan_mode("3");
-          } else if (x == "4") {
-            call.set_fan_mode("4");
-          } else if (x == "5") {
-            call.set_fan_mode("5");
+          if (x == "Auto") {
+            call.set_fan_mode(climate::CLIMATE_FAN_AUTO);
+          } else if (x == "1 - Diffuse") {
+            call.set_fan_mode(climate::CLIMATE_FAN_DIFFUSE);
+          } else if (x == "2 - Low") {
+            call.set_fan_mode(climate::CLIMATE_FAN_LOW);
+          } else if (x == "3 - Medium") {
+            call.set_fan_mode(climate::CLIMATE_FAN_MEDIUM);
+          } else if (x == "4 - High") {
+            call.set_fan_mode(climate::CLIMATE_FAN_HIGH);
+          } else if (x == "5 - Focus") {
+            call.set_fan_mode(climate::CLIMATE_FAN_FOCUS);
           }
           call.perform();
   - platform: template
