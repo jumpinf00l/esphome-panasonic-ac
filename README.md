@@ -4,7 +4,7 @@ This is jumpinf00l's super-dodgy hack to add a few nicer sensors and selects, it
 ## <a name="key--changes">Key changes</a>:
  - Fan speed is now a Home Assistant style fan mode
    - This allows the thermostat entity in Apple Home to show fan speeds. See [Fan Mode](#fan-mode) for mapping and notes
-   - This has no effect on Google Home. See [Fan Mode Notes]#fan-mode-notes for notes on this
+   - This has no effect on Google Home. See [Fan Mode Notes](#fan-mode-notes) for notes on this
  - Added Select entities for setting Mode, Fan mode, and Preset separate to the Climate entity
    - These are useful for building custom cards or changing the fan mode via the ESPHome device's web UI
    - These are currently achieved through super-dodgy invervals which run every 1 second. Awful for performance, awful for logging, awful for WiFi/API, but they work for now. See [Wishlist](#wishlist) for a potential fix for this
