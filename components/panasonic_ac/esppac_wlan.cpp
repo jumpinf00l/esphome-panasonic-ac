@@ -320,7 +320,7 @@ climate::ClimateMode PanasonicACWLAN::determine_mode(uint8_t mode) {
   }
 }
 
-climate::ClimateMode PanasonicACWLAN::determine_fan_mode(uint8_t mode) {
+climate::ClimateMode PanasonicACWLAN::determine_fan_mode(uint8_t fan_mode) {
   switch (fan_mode)
   {
     case 0x41:
