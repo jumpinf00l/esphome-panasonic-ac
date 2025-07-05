@@ -3,7 +3,8 @@ This is jumpinf00l's super-dodgy hack to add a few nicer sensors and selects, it
 
 ## <a name="key--changes">Key changes</a>:
  - Fan speed is now a Home Assistant style fan mode
-   - This allows the thermostat entity in Apple Home to show fan speeds. See [Fan Mode](#fan-mode) below for mapping and notes
+   - This allows the thermostat entity in Apple Home to show fan speeds. See [Fan Mode](#fan-mode) for mapping and notes
+   - This has no effect on Google Home. See [Fan Mode Notes]#fan-mode-notes for notes on this
  - Added Select entities for setting Mode, Fan mode, and Preset separate to the Climate entity
    - These are useful for building custom cards or changing the fan mode via the ESPHome device's web UI
    - These are currently achieved through super-dodgy invervals which run every 1 second. Awful for performance, awful for logging, awful for WiFi/API, but they work for now. See [Wishlist](#wishlist) for a potential fix for this
@@ -36,7 +37,7 @@ This is jumpinf00l's super-dodgy hack to add a few nicer sensors and selects, it
  - Apple Home will only show three speeds on the thermostat entity: Low, Medium, and High which are speeds 2, 3, and 4
    - I've had some dodgy experiences with setting these fan speeds in Apple Home where subsequent changes to the Home Assistant climate entity fan no longer change on the Panasonic AC unit, so YMMV
  - Google Home will not show fan speeds on the thermostat entity at all
-    - There is a clear reason for this and is unfortunately the trade-off between two issues. Home Assistant exposes its climate entities as Google Home thermostat devices rather than a Google Home ac_unit devices because:
+    - There is a clear reason for this and is unfortunately the trade-off between two 'exceptionally Google' style issues. Home Assistant exposes its climate entities as Google Home thermostat devices rather than a Google Home ac_unit devices because:
       - Google Home ac_unit devices do not support heat mode
       - Google Home thermostat devices do not support fan modes
     - See [Wishlist](#wishlist) for a potential workaround through adding a fan entity to the ESPHome device which can be exposed to Apple Home and Google Home as a fan device
