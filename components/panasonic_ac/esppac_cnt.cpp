@@ -81,7 +81,7 @@ void PanasonicACCNT::control(const climate::ClimateCall &call) {
   }
   
   if (call.get_fan_mode().has_value()) {
-    ESP_LOGV(TAG, "Requested swing mode change");
+    ESP_LOGI(TAG, "Requested fan mode change");
 
     if(this->custom_preset != "Normal")
     {
@@ -91,25 +91,31 @@ void PanasonicACCNT::control(const climate::ClimateCall &call) {
     
     switch (*call.get_fan_mode()) {
       case climate::CLIMATE_FAN_AUTO:
+        ESP_LOGI(TAG, "Fan mode: Auto");
         this->cmd[3] = 0xA0;
         break;
       case climate::CLIMATE_FAN_DIFFUSE:
+        ESP_LOGI(TAG, "Fan mode: 1 - Diffuse");
         this->cmd[3] = 0x30;
         break;
       case climate::CLIMATE_FAN_LOW:
+        ESP_LOGI(TAG, "Fan mode: 2 - Low");
         this->cmd[3] = 0x40;
         break;
       case climate::CLIMATE_FAN_MEDIUM:
+        ESP_LOGI(TAG, "Fan mode: 3 - Medium");
         this->cmd[3] = 0x50;
         break;
       case climate::CLIMATE_FAN_HIGH:
+        ESP_LOGI(TAG, "Fan mode: 4 - High");
         this->cmd[3] = 0x60;
         break;
       case climate::CLIMATE_FAN_FOCUS:
+        ESP_LOGI(TAG, "Fan mode: 5 - Focus");
         this->cmd[3] = 0x70;
         break;
       default:
-        ESP_LOGV(TAG, "Unsupported fan mode requested");
+        ESP_LOGW(TAG, "Unsupported fan mode requested");
         break;
     }
   }
@@ -364,23 +370,23 @@ climate::ClimateMode PanasonicACCNT::determine_mode(uint8_t mode) {
 std::string PanasonicACCNT::determine_fan_speed(uint8_t speed) {
   switch (speed) {
     case 0xA0:  // Auto
-      ESP_LOGI(TAG, "Setting fan speed to: AUTO");
-      return "climate::CLIMATE_FAN_AUTO";
+      ESP_LOGI(TAG, "Setting fan speed to: Auto");
+      return climate::CLIMATE_FAN_AUTO;
     case 0x30:  // 1
-      ESP_LOGI(TAG, "Setting fan speed to: 1 - DIFFUSE");
-      return "climate::CLIMATE_FAN_DIFFUSE";
+      ESP_LOGI(TAG, "Setting fan speed to: 1 - Diffuse");
+      return climate::CLIMATE_FAN_DIFFUSE;
     case 0x40:  // 2
-      ESP_LOGI(TAG, "Setting fan speed to: 2 - LOW");
-      return "climate::CLIMATE_FAN_LOW";
+      ESP_LOGI(TAG, "Setting fan speed to: 2 - Low");
+      return climate::CLIMATE_FAN_LOW;
     case 0x50:  // 3
-      ESP_LOGI(TAG, "Setting fan speed to: 3 - MEDIUM");
-      return "climate::CLIMATE_FAN_MEDIUM";
+      ESP_LOGI(TAG, "Setting fan speed to: 3 - Medium");
+      return climate::CLIMATE_FAN_MEDIUM;
     case 0x60:  // 4
-      ESP_LOGI(TAG, "Setting fan speed to: 4 - HIGH");
-      return "climate::CLIMATE_FAN_HIGH";
+      ESP_LOGI(TAG, "Setting fan speed to: 4 - High");
+      return climate::CLIMATE_FAN_HIGH;
     case 0x70:  // 5
-      ESP_LOGI(TAG, "Setting fan speed to: 5 - FOCUS");
-      return "climate::CLIMATE_FAN_FOCUS";
+      ESP_LOGI(TAG, "Setting fan speed to: 5 - Focus");
+      return climate::CLIMATE_FAN_FOCUS;
     default:
       ESP_LOGW(TAG, "Received unknown fan speed");
       return "Unknown";
