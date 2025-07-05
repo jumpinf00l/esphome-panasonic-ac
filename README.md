@@ -1,31 +1,67 @@
-# It's a fork
-This is jumpinf00l's super-dodgy hack to add a few nicer sensors and selects, it's only really public so that ESPHome can reach it, but I guess you can use it. No, I don't intend to do a PR because, as previously mentioned, these are super-dodgy hacks and intended only for jumpinf00l. This is specifically to support features of Panasonic CS-Z25XKRW, but these extra selects should be pretty universal
+# <a name="its-a-fork">It's a fork</a>:
+This is jumpinf00l's super-dodgy hack to add a few nicer sensors and selects, it's only really public so that my ESPHome can reach it to allow for ease of change tracking, but I guess you can use it. No, I don't intend to do a PR because, as previously mentioned, these are super-dodgy hacks and intended only for jumpinf00l. This is specifically to support features of Panasonic CS-Z25XKRW and CS-Z50XKRW, but these changes should be pretty universal
 
-# Key changes:
- - Fan speed is now a Home Assistant style fan mode. This allows the thermostat entity in Apple Home to show fan speeds. See Fan Mode below for mapping
+## <a name="key--changes">Key changes</a>:
+ - Fan speed is now a Home Assistant style fan mode
+   - This allows the thermostat entity in Apple Home to show fan speeds. See [Fan Mode](#fan-mode) below for mapping and notes
+ - Added Select entities for setting Mode, Fan mode, and Preset separate to the Climate entity
+   - These are useful for building custom cards or changing the fan mode via the ESPHome device's web UI
+   - These are currently achieved through super-dodgy invervals which run every 1 second. Awful for performance, awful for logging, awful for WiFi/API, but they work for now. See [Wishlist](#wishlist) for a potential fix for this
+ - Added Daily Energy as a measurement of power usage over the day. Not strictly part of this custom component and more for documentation alongside, but neat and adds functionality for use with the Home Assistant Energy Dashboard
+ - Added inside temperature as an entity rather than relying on the attribute of the climate entity
+   - More consisitent for Home Assistant dashboard design
+   - The inside temperature attribute remains on the climate entity, so can be referenced either way
+ - Added entities for filter maintenance
+   - Again, not necessarily part of the custom component, but a neat addition which you can use to trigger an automation to remind you to clean the filter at least a few times in its life
+   - Entities:
+     - Sensor: Total Runtime (since the ESPHome device started tracking it of course, this isn't a value provided by the AC unit itself to my knowledge unfortunately)
+     - Sensor: Filter remaining hours
+       - Set the 'initial_filter_remaining_hours' substitution to something useful to get a time remaining indication of the filter in hours
+     - Sensor: Filter remaining percent
+       - Set the 'initial_filter_remaining_hours' substitution to something useful to get a percentage remaining indication of the filter in percent
+     - Reset button to mark the filter as cleaned and return it to 100%
+       - Also press this if changing the 'initial_filter_remaining_hours' substitution
 
-# Fan Mode:
-| Home Assistant / ESPHome Fan Mode  | Panasonic AC Speed |
-| ------------- | ------------- |
-| Auto  | Auto  |
-| Diffuse  | 1  |
-| Low  | 2  |
-| Medium  | 3  |
-| High  | 4  |
-| Focus  | 5  |
+## <a name="fan-mode">Fan Mode</a>:
+| Home Assistant / ESPHome Fan Mode  | Panasonic AC Speed | Apple Home                               | Google Home |
+| ---------------------------------- | ------------------ | ---------------------------------------- | ----------- |
+| Auto                               | Auto               | N/A                                      | N/A         |
+| Diffuse                            | 1                  | N/A                                      | N/A         |
+| Low                                | 2                  | 33.3% (bottom third of bar including 0%) | N/A         |
+| Medium                             | 3                  | 66.6% (middle third of bar)              | N/A         |
+| High                               | 4                  | 100% (top third of bar                   | N/A         |
+| Focus                              | 5                  | N/A                                      | N/A         |
 
-Notes: 
+### <a name="fan-mode-notes">Fan Mode Notes</a>: 
  - Apple Home will only show three speeds on the thermostat entity: Low, Medium, and High which are speeds 2, 3, and 4
- - Google Home will not show fan speeds on the thermostat entity due to Home Assistant exposing a Home Assistant thermostat as a Google Home thermostat rather than a Google Home ac_unit (because ac_unit does not support heating). Thermostats do not support fan speeds in Google Home
- - I'm planning to add an optional fan entity which will appear under the ESPHome device in Home Assistant. Once exposed to Apple Home and Google Home, this will allow selecting all 5 speeds with the Auto speed being a preset which I still don't think will appear in either. No ETA on this
+   - I've had some dodgy experiences with setting these fan speeds in Apple Home where subsequent changes to the Home Assistant climate entity fan no longer change on the Panasonic AC unit, so YMMV
+ - Google Home will not show fan speeds on the thermostat entity at all
+    - There is a clear reason for this and is unfortunately the trade-off between two issues. Home Assistant exposes its climate entities as Google Home thermostat devices rather than a Google Home ac_unit devices because:
+      - Google Home ac_unit devices do not support heat mode
+      - Google Home thermostat devices do not support fan modes
+    - See [Wishlist](#wishlist) for a potential workaround through adding a fan entity to the ESPHome device which can be exposed to Apple Home and Google Home as a fan device
 
-## Example
-Here's a working cut-down example (add your own substitutions, esphome, wifi, etc sections):
+## <a name="wishlist">Wishlist</a>:
+There is no ETA on any item on this list, nor an guarantee that these items will ever be available
+ - Fix deprecation notices when compiling
+ - Incorporate fan mode and mode Select components as options under the Climate component
+   - This will neaten the code up, neaten the logs up, reduce Wi-Fi/API activity, and improve performance
+ - Set Presets as a Home Assistant style list, similar to what was done with the custom fan speed to fan mode change
+ - Align presets with the Panasonic IR remote
+   - Set Eco as a preset rather than a switch
+   - Set Quiet as a fan speed rather than a preset
+ - Add activity attribute to the climate component
+ - Add iAuto-X as a preset, switch, or button
+ - Rename horizontal swing/vane modes to align front-end naming conventions
+   - Low importance because my Panasonic AC units don't support horizontal swing/vane adjustment (they're manual/povo-spec)
 
-Notes:
- - I'm planning to incorporate the fan speed and mode select components as options on the climate component which will neaten the code up, neaten the logs up, and just be a better way to do it. No ETA on this
+## <a name="example">Example</a>:
+Here's a working cut-down example (add your own esphome, wifi, etc sections):
 
 ```
+substitutions:
+  initial_filter_remaining_hours: "500.0" # hours until filter needs cleaning
+
 esp32:
   board: esp32-c3-devkitm-1
   framework:
@@ -263,6 +299,8 @@ interval:
               }
           }
 ```
+
+---
 
 # Overview
 
