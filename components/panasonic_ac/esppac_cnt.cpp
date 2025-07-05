@@ -367,7 +367,7 @@ climate::ClimateMode PanasonicACCNT::determine_mode(uint8_t mode) {
   }
 }
 
-std::string PanasonicACCNT::determine_fan_mode(uint8_t fan_mode) {
+climate::ClimateFanMode PanasonicACCNT::determine_fan_mode(uint8_t fan_mode) {
   switch (fan_mode) {
     case 0xA0:  // Auto
       ESP_LOGI(TAG, "Setting fan mode to: Auto");
