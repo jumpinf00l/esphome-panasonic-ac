@@ -369,27 +369,27 @@ climate::ClimateMode PanasonicACCNT::determine_mode(uint8_t mode) {
 
 climate::ClimateFanMode PanasonicACCNT::determine_fan_mode(uint8_t fan_mode) {
   switch (fan_mode) {
-    case 0xA0:  // Auto
+    case 0xA0:
       ESP_LOGI(TAG, "Setting fan mode to: Auto");
       return climate::CLIMATE_FAN_AUTO;
-    case 0x30:  // 1
+    case 0x30:
       ESP_LOGI(TAG, "Setting fan mode to: 1 - Diffuse");
       return climate::CLIMATE_FAN_DIFFUSE;
-    case 0x40:  // 2
+    case 0x40:
       ESP_LOGI(TAG, "Setting fan mode to: 2 - Low");
       return climate::CLIMATE_FAN_LOW;
-    case 0x50:  // 3
+    case 0x50:
       ESP_LOGI(TAG, "Setting fan mode to: 3 - Medium");
       return climate::CLIMATE_FAN_MEDIUM;
-    case 0x60:  // 4
+    case 0x60:
       ESP_LOGI(TAG, "Setting fan mode to: 4 - High");
       return climate::CLIMATE_FAN_HIGH;
-    case 0x70:  // 5
+    case 0x70:
       ESP_LOGI(TAG, "Setting fan mode to: 5 - Focus");
       return climate::CLIMATE_FAN_FOCUS;
     default:
       ESP_LOGW(TAG, "Received unknown fan mode");
-      return "Unknown";
+      return climate::CLIMATE_FAN_AUTO;
   }
 }
 
