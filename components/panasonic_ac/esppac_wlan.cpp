@@ -337,7 +337,7 @@ climate::ClimateFanMode PanasonicACWLAN::determine_fan_mode(uint8_t fan_mode) {
       return climate::CLIMATE_FAN_FOCUS;
     default:
       ESP_LOGW(TAG, "Received unknown fan mode");
-      return "unknown";
+      return climate::CLIMATE_FAN_AUTO;
   }
 }
 
