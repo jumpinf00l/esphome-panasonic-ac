@@ -133,7 +133,7 @@ void PanasonicACWLAN::control(const climate::ClimateCall &call) {
         break;
     }
 
-    this->mode =
+    this->fan_mode =
         *call.get_fan_mode();
     this->publish_state();
   }
