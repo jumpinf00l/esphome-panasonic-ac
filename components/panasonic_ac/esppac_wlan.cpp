@@ -99,37 +99,48 @@ void PanasonicACWLAN::control(const climate::ClimateCall &call) {
         *call.get_mode();   // Set mode manually since we won't receive a report from the AC if its the same mode again
     this->publish_state();  // Send this state, will get updated once next poll is executed
   }
+  
+  if (call.get_fan_mode().has_value()) {
+    ESP_LOGV(TAG, "Requested fan mode change");
 
+    switch (*call.get_fan_mode()) {
+      case climate::CLIMATE_FAN_AUTO:
+        set_value(0xB2, 0x41);
+        set_value(0xA0, 0x41);
+        break;
+      case climate::CLIMATE_FAN_DIFFUSE:
+        set_value(0xB2, 0x41);
+        set_value(0xA0, 0x32);
+        break;
+      case climate::CLIMATE_FAN_LOW:
+        set_value(0xB2, 0x41);
+        set_value(0xA0, 0x33);
+        break;
+      case climate::CLIMATE_FAN_MEDIUM:
+        set_value(0xB2, 0x41);
+        set_value(0xA0, 0x34);
+        break;
+      case climate::CLIMATE_FAN_HIGH:
+        set_value(0xB2, 0x41);
+        set_value(0xA0, 0x35);
+        break;
+      case climate::CLIMATE_FAN_FOCUS:
+        set_value(0xB2, 0x41);
+        set_value(0xA0, 0x36);
+        break;
+      default:
+        ESP_LOGV(TAG, "Unsupported fan mode requested");
+        break;
+    }
+
+    this->mode =
+        *call.get_fan_mode();
+    this->publish_state();
+  }
+  
   if (call.get_target_temperature().has_value()) {
     ESP_LOGV(TAG, "Requested temperature change");
     set_value(0x31, *call.get_target_temperature() * 2);
-  }
-
-  if (call.get_custom_fan_mode().has_value()) {
-    ESP_LOGV(TAG, "Requested fan mode change");
-
-    std::string fanMode = *call.get_custom_fan_mode();
-
-    if (fanMode == "Automatic") {
-      set_value(0xB2, 0x41);
-      set_value(0xA0, 0x41);
-    } else if (fanMode == "1") {
-      set_value(0xB2, 0x41);
-      set_value(0xA0, 0x32);
-    } else if (fanMode == "2") {
-      set_value(0xB2, 0x41);
-      set_value(0xA0, 0x33);
-    } else if (fanMode == "3") {
-      set_value(0xB2, 0x41);
-      set_value(0xA0, 0x34);
-    } else if (fanMode == "4") {
-      set_value(0xB2, 0x41);
-      set_value(0xA0, 0x35);
-    } else if (fanMode == "5") {
-      set_value(0xB2, 0x41);
-      set_value(0xA0, 0x36);
-    } else
-      ESP_LOGV(TAG, "Unsupported fan mode requested");
   }
 
   if (call.get_swing_mode().has_value()) {
@@ -309,23 +320,24 @@ climate::ClimateMode PanasonicACWLAN::determine_mode(uint8_t mode) {
   }
 }
 
-std::string PanasonicACWLAN::determine_fan_speed(uint8_t speed) {
-  switch (speed) {
-    case 0x32:  // 1
-      return "1";
-    case 0x33:  // 2
-      return "2";
-    case 0x34:  // 3
-      return "3";
-    case 0x35:  // 4
-      return "4";
-    case 0x36:  // 5
-      return "5";
-    case 0x41:  // Auto
-      return "Automatic";
+climate::ClimateMode PanasonicACWLAN::determine_fan_mode(uint8_t mode) {
+  switch (fan_mode)
+  {
+    case 0x41:
+      return climate::CLIMATE_FAN_AUTO;
+    case 0x32:
+      return climate::CLIMATE_FAN_DIFFUSE;
+    case 0x33:
+      return climate::CLIMATE_FAN_LOW;
+    case 0x34:
+      return climate::CLIMATE_FAN_MEDIUM;
+    case 0x35:
+      return climate::CLIMATE_FAN_HIGH;
+    case 0x36:
+      return climate::CLIMATE_FAN_FOCUS;
     default:
-      ESP_LOGW(TAG, "Received unknown fan speed");
-      return "Unknown";
+      ESP_LOGW(TAG, "Received unknown fan mode");
+      return "unknown";
   }
 }
 
@@ -442,7 +454,7 @@ void PanasonicACWLAN::handle_packet() {
 
     update_nanoex(nanoex);
 
-    this->custom_fan_mode = determine_fan_speed(this->rx_buffer_[26]);
+    this->fan_mode = determine_fan_mode(this->rx_buffer_[26]);
     this->custom_preset = determine_preset(this->rx_buffer_[42]);
 
     this->swing_mode = determine_swing(this->rx_buffer_[30]);
@@ -499,9 +511,9 @@ void PanasonicACWLAN::handle_packet() {
           ESP_LOGV(TAG, "Received target temperature");
           update_target_temperature((int8_t) this->rx_buffer_[currentIndex + 2]);
           break;
-        case 0xA0:  // Fan speed
-          ESP_LOGV(TAG, "Received fan speed");
-          this->custom_fan_mode = determine_fan_speed(this->rx_buffer_[currentIndex + 2]);
+        case 0xA0:  // Fan mode
+          ESP_LOGV(TAG, "Received fan mode");
+          this->fan_mode = determine_fan_mode(this->rx_buffer_[currentIndex + 2]);
           break;
         case 0xB2: // Preset
           ESP_LOGV(TAG, "Received preset");
