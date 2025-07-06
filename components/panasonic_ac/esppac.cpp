@@ -170,11 +170,19 @@ void PanasonicAC::set_inside_temperature_sensor(sensor::Sensor *inside_temperatu
 void PanasonicAC::set_current_temperature_sensor(sensor::Sensor *current_temperature_sensor)
 {
   this->current_temperature_sensor_ = current_temperature_sensor;
-  this->current_temperature_sensor_->add_on_state_callback([this](float state)
-                                                           {
-                                                             this->current_temperature = state;
-                                                             this->publish_state();
-                                                           });
+  this->current_temperature_sensor_->add_on_state_callback([this](float state) {
+    this->current_temperature = state;
+    this->publish_state();
+  });
+}
+
+void PanasonicAC::set_hvac_action_sensor(sensor::Sensor *hvac_action_sensor)
+{
+  this->hvac_action_sensor_ = hvac_action_sensor;
+  this->hvac_action_sensor_->add_on_state_callback([this](float state) {
+    this->hvac_action_sensor = state;
+    this->publish_state();
+  });
 }
 
 void PanasonicAC::set_vertical_swing_select(select::Select *vertical_swing_select) {
