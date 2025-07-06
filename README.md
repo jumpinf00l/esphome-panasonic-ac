@@ -63,7 +63,7 @@ There is no ETA on any item on this list, nor an guarantee that these items will
    - Low importance because my Panasonic AC units don't support horizontal swing/vane adjustment (they're manual/povo-spec adjustment louvres)
 
 ## <a name="general-notes">General Notes</a>:
- - This has only been tested using CNT mode. WiFi mode is untested but should work similarly
+ - This has only been tested using CNT mode. WLAN mode is untested but should work similarly
  - This is a zero-ecosystem household; there is no love for or preference over Apple Home or Google Home, nor the products of either of these companies
 
 ## <a name="example">Example</a>:
