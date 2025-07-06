@@ -149,6 +149,7 @@ void PanasonicAC::update_mild_dry(bool mild_dry) {
 }
 
 climate::ClimateAction PanasonicAC::determine_action() {
+  LOGI(TAG, "Determining climate action")
   if (this->mode == climate::CLIMATE_MODE_OFF) {
     return climate::CLIMATE_ACTION_OFF;
   } else if (this->mode == climate::CLIMATE_MODE_FAN_ONLY) {
