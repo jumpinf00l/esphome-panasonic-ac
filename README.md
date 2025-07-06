@@ -2,8 +2,11 @@
 This is jumpinf00l's super-dodgy hack to add a few nicer sensors and selects, it's only really public so that my ESPHome can reach it to allow for ease of change tracking, but I guess you can use it. No, I don't intend to do a PR because, as previously mentioned, these are super-dodgy hacks and intended only for jumpinf00l. This is specifically to support features of Panasonic CS-Z25XKRW and CS-Z50XKRW, but these changes should be pretty universal
 
 ## <a name="key--changes">Key changes</a>:
- - Fixed deprecation notices
+<b><a name="0.2.x-fix_deprecated_schema">0.2.x - Fix Deprecated Schema Warnings</a></b>
+ - Fixed deprecated schema warnings when compiling
    - Shamelessly copied from PRs on the main repo
+
+<b><a name="0.1.x-fan_modes">0.1.x - Change from fan speed to Home Assistant style fan mode</a></b>
  - Fan speed is now a Home Assistant style fan mode
    - This allows the thermostat entity in Apple Home to show fan speeds. See [Fan Mode](#fan-mode) for mapping and notes
    - This has no effect on Google Home. See [Fan Mode Notes](#fan-mode-notes) for notes on this
@@ -46,7 +49,7 @@ This is jumpinf00l's super-dodgy hack to add a few nicer sensors and selects, it
 
 ## <a name="wishlist">Wishlist</a>:
 There is no ETA on any item on this list, nor an guarantee that these items will ever be available
- - ~Fix deprecation notices when compiling~ ✅
+ - ~Fix deprecation notices when compiling~ ✅ [0.2.x - Fix Deprecated Schema Warnings](#0.2.x-fix_deprecated_schema)
  - Add activity attribute to the climate component
  - Set Presets as a Home Assistant style options, similar to work completed on custom fan speed to fan mode change
    - Align presets with the Panasonic IR remote:
