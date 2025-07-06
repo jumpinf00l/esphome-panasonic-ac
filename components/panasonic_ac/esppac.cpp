@@ -148,25 +148,6 @@ void PanasonicAC::update_mild_dry(bool mild_dry) {
   }
 }
 
-climate::ClimateAction PanasonicAC::determine_action() {
-  ESP_LOGI(TAG, "Determining climate action");
-  if (this->mode == climate::CLIMATE_MODE_OFF) {
-    return climate::CLIMATE_ACTION_OFF;
-  } else if (this->mode == climate::CLIMATE_MODE_FAN_ONLY) {
-    return climate::CLIMATE_ACTION_FAN;
-  } else if (this->mode == climate::CLIMATE_MODE_DRY) {
-    return climate::CLIMATE_ACTION_DRYING;
-  } else if ((this->mode == climate::CLIMATE_MODE_COOL || this->mode == climate::CLIMATE_MODE_HEAT_COOL) &&
-             this->current_temperature + TEMPERATURE_TOLERANCE >= this->target_temperature) {
-    return climate::CLIMATE_ACTION_COOLING;
-  } else if ((this->mode == climate::CLIMATE_MODE_HEAT || this->mode == climate::CLIMATE_MODE_HEAT_COOL) &&
-             this->current_temperature - TEMPERATURE_TOLERANCE <= this->target_temperature) {
-    return climate::CLIMATE_ACTION_HEATING;
-  } else {
-    return climate::CLIMATE_ACTION_IDLE;
-  }
-}
-
 void PanasonicAC::update_current_power_consumption(int16_t power) {
   if (this->current_power_consumption_sensor_ != nullptr && this->current_power_consumption_sensor_->state != power) {
     this->current_power_consumption_sensor_->publish_state(
