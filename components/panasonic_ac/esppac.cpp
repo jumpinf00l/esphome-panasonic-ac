@@ -10,7 +10,7 @@ static const char *const TAG = "panasonic_ac";
 climate::ClimateTraits PanasonicAC::traits() {
   auto traits = climate::ClimateTraits();
 
-  traits.set_supports_action(true);
+  traits.set_supports_action(false);
 
   traits.set_supports_current_temperature(true);
   traits.set_supports_two_point_target_temperature(false);
@@ -148,6 +148,24 @@ void PanasonicAC::update_mild_dry(bool mild_dry) {
   }
 }
 
+climate::ClimateAction PanasonicAC::determine_action() {
+  if (this->mode == climate::CLIMATE_MODE_OFF) {
+    return climate::CLIMATE_ACTION_OFF;
+  } else if (this->mode == climate::CLIMATE_MODE_FAN_ONLY) {
+    return climate::CLIMATE_ACTION_FAN;
+  } else if (this->mode == climate::CLIMATE_MODE_DRY) {
+    return climate::CLIMATE_ACTION_DRYING;
+  } else if ((this->mode == climate::CLIMATE_MODE_COOL || this->mode == climate::CLIMATE_MODE_HEAT_COOL) &&
+             this->current_temperature + TEMPERATURE_TOLERANCE >= this->target_temperature) {
+    return climate::CLIMATE_ACTION_COOLING;
+  } else if ((this->mode == climate::CLIMATE_MODE_HEAT || this->mode == climate::CLIMATE_MODE_HEAT_COOL) &&
+             this->current_temperature - TEMPERATURE_TOLERANCE <= this->target_temperature) {
+    return climate::CLIMATE_ACTION_HEATING;
+  } else {
+    return climate::CLIMATE_ACTION_IDLE;
+  }
+}
+
 void PanasonicAC::update_current_power_consumption(int16_t power) {
   if (this->current_power_consumption_sensor_ != nullptr && this->current_power_consumption_sensor_->state != power) {
     this->current_power_consumption_sensor_->publish_state(
@@ -170,19 +188,11 @@ void PanasonicAC::set_inside_temperature_sensor(sensor::Sensor *inside_temperatu
 void PanasonicAC::set_current_temperature_sensor(sensor::Sensor *current_temperature_sensor)
 {
   this->current_temperature_sensor_ = current_temperature_sensor;
-  this->current_temperature_sensor_->add_on_state_callback([this](float state) {
-    this->current_temperature = state;
-    this->publish_state();
-  });
-}
-
-void PanasonicAC::set_hvac_action_sensor(sensor::Sensor *hvac_action_sensor)
-{
-  this->hvac_action_sensor_ = hvac_action_sensor;
-  this->hvac_action_sensor_->add_on_state_callback([this](float state) {
-    this->hvac_action_sensor = state;
-    this->publish_state();
-  });
+  this->current_temperature_sensor_->add_on_state_callback([this](float state)
+                                                           {
+                                                             this->current_temperature = state;
+                                                             this->publish_state();
+                                                           });
 }
 
 void PanasonicAC::set_vertical_swing_select(select::Select *vertical_swing_select) {
