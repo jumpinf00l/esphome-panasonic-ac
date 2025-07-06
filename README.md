@@ -2,6 +2,8 @@
 This is jumpinf00l's super-dodgy hack to add a few nicer sensors and selects, it's only really public so that my ESPHome can reach it to allow for ease of change tracking, but I guess you can use it. No, I don't intend to do a PR because, as previously mentioned, these are super-dodgy hacks and intended only for jumpinf00l. This is specifically to support features of Panasonic CS-Z25XKRW and CS-Z50XKRW, but these changes should be pretty universal
 
 ## <a name="key--changes">Key changes</a>:
+ - Fixed deprecation notices
+   - Shamelessly copied from PRs on the main repo
  - Fan speed is now a Home Assistant style fan mode
    - This allows the thermostat entity in Apple Home to show fan speeds. See [Fan Mode](#fan-mode) for mapping and notes
    - This has no effect on Google Home. See [Fan Mode Notes](#fan-mode-notes) for notes on this
@@ -44,18 +46,18 @@ This is jumpinf00l's super-dodgy hack to add a few nicer sensors and selects, it
 
 ## <a name="wishlist">Wishlist</a>:
 There is no ETA on any item on this list, nor an guarantee that these items will ever be available
- - Fix deprecation notices when compiling
+ - ~Fix deprecation notices when compiling~ ✅
+ - Add activity attribute to the climate component
+ - Set Presets as a Home Assistant style options, similar to work completed on custom fan speed to fan mode change
+   - Align presets with the Panasonic IR remote:
+     - Set Eco as a preset rather than a switch
+     - Set Quiet as a fan speed rather than a preset
  - Incorporate fan mode and mode Select components as options under the Climate component
    - This will neaten the code up, neaten the logs up, reduce Wi-Fi/API activity, and improve performance
    - Investigate an option for adding custom names to the fan modes in the Select component in the case that the user doesn't want "1 - Diffuse" and for example wants "Diffuse" or "1" instead
- - Set Presets as a Home Assistant style list, similar to what was done with the custom fan speed to fan mode change
- - Align presets with the Panasonic IR remote
-   - Set Eco as a preset rather than a switch
-   - Set Quiet as a fan speed rather than a preset
- - Add activity attribute to the climate component
  - Add iAuto-X as a preset, switch, or button
  - Rename horizontal swing/vane modes to align front-end naming conventions
-   - Low importance because my Panasonic AC units don't support horizontal swing/vane adjustment (they're manual/povo-spec)
+   - Low importance because my Panasonic AC units don't support horizontal swing/vane adjustment (they're manual/povo-spec adjustment louvres)
 
 ## <a name="general-notes">General Notes</a>:
  - This has only been tested using CNT mode. WiFi mode is untested but should work similarly
