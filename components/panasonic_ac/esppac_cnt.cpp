@@ -184,11 +184,11 @@ void PanasonicACCNT::control(const climate::ClimateCall &call) {
 void PanasonicACCNT::set_data(bool set) {
   this->mode = determine_mode(this->data[0]);
   this->fan_mode = determine_fan_mode(this->data[3]);
+  this->preset = determine_preset(this->data[5]);
 
   std::string verticalSwing = determine_vertical_swing(this->data[4]);
   std::string horizontalSwing = determine_horizontal_swing(this->data[4]);
 
-  climate::ClimatePreset = determine_preset(this->data[5]);
   bool nanoex = determine_preset_nanoex(this->data[5]);
   bool eco = determine_eco(this->data[8]);
   bool econavi = determine_econavi(this->data[5]);
