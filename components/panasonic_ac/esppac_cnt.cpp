@@ -83,10 +83,10 @@ void PanasonicACCNT::control(const climate::ClimateCall &call) {
   if (call.get_fan_mode().has_value()) {
     ESP_LOGI(TAG, "Requested fan mode change");
 
-    if(this->custom_preset != "Normal")
+    if(this->preset != climate::CLIMATE_PRESET_NONE)
     {
-      ESP_LOGV(TAG, "Resetting preset");
-      this->cmd[5] = (this->cmd[5] & 0xF0);  // Clear right nib for normal mode
+      ESP_LOGV(TAG, "Setting preset to: None");
+      this->cmd[5] = (this->cmd[5] & 0xF0);  // Clear right nib for CLIMATE_PRESET_NONE
     }
     
     switch (*call.get_fan_mode()) {
@@ -142,7 +142,7 @@ void PanasonicACCNT::control(const climate::ClimateCall &call) {
     }
   }
 
-  if (call.get_custom_preset().has_value()) {
+/*  if (call.get_custom_preset().has_value()) {
     ESP_LOGV(TAG, "Requested preset change");
 
     std::string preset = *call.get_custom_preset();
@@ -155,8 +155,27 @@ void PanasonicACCNT::control(const climate::ClimateCall &call) {
       this->cmd[5] = (this->cmd[5] & 0xF0) + 0x04;  // Clear right nib and set quiet mode
     else
       ESP_LOGV(TAG, "Unsupported preset requested");
-  }
+  } */
 
+  if (call.get_preset().has_value()) {
+    ESP_LOGV(TAG, "Requested preset change");
+
+    switch (*call.get_preset()) {
+      case climate::CLIMATE_PRESET_NONE:
+        this->cmd[5] = (this->cmd[5] & 0xF0);             // Clear right nib for CLIMATE_PRESET_NONE
+        break;
+      case climate::CLIMATE_PRESET_BOOST:
+        this->cmd[5] = (this->cmd[5] & 0xF0) + 0x02;      // Clear right nib and set CLIMATE_PRESET_BOOST
+        break;
+      case climate::CLIMATE_PRESET_ECO:                              
+        this->cmd[5] = (this->cmd[5] & 0xF0) + 0x04;    // Clear right nib and set CLIMATE_PRESET_ECO <------- CURRENTLY SETS QUIET WHICH IS A FAN MODE, CHANGE TO ECO WHICH IS A PRESET
+        break;
+      default:
+        ESP_LOGW(TAG, "Unsupported preset requested");
+        break;
+    }
+  }
+  
 }
 
 /*
@@ -227,7 +246,7 @@ void PanasonicACCNT::set_data(bool set) {
   this->update_swing_vertical(verticalSwing);
   this->update_swing_horizontal(horizontalSwing);
 
-  this->custom_preset = preset;
+  this->preset = preset;
 
   this->update_nanoex(nanoex);
   this->update_eco(eco);
@@ -443,19 +462,22 @@ std::string PanasonicACCNT::determine_horizontal_swing(uint8_t swing) {
   }
 }
 
-std::string PanasonicACCNT::determine_preset(uint8_t preset) {
-  uint8_t nib = (preset >> 0) & 0x0F;  // Right nib for preset (Powerful/Quiet)
+climate::ClimatePreset PanasonicACCNT::determine_preset(uint8_t preset) {
+  uint8_t nib = (preset >> 0) & 0x0F;  // Right nib for preset (Powerful/Eco)
 
   switch (nib) {
-    case 0x02:
-      return "Powerful";
-    case 0x04:
-      return "Quiet";
     case 0x00:
-      return "Normal";
+      ESP_LOGI(TAG, "Setting preset to: None");
+      return climate::CLIMATE_PRESET_NONE;
+    case 0x02:
+      ESP_LOGI(TAG, "Setting preset to: Boost");
+      return climate::CLIMATE_PRESET_BOOST;
+    case 0x04:
+      ESP_LOGI(TAG, "Setting preset to: Eco (currently quiet fan mode!)");
+      return climate::CLIMATE_PRESET_ECO;
     default:
       ESP_LOGW(TAG, "Received unknown preset");
-      return "Normal";
+      return climate::CLIMATE_PRESET_NONE;
   }
 }
 
