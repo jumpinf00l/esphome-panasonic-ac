@@ -188,7 +188,7 @@ void PanasonicACCNT::set_data(bool set) {
   std::string verticalSwing = determine_vertical_swing(this->data[4]);
   std::string horizontalSwing = determine_horizontal_swing(this->data[4]);
 
-  std::string preset = determine_preset(this->data[5]);
+  climate::ClimatePreset = determine_preset(this->data[5]);
   bool nanoex = determine_preset_nanoex(this->data[5]);
   bool eco = determine_eco(this->data[8]);
   bool econavi = determine_econavi(this->data[5]);
