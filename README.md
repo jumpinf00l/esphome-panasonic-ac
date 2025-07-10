@@ -66,6 +66,9 @@ There is no ETA on any item on this list, nor an guarantee that these items will
  - Add iAuto-X as a preset, switch, or button
  - Rename horizontal swing/vane modes to align front-end naming conventions
    - Low importance because my Panasonic AC units don't support horizontal swing/vane adjustment (they're manual/povo-spec adjustment louvres)
+ - Add a fan entity which can be exposed to Apple Home and Google Home to allow controlling of all fan modes
+   - Investigate presenting this as a percentage
+     - 0 - 14.28% = auto <> 28.57% = quiet <> 42.85% = diffuse <> 57.14% = low <> 71.42% = medium <> 85.71% = high <> 100% = focus
 
 ## <a name="general-notes">General Notes</a>:
  - This has only been tested using CNT mode. WLAN mode is untested but should work similarly
