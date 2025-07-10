@@ -1,12 +1,11 @@
 # <a name="its-a-fork">It's a fork</a>:
 This is jumpinf00l's super-dodgy hack to add a few nicer sensors and selects, it's only really public so that my ESPHome can reach it to allow for ease of change tracking, but I guess you can use it. No, I don't intend to do a PR because, as previously mentioned, these are super-dodgy hacks and intended only for jumpinf00l. This is specifically to support features of Panasonic CS-Z25XKRW and CS-Z50XKRW, but these changes should be pretty universal
 
-## <a name="key--changes">Key changes</a>:
-<b><a name="0.2.x-fix_deprecated_schema">0.2.x - Fix Deprecated Schema Warnings</a></b>
+## <a name="key-changes">Key changes</a>:
+ - Presets are now Home Assistant style presets
+   - See [Presets](#presets) for mapping
  - Fixed deprecated schema warnings when compiling
    - Shamelessly copied from PRs on the main repo
-
-<b><a name="0.1.x-fan_modes">0.1.x - Change from fan speed to Home Assistant style fan mode</a></b>
  - Fan speed is now a Home Assistant style fan mode
    - This allows the thermostat entity in Apple Home to show fan speeds. See [Fan Mode](#fan-mode) for mapping and notes
    - This has no effect on Google Home. See [Fan Mode Notes](#fan-mode-notes) for notes on this
@@ -27,6 +26,12 @@ This is jumpinf00l's super-dodgy hack to add a few nicer sensors and selects, it
        - Set the 'initial_filter_remaining_hours' substitution to something useful to get a percentage remaining indication of the filter in percent
      - Reset button to mark the filter as cleaned and return it to 100%
        - Also press this if changing the 'initial_filter_remaining_hours' substitution
+
+## <a name="presets">Presets</a>:
+| Home Assistant / ESPHome Preset | Panasonic Preset |
+| ------------------------------- | ---------------- |
+| Boost                           | Powerful         |
+| Eco                             | ⚠️ ***Quiet fan mode***   |
 
 ## <a name="fan-mode">Fan Mode</a>:
 | Home Assistant / ESPHome Fan Mode  | Panasonic AC Speed | Apple Home                               | Google Home |
@@ -49,10 +54,10 @@ This is jumpinf00l's super-dodgy hack to add a few nicer sensors and selects, it
 
 ## <a name="wishlist">Wishlist</a>:
 There is no ETA on any item on this list, nor an guarantee that these items will ever be available
- - ~Fix deprecation notices when compiling~ ✅ [0.2.x - Fix Deprecated Schema Warnings](#0.2.x-fix_deprecated_schema)
+ - ~Fix deprecation notices when compiling~ ✅ v0.2.x - Fix Deprecated Schema Warnings
  - Add activity attribute to the climate component
- - Set Presets as a Home Assistant style options, similar to work completed on custom fan speed to fan mode change
-   - Align presets with the Panasonic IR remote:
+ - ~Set Presets as a Home Assistant style options, similar to work completed on custom fan speed to fan mode change~ ✅ v0.3.x - Presets
+   - Align presets with the Panasonic IR remote: ⚠️ ***v0.3.x - Presets - TO DO***
      - Set Eco as a preset rather than a switch
      - Set Quiet as a fan speed rather than a preset
  - Incorporate fan mode and mode Select components as options under the Climate component
@@ -65,6 +70,10 @@ There is no ETA on any item on this list, nor an guarantee that these items will
 ## <a name="general-notes">General Notes</a>:
  - This has only been tested using CNT mode. WLAN mode is untested but should work similarly
  - This is a zero-ecosystem household; there is no love for or preference over Apple Home or Google Home, nor the products of either of these companies
+ - Jumpinf00l has zero intention to develop or maintain this code beyond the wishlist
+   - If something breaks, it might not be fixed
+   - Submit bugs and PRs to the original repo that this was forked from
+   - Please be warned and re-read [It's a fork](#its-a-fork)
 
 ## <a name="example">Example</a>:
 Here's a working cut-down example (add your own esphome, wifi, etc sections):
