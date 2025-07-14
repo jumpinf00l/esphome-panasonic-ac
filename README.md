@@ -31,12 +31,13 @@ This is jumpinf00l's super-dodgy hack to add a few nicer sensors and selects, it
 | Home Assistant / ESPHome Preset | Panasonic Preset |
 | ------------------------------- | ---------------- |
 | Boost                           | Powerful         |
-| Eco                             | ⚠️ ***Quiet fan mode***   |
+| Eco                             | Eco              |
 
 ## <a name="fan-mode">Fan Mode</a>:
 | Home Assistant / ESPHome Fan Mode  | Panasonic AC Speed | Apple Home                               | Google Home |
 | ---------------------------------- | ------------------ | ---------------------------------------- | ----------- |
 | Auto                               | Auto               | N/A                                      | N/A         |
+| Quiet                              | Quiet              | N/A                                      | N/A         |
 | Diffuse                            | 1                  | N/A                                      | N/A         |
 | Low                                | 2                  | 33.3% (bottom third of bar including 0%) | N/A         |
 | Medium                             | 3                  | 66.6% (middle third of bar)              | N/A         |
@@ -45,7 +46,8 @@ This is jumpinf00l's super-dodgy hack to add a few nicer sensors and selects, it
 
 ### <a name="fan-mode-notes">Fan Mode Notes</a>: 
  - Apple Home will only show three speeds on the thermostat entity: Low, Medium, and High which are speeds 2, 3, and 4
-   - I've had some dodgy experiences with setting these fan speeds in Apple Home where subsequent changes to the Home Assistant climate entity fan no longer change on the Panasonic AC unit, so YMMV
+    - The experience with setting fan speeds in both Apple Home and Home Assistant changes slightly: Apple Home appears to enforce its last setting when changing via Home Assistant which might not update on the Home Assistant front-end or change on the Panasonic AC
+    - Closing the Apple Home app after usage appears to work around this
  - Google Home will not show fan speeds on the thermostat entity at all
     - There is a clear reason for this and is unfortunately the trade-off between two 'exceptionally Google' style issues. Home Assistant exposes its climate entities as Google Home thermostat devices rather than a Google Home ac_unit devices because:
       - Google Home ac_unit devices do not support heat mode
@@ -57,9 +59,9 @@ There is no ETA on any item on this list, nor an guarantee that these items will
  - ~Fix deprecation notices when compiling~ ✅ v0.2.x - Fix Deprecated Schema Warnings
  - Add activity attribute to the climate component
  - ~Set Presets as a Home Assistant style options, similar to work completed on custom fan speed to fan mode change~ ✅ v0.3.x - Presets
-   - Align presets with the Panasonic IR remote: ⚠️ ***v0.3.x - Presets - TO DO***
-     - Set Eco as a preset rather than a switch
-     - Set Quiet as a fan speed rather than a preset
+   - ~Align presets with the Panasonic IR remote~
+     - ~Set Eco as a preset rather than a switch~
+     - ~Set Quiet as a fan speed rather than a preset~
  - Incorporate fan mode and mode Select components as options under the Climate component
    - This will neaten the code up, neaten the logs up, reduce Wi-Fi/API activity, and improve performance
    - Investigate an option for adding custom names to the fan modes in the Select component in the case that the user doesn't want "1 - Diffuse" and for example wants "Diffuse" or "1" instead
@@ -82,8 +84,15 @@ There is no ETA on any item on this list, nor an guarantee that these items will
    - Submit bugs and PRs to the original repo that this was forked from
    - Please be warned and re-read [It's a fork](#its-a-fork)
 
+## AI Usage Notes:
+ - AI technologies have been used in the customisation of this code
+   - *Don't Panic*. There are no AI connections, internal AI process, or any other such nonsense in this code
+   - This code has been passed through OpenAI gpt-4o and Google Gemini 2.5 Flash mostly for sanity-checking code as I push the limits of my knowledge
+   - All returned code has been checked and confirmed safe by a squishy, living, breathing human
+
 ## <a name="example">Example</a>:
-Here's a working cut-down example (add your own esphome, wifi, etc sections):
+<details>
+<summary>Here's a working cut-down example (add your own esphome, wifi, etc sections)</summary>
 
 ```
 substitutions:
@@ -339,6 +348,7 @@ interval:
                 id(filter_remaining_hours).publish_state(id(glob_filter_remaining_hours));
                 id(filter_remaining_percent).publish_state(id(glob_filter_remaining_percent));
 ```
+</details>
 
 ---
 
