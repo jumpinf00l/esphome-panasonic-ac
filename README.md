@@ -69,6 +69,10 @@ There is no ETA on any item on this list, nor an guarantee that these items will
  - Add a fan entity which can be exposed to Apple Home and Google Home to allow controlling of all fan modes
    - Investigate presenting this as a percentage
      - 0 - 14.28% = auto <> 28.57% = quiet <> 42.85% = diffuse <> 57.14% = low <> 71.42% = medium <> 85.71% = high <> 100% = focus
+ - Remove/hide unsupportable options in fan_only mode from Home Assistant
+   - Examples: Fan_only doesn't support Eco preset or temperature setpoint
+   - This will be tricky with the custom select entities
+   - This is lowest priority since nothing breaks if setting an unsupported option in fan_only mode
 
 ## <a name="general-notes">General Notes</a>:
  - This has only been tested using CNT mode. WLAN mode is untested but should work similarly
