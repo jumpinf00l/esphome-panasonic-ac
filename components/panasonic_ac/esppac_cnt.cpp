@@ -87,12 +87,20 @@ void PanasonicACCNT::control(const climate::ClimateCall &call) {
     {
       ESP_LOGV(TAG, "Setting preset to: None");
       this->cmd[5] = (this->cmd[5] & 0xF0);  // Clear right nib for CLIMATE_PRESET_NONE
+      // If the preset being cleared was CLIMATE_PRESET_ECO, turn off the eco setting
+      if (this->preset == climate::CLIMATE_PRESET_ECO) {
+        this->cmd[8] = 0x00; // Turn eco OFF
+      }
     }
     
     switch (*call.get_fan_mode()) {
       case climate::CLIMATE_FAN_AUTO:
         ESP_LOGI(TAG, "Fan mode: Auto");
         this->cmd[3] = 0xA0;
+        break;
+      case climate::CLIMATE_FAN_QUIET:
+        ESP_LOGI(TAG, "Fan mode: Quiet");
+        this->cmd[5] = (this->cmd[5] & 0xF0) + 0x04; // Set the quiet bit in cmd[5] (preset byte)
         break;
       case climate::CLIMATE_FAN_DIFFUSE:
         ESP_LOGI(TAG, "Fan mode: 1 - Diffuse");
@@ -163,12 +171,15 @@ void PanasonicACCNT::control(const climate::ClimateCall &call) {
     switch (*call.get_preset()) {
       case climate::CLIMATE_PRESET_NONE:
         this->cmd[5] = (this->cmd[5] & 0xF0);             // Clear right nib for CLIMATE_PRESET_NONE
+        this->cmd[8] = 0x00;                              // Turn eco OFF
         break;
       case climate::CLIMATE_PRESET_BOOST:
         this->cmd[5] = (this->cmd[5] & 0xF0) + 0x02;      // Clear right nib and set CLIMATE_PRESET_BOOST
+        this->cmd[8] = 0x00;                              // Turn eco OFF
         break;
       case climate::CLIMATE_PRESET_ECO:                              
-        this->cmd[5] = (this->cmd[5] & 0xF0) + 0x04;    // Clear right nib and set CLIMATE_PRESET_ECO <------- CURRENTLY SETS QUIET WHICH IS A FAN MODE, CHANGE TO ECO WHICH IS A PRESET
+        this->cmd[5] = (this->cmd[5] & 0xF0);             // Clear other preset bits in cmd[5] (like quiet if it was set)
+        this->cmd[8] = 0x40;                              // Turn eco ON
         break;
       default:
         ESP_LOGW(TAG, "Unsupported preset requested");
@@ -462,21 +473,24 @@ std::string PanasonicACCNT::determine_horizontal_swing(uint8_t swing) {
   }
 }
 
-climate::ClimatePreset PanasonicACCNT::determine_preset(uint8_t preset) {
-  uint8_t nib = (preset >> 0) & 0x0F;  // Right nib for preset (Powerful/Eco)
+climate::ClimatePreset PanasonicACCNT::determine_preset(uint8_t preset_byte) {
+  // First, check if eco mode is active via data[8]
+  if ((this->data[8] & 0x40) == 0x40) {
+    return climate::CLIMATE_PRESET_ECO;
+  }
 
-  switch (nib) {
-    case 0x00:
-      ESP_LOGI(TAG, "Setting preset to: None");
+  // Then check for other presets based on preset_byte (data[5])
+  switch (preset_byte & 0x0F) { // Check only the right nibble
+    case 0x00: // No preset
       return climate::CLIMATE_PRESET_NONE;
-    case 0x02:
-      ESP_LOGI(TAG, "Setting preset to: Boost");
+    case 0x02: // Powerful / Boost
       return climate::CLIMATE_PRESET_BOOST;
-    case 0x04:
-      ESP_LOGI(TAG, "Setting preset to: Eco (currently quiet fan mode!)");
-      return climate::CLIMATE_PRESET_ECO;
+    // 0x04 was previously CLIMATE_PRESET_ECO (quiet). Now it's CLIMATE_FAN_QUIET and should not be a preset.
+    // So, if 0x04 is found here, and eco is not active, it implies no preset.
+    case 0x04: // This was old "Quiet" preset, now should not be a preset, return NONE
+      return climate::CLIMATE_PRESET_NONE;
     default:
-      ESP_LOGW(TAG, "Received unknown preset");
+      ESP_LOGW(TAG, "Received unknown climate preset: 0x%02X", preset_byte);
       return climate::CLIMATE_PRESET_NONE;
   }
 }
