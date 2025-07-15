@@ -6,6 +6,9 @@ from esphome.const import (
     CONF_NAME,
     CONF_ICON,
     CONF_TYPE,
+    CONF_UNIT_OF_MEASUREMENT, # Added
+    CONF_DEVICE_CLASS,       # Added
+    CONF_STATE_CLASS,        # Added
     DEVICE_CLASS_TEMPERATURE,
     DEVICE_CLASS_POWER,
     STATE_CLASS_MEASUREMENT,
@@ -51,7 +54,7 @@ PLATFORM_SCHEMA = climate.CLIMATE_SCHEMA.extend(
         cv.Required(CONF_TYPE): cv.one_of("cnt", "wlan", lower=True),
         cv.Optional(CONF_NAME): cv.string,
         cv.Optional(CONF_ICON): cv.icon,
-        cv.Optional("web_server"): cv.Schema({}), # Dummy for now, for web_server options
+        cv.Optional("web_server"): cv.Schema({}),
 
         cv.Optional(CONF_HORIZONTAL_SWING_SELECT): select.SELECT_SCHEMA.extend(
             {
@@ -69,21 +72,23 @@ PLATFORM_SCHEMA = climate.CLIMATE_SCHEMA.extend(
                 cv.Optional("web_server"): cv.Schema({}),
             }
         ),
-        cv.Optional(CONF_OUTSIDE_TEMPERATURE): sensor.sensor_schema(
-            UNIT_CELSIUS, DEVICE_CLASS_TEMPERATURE, STATE_CLASS_MEASUREMENT
-        ).extend(
+        cv.Optional(CONF_OUTSIDE_TEMPERATURE): sensor.sensor_schema().extend(
             {
                 cv.Optional(CONF_NAME): cv.string,
                 cv.Optional(CONF_ICON): cv.icon,
+                cv.Optional(CONF_UNIT_OF_MEASUREMENT): UNIT_CELSIUS,
+                cv.Optional(CONF_DEVICE_CLASS): DEVICE_CLASS_TEMPERATURE,
+                cv.Optional(CONF_STATE_CLASS): STATE_CLASS_MEASUREMENT,
                 cv.Optional("web_server"): cv.Schema({}),
             }
         ),
-        cv.Optional(CONF_INSIDE_TEMPERATURE): sensor.sensor_schema(
-            UNIT_CELSIUS, DEVICE_CLASS_TEMPERATURE, STATE_CLASS_MEASUREMENT
-        ).extend(
+        cv.Optional(CONF_INSIDE_TEMPERATURE): sensor.sensor_schema().extend(
             {
                 cv.Optional(CONF_NAME): cv.string,
                 cv.Optional(CONF_ICON): cv.icon,
+                cv.Optional(CONF_UNIT_OF_MEASUREMENT): UNIT_CELSIUS,
+                cv.Optional(CONF_DEVICE_CLASS): DEVICE_CLASS_TEMPERATURE,
+                cv.Optional(CONF_STATE_CLASS): STATE_CLASS_MEASUREMENT,
                 cv.Optional("web_server"): cv.Schema({}),
             }
         ),
@@ -120,13 +125,14 @@ PLATFORM_SCHEMA = climate.CLIMATE_SCHEMA.extend(
                 cv.Optional("web_server"): cv.Schema({}),
             }
         ),
-        cv.Optional(CONF_CURRENT_POWER_CONSUMPTION): sensor.sensor_schema(
-            UNIT_WATT, DEVICE_CLASS_POWER, STATE_CLASS_MEASUREMENT
-        ).extend(
+        cv.Optional(CONF_CURRENT_POWER_CONSUMPTION): sensor.sensor_schema().extend(
             {
                 cv.GenerateID(): cv.declare_id(sensor.Sensor),
                 cv.Optional(CONF_NAME): cv.string,
                 cv.Optional(CONF_ICON): cv.icon,
+                cv.Optional(CONF_UNIT_OF_MEASUREMENT): UNIT_WATT,
+                cv.Optional(CONF_DEVICE_CLASS): DEVICE_CLASS_POWER,
+                cv.Optional(CONF_STATE_CLASS): STATE_CLASS_MEASUREMENT,
                 cv.Optional("web_server"): cv.Schema({}),
             }
         ),
