@@ -1,3 +1,6 @@
+// esppac_cnt.h
+#pragma once
+
 #include "esphome/components/climate/climate.h"
 #include "esphome/components/climate/climate_mode.h"
 #include "esppac.h"
@@ -25,7 +28,7 @@ class PanasonicACCNT : public PanasonicAC {
   void on_vertical_swing_change(const std::string &swing) override;
   void on_nanoex_change(bool nanoex) override;
   void on_eco_change(bool eco) override;
-  void on_econavi_change(bool eco) override;
+  void on_econavi_change(bool econavi) override;
   void on_mild_dry_change(bool mild_dry) override;
 
   void setup() override;
@@ -50,17 +53,17 @@ class PanasonicACCNT : public PanasonicAC {
   void handle_packet();
 
   climate::ClimateMode determine_mode(uint8_t mode);
-  climate::ClimateFanMode determine_fan_mode(uint8_t fan_mode);
+  climate::ClimateFanMode determine_fan_mode(uint8_t fan_mode_byte_3, uint8_t fan_mode_byte_5);
 
   std::string determine_vertical_swing(uint8_t swing);
   std::string determine_horizontal_swing(uint8_t swing);
 
   climate::ClimatePreset determine_preset(uint8_t preset);
   bool determine_preset_nanoex(uint8_t preset);
-  bool determine_eco(uint8_t value);
-  bool determine_econavi(uint8_t value);
-  bool determine_mild_dry(uint8_t value);
-  uint16_t determine_power_consumption(uint8_t byte_28, uint8_t multiplier, uint8_t offset);
+  bool determine_preset_eco(uint8_t preset);
+  bool determine_preset_econavi(uint8_t preset);
+  bool determine_preset_mild_dry(uint8_t preset);
+  int16_t determine_power_consumption(int8_t byte_28, int8_t byte_29, int8_t byte_30);
 };
 
 }  // namespace CNT
