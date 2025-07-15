@@ -6,9 +6,9 @@ from esphome.const import (
     CONF_NAME,
     CONF_ICON,
     CONF_TYPE,
-    CONF_UNIT_OF_MEASUREMENT, # Added
-    CONF_DEVICE_CLASS,       # Added
-    CONF_STATE_CLASS,        # Added
+    CONF_UNIT_OF_MEASUREMENT,
+    CONF_DEVICE_CLASS,
+    CONF_STATE_CLASS,
     DEVICE_CLASS_TEMPERATURE,
     DEVICE_CLASS_POWER,
     STATE_CLASS_MEASUREMENT,
@@ -48,7 +48,8 @@ HORIZONTAL_SWING_OPTIONS = ["auto", "fixed"]
 VERTICAL_SWING_OPTIONS = ["auto", "fixed"]
 
 # Schema for the panasonic_ac climate platform
-PLATFORM_SCHEMA = climate.CLIMATE_SCHEMA.extend(
+# Renamed PLATFORM_SCHEMA to CONFIG_SCHEMA
+CONFIG_SCHEMA = climate.CLIMATE_SCHEMA.extend(
     {
         cv.GenerateID(): cv.declare_id(PanasonicAC),
         cv.Required(CONF_TYPE): cv.one_of("cnt", "wlan", lower=True),
@@ -140,10 +141,9 @@ PLATFORM_SCHEMA = climate.CLIMATE_SCHEMA.extend(
 ).extend(uart.UART_DEVICE_SCHEMA)
 
 async def to_code(config):
-    # Determine which class to instantiate based on 'type'
     if config[CONF_TYPE] == "cnt":
         var = cg.new_Pvariable(config[CONF_ID], PanasonicACCNT)
-    else: # type == "wlan"
+    else:
         var = cg.new_Pvariable(config[CONF_ID], PanasonicACWLAN)
 
     await cg.register_component(var, config)
