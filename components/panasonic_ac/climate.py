@@ -9,6 +9,8 @@ from esphome.const import (
     CONF_UNIT_OF_MEASUREMENT,
     CONF_DEVICE_CLASS,
     CONF_STATE_CLASS,
+    CONF_SORTING_GROUP_ID,  # Added
+    CONF_SORTING_WEIGHT,    # Added
     DEVICE_CLASS_TEMPERATURE,
     DEVICE_CLASS_POWER,
     STATE_CLASS_MEASUREMENT,
@@ -48,20 +50,23 @@ HORIZONTAL_SWING_OPTIONS = ["auto", "fixed"]
 VERTICAL_SWING_OPTIONS = ["auto", "fixed"]
 
 # Schema for the panasonic_ac climate platform
-# Renamed PLATFORM_SCHEMA to CONFIG_SCHEMA
 CONFIG_SCHEMA = climate.CLIMATE_SCHEMA.extend(
     {
         cv.GenerateID(): cv.declare_id(PanasonicAC),
         cv.Required(CONF_TYPE): cv.one_of("cnt", "wlan", lower=True),
         cv.Optional(CONF_NAME): cv.string,
         cv.Optional(CONF_ICON): cv.icon,
-        cv.Optional("web_server"): cv.Schema({}),
+        cv.Optional(CONF_SORTING_GROUP_ID): cv.string,  # Added here
+        cv.Optional(CONF_SORTING_WEIGHT): cv.int_,      # Added here
+        cv.Optional("web_server"): cv.Schema({}), # Keep this as a dummy, or remove if not needed for the climate component directly
 
         cv.Optional(CONF_HORIZONTAL_SWING_SELECT): select.SELECT_SCHEMA.extend(
             {
                 cv.GenerateID(): cv.declare_id(PanasonicACSelect),
                 cv.Optional(CONF_NAME): cv.string,
                 cv.Optional(CONF_ICON): cv.icon,
+                cv.Optional(CONF_SORTING_GROUP_ID): cv.string,  # Added here
+                cv.Optional(CONF_SORTING_WEIGHT): cv.int_,      # Added here
                 cv.Optional("web_server"): cv.Schema({}),
             }
         ),
@@ -70,6 +75,8 @@ CONFIG_SCHEMA = climate.CLIMATE_SCHEMA.extend(
                 cv.GenerateID(): cv.declare_id(PanasonicACSelect),
                 cv.Optional(CONF_NAME): cv.string,
                 cv.Optional(CONF_ICON): cv.icon,
+                cv.Optional(CONF_SORTING_GROUP_ID): cv.string,  # Added here
+                cv.Optional(CONF_SORTING_WEIGHT): cv.int_,      # Added here
                 cv.Optional("web_server"): cv.Schema({}),
             }
         ),
@@ -80,6 +87,8 @@ CONFIG_SCHEMA = climate.CLIMATE_SCHEMA.extend(
                 cv.Optional(CONF_UNIT_OF_MEASUREMENT): UNIT_CELSIUS,
                 cv.Optional(CONF_DEVICE_CLASS): DEVICE_CLASS_TEMPERATURE,
                 cv.Optional(CONF_STATE_CLASS): STATE_CLASS_MEASUREMENT,
+                cv.Optional(CONF_SORTING_GROUP_ID): cv.string,  # Added here
+                cv.Optional(CONF_SORTING_WEIGHT): cv.int_,      # Added here
                 cv.Optional("web_server"): cv.Schema({}),
             }
         ),
@@ -90,6 +99,8 @@ CONFIG_SCHEMA = climate.CLIMATE_SCHEMA.extend(
                 cv.Optional(CONF_UNIT_OF_MEASUREMENT): UNIT_CELSIUS,
                 cv.Optional(CONF_DEVICE_CLASS): DEVICE_CLASS_TEMPERATURE,
                 cv.Optional(CONF_STATE_CLASS): STATE_CLASS_MEASUREMENT,
+                cv.Optional(CONF_SORTING_GROUP_ID): cv.string,  # Added here
+                cv.Optional(CONF_SORTING_WEIGHT): cv.int_,      # Added here
                 cv.Optional("web_server"): cv.Schema({}),
             }
         ),
@@ -99,6 +110,8 @@ CONFIG_SCHEMA = climate.CLIMATE_SCHEMA.extend(
                 cv.GenerateID(): cv.declare_id(PanasonicACSwitch),
                 cv.Optional(CONF_NAME): cv.string,
                 cv.Optional(CONF_ICON): cv.icon,
+                cv.Optional(CONF_SORTING_GROUP_ID): cv.string,  # Added here
+                cv.Optional(CONF_SORTING_WEIGHT): cv.int_,      # Added here
                 cv.Optional("web_server"): cv.Schema({}),
             }
         ),
@@ -107,6 +120,8 @@ CONFIG_SCHEMA = climate.CLIMATE_SCHEMA.extend(
                 cv.GenerateID(): cv.declare_id(PanasonicACSwitch),
                 cv.Optional(CONF_NAME): cv.string,
                 cv.Optional(CONF_ICON): cv.icon,
+                cv.Optional(CONF_SORTING_GROUP_ID): cv.string,  # Added here
+                cv.Optional(CONF_SORTING_WEIGHT): cv.int_,      # Added here
                 cv.Optional("web_server"): cv.Schema({}),
             }
         ),
@@ -115,6 +130,8 @@ CONFIG_SCHEMA = climate.CLIMATE_SCHEMA.extend(
                 cv.GenerateID(): cv.declare_id(PanasonicACSwitch),
                 cv.Optional(CONF_NAME): cv.string,
                 cv.Optional(CONF_ICON): cv.icon,
+                cv.Optional(CONF_SORTING_GROUP_ID): cv.string,  # Added here
+                cv.Optional(CONF_SORTING_WEIGHT): cv.int_,      # Added here
                 cv.Optional("web_server"): cv.Schema({}),
             }
         ),
@@ -123,6 +140,8 @@ CONFIG_SCHEMA = climate.CLIMATE_SCHEMA.extend(
                 cv.GenerateID(): cv.declare_id(PanasonicACSwitch),
                 cv.Optional(CONF_NAME): cv.string,
                 cv.Optional(CONF_ICON): cv.icon,
+                cv.Optional(CONF_SORTING_GROUP_ID): cv.string,  # Added here
+                cv.Optional(CONF_SORTING_WEIGHT): cv.int_,      # Added here
                 cv.Optional("web_server"): cv.Schema({}),
             }
         ),
@@ -134,6 +153,8 @@ CONFIG_SCHEMA = climate.CLIMATE_SCHEMA.extend(
                 cv.Optional(CONF_UNIT_OF_MEASUREMENT): UNIT_WATT,
                 cv.Optional(CONF_DEVICE_CLASS): DEVICE_CLASS_POWER,
                 cv.Optional(CONF_STATE_CLASS): STATE_CLASS_MEASUREMENT,
+                cv.Optional(CONF_SORTING_GROUP_ID): cv.string,  # Added here
+                cv.Optional(CONF_SORTING_WEIGHT): cv.int_,      # Added here
                 cv.Optional("web_server"): cv.Schema({}),
             }
         ),
