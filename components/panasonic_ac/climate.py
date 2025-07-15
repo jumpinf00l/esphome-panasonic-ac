@@ -11,7 +11,6 @@ from esphome.const import (
     STATE_CLASS_MEASUREMENT,
     UNIT_CELSIUS,
     UNIT_WATT,
-    PLATFORM_SCHEMA,
 )
 
 AUTO_LOAD = ["switch", "sensor", "select"]
@@ -25,7 +24,7 @@ PanasonicACCNT = panasonic_ac_cnt_ns.class_("PanasonicACCNT", PanasonicAC)
 panasonic_ac_wlan_ns = panasonic_ac_ns.namespace("WLAN")
 PanasonicACWLAN = panasonic_ac_wlan_ns.class_("PanasonicACWLAN", PanasonicAC)
 
-# Custom components for switches and selects (as defined in the old climate.py)
+# Custom components for switches and selects
 PanasonicACSwitch = panasonic_ac_ns.class_("PanasonicACSwitch", switch.Switch, cg.Component)
 PanasonicACSelect = panasonic_ac_ns.class_("PanasonicACSelect", select.Select, cg.Component)
 
@@ -125,14 +124,14 @@ PLATFORM_SCHEMA = climate.CLIMATE_SCHEMA.extend(
             UNIT_WATT, DEVICE_CLASS_POWER, STATE_CLASS_MEASUREMENT
         ).extend(
             {
-                cv.GenerateID(): cv.declare_id(sensor.Sensor), # Explicitly generate ID for the sensor
+                cv.GenerateID(): cv.declare_id(sensor.Sensor),
                 cv.Optional(CONF_NAME): cv.string,
                 cv.Optional(CONF_ICON): cv.icon,
                 cv.Optional("web_server"): cv.Schema({}),
             }
         ),
     }
-).extend(uart.UART_DEVICE_SCHEMA) # Inherit UART device configuration
+).extend(uart.UART_DEVICE_SCHEMA)
 
 async def to_code(config):
     # Determine which class to instantiate based on 'type'
@@ -174,7 +173,6 @@ async def to_code(config):
             conf = config[s_key]
             a_switch = await switch.new_switch(conf)
             await cg.register_component(a_switch, conf)
-            # Use getattr to call the correct setter method dynamically
             cg.add(getattr(var, f"set_{s_key}")(a_switch))
 
     if CONF_CURRENT_POWER_CONSUMPTION in config:
