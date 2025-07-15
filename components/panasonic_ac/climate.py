@@ -6,16 +6,12 @@ from esphome.const import (
     CONF_NAME,
     CONF_ICON,
     CONF_TYPE,
-    CONF_UNIT_OF_MEASUREMENT,
-    CONF_DEVICE_CLASS,
-    CONF_STATE_CLASS,
-    CONF_SORTING_GROUP_ID,  # Added
-    CONF_SORTING_WEIGHT,    # Added
     DEVICE_CLASS_TEMPERATURE,
     DEVICE_CLASS_POWER,
     STATE_CLASS_MEASUREMENT,
     UNIT_CELSIUS,
     UNIT_WATT,
+    PLATFORM_SCHEMA,
 )
 
 AUTO_LOAD = ["switch", "sensor", "select"]
@@ -29,7 +25,7 @@ PanasonicACCNT = panasonic_ac_cnt_ns.class_("PanasonicACCNT", PanasonicAC)
 panasonic_ac_wlan_ns = panasonic_ac_ns.namespace("WLAN")
 PanasonicACWLAN = panasonic_ac_wlan_ns.class_("PanasonicACWLAN", PanasonicAC)
 
-# Custom components for switches and selects
+# Custom components for switches and selects (as defined in the old climate.py)
 PanasonicACSwitch = panasonic_ac_ns.class_("PanasonicACSwitch", switch.Switch, cg.Component)
 PanasonicACSelect = panasonic_ac_ns.class_("PanasonicACSelect", select.Select, cg.Component)
 
@@ -50,23 +46,19 @@ HORIZONTAL_SWING_OPTIONS = ["auto", "fixed"]
 VERTICAL_SWING_OPTIONS = ["auto", "fixed"]
 
 # Schema for the panasonic_ac climate platform
-CONFIG_SCHEMA = climate.CLIMATE_SCHEMA.extend(
+PLATFORM_SCHEMA = climate.CLIMATE_SCHEMA.extend(
     {
         cv.GenerateID(): cv.declare_id(PanasonicAC),
         cv.Required(CONF_TYPE): cv.one_of("cnt", "wlan", lower=True),
         cv.Optional(CONF_NAME): cv.string,
         cv.Optional(CONF_ICON): cv.icon,
-        cv.Optional(CONF_SORTING_GROUP_ID): cv.string,  # Added here
-        cv.Optional(CONF_SORTING_WEIGHT): cv.int_,      # Added here
-        cv.Optional("web_server"): cv.Schema({}), # Keep this as a dummy, or remove if not needed for the climate component directly
+        cv.Optional("web_server"): cv.Schema({}), # Dummy for now, for web_server options
 
         cv.Optional(CONF_HORIZONTAL_SWING_SELECT): select.SELECT_SCHEMA.extend(
             {
                 cv.GenerateID(): cv.declare_id(PanasonicACSelect),
                 cv.Optional(CONF_NAME): cv.string,
                 cv.Optional(CONF_ICON): cv.icon,
-                cv.Optional(CONF_SORTING_GROUP_ID): cv.string,  # Added here
-                cv.Optional(CONF_SORTING_WEIGHT): cv.int_,      # Added here
                 cv.Optional("web_server"): cv.Schema({}),
             }
         ),
@@ -75,32 +67,24 @@ CONFIG_SCHEMA = climate.CLIMATE_SCHEMA.extend(
                 cv.GenerateID(): cv.declare_id(PanasonicACSelect),
                 cv.Optional(CONF_NAME): cv.string,
                 cv.Optional(CONF_ICON): cv.icon,
-                cv.Optional(CONF_SORTING_GROUP_ID): cv.string,  # Added here
-                cv.Optional(CONF_SORTING_WEIGHT): cv.int_,      # Added here
                 cv.Optional("web_server"): cv.Schema({}),
             }
         ),
-        cv.Optional(CONF_OUTSIDE_TEMPERATURE): sensor.sensor_schema().extend(
+        cv.Optional(CONF_OUTSIDE_TEMPERATURE): sensor.sensor_schema(
+            UNIT_CELSIUS, DEVICE_CLASS_TEMPERATURE, STATE_CLASS_MEASUREMENT
+        ).extend(
             {
                 cv.Optional(CONF_NAME): cv.string,
                 cv.Optional(CONF_ICON): cv.icon,
-                cv.Optional(CONF_UNIT_OF_MEASUREMENT): UNIT_CELSIUS,
-                cv.Optional(CONF_DEVICE_CLASS): DEVICE_CLASS_TEMPERATURE,
-                cv.Optional(CONF_STATE_CLASS): STATE_CLASS_MEASUREMENT,
-                cv.Optional(CONF_SORTING_GROUP_ID): cv.string,  # Added here
-                cv.Optional(CONF_SORTING_WEIGHT): cv.int_,      # Added here
                 cv.Optional("web_server"): cv.Schema({}),
             }
         ),
-        cv.Optional(CONF_INSIDE_TEMPERATURE): sensor.sensor_schema().extend(
+        cv.Optional(CONF_INSIDE_TEMPERATURE): sensor.sensor_schema(
+            UNIT_CELSIUS, DEVICE_CLASS_TEMPERATURE, STATE_CLASS_MEASUREMENT
+        ).extend(
             {
                 cv.Optional(CONF_NAME): cv.string,
                 cv.Optional(CONF_ICON): cv.icon,
-                cv.Optional(CONF_UNIT_OF_MEASUREMENT): UNIT_CELSIUS,
-                cv.Optional(CONF_DEVICE_CLASS): DEVICE_CLASS_TEMPERATURE,
-                cv.Optional(CONF_STATE_CLASS): STATE_CLASS_MEASUREMENT,
-                cv.Optional(CONF_SORTING_GROUP_ID): cv.string,  # Added here
-                cv.Optional(CONF_SORTING_WEIGHT): cv.int_,      # Added here
                 cv.Optional("web_server"): cv.Schema({}),
             }
         ),
@@ -110,8 +94,6 @@ CONFIG_SCHEMA = climate.CLIMATE_SCHEMA.extend(
                 cv.GenerateID(): cv.declare_id(PanasonicACSwitch),
                 cv.Optional(CONF_NAME): cv.string,
                 cv.Optional(CONF_ICON): cv.icon,
-                cv.Optional(CONF_SORTING_GROUP_ID): cv.string,  # Added here
-                cv.Optional(CONF_SORTING_WEIGHT): cv.int_,      # Added here
                 cv.Optional("web_server"): cv.Schema({}),
             }
         ),
@@ -120,8 +102,6 @@ CONFIG_SCHEMA = climate.CLIMATE_SCHEMA.extend(
                 cv.GenerateID(): cv.declare_id(PanasonicACSwitch),
                 cv.Optional(CONF_NAME): cv.string,
                 cv.Optional(CONF_ICON): cv.icon,
-                cv.Optional(CONF_SORTING_GROUP_ID): cv.string,  # Added here
-                cv.Optional(CONF_SORTING_WEIGHT): cv.int_,      # Added here
                 cv.Optional("web_server"): cv.Schema({}),
             }
         ),
@@ -130,8 +110,6 @@ CONFIG_SCHEMA = climate.CLIMATE_SCHEMA.extend(
                 cv.GenerateID(): cv.declare_id(PanasonicACSwitch),
                 cv.Optional(CONF_NAME): cv.string,
                 cv.Optional(CONF_ICON): cv.icon,
-                cv.Optional(CONF_SORTING_GROUP_ID): cv.string,  # Added here
-                cv.Optional(CONF_SORTING_WEIGHT): cv.int_,      # Added here
                 cv.Optional("web_server"): cv.Schema({}),
             }
         ),
@@ -140,31 +118,27 @@ CONFIG_SCHEMA = climate.CLIMATE_SCHEMA.extend(
                 cv.GenerateID(): cv.declare_id(PanasonicACSwitch),
                 cv.Optional(CONF_NAME): cv.string,
                 cv.Optional(CONF_ICON): cv.icon,
-                cv.Optional(CONF_SORTING_GROUP_ID): cv.string,  # Added here
-                cv.Optional(CONF_SORTING_WEIGHT): cv.int_,      # Added here
                 cv.Optional("web_server"): cv.Schema({}),
             }
         ),
-        cv.Optional(CONF_CURRENT_POWER_CONSUMPTION): sensor.sensor_schema().extend(
+        cv.Optional(CONF_CURRENT_POWER_CONSUMPTION): sensor.sensor_schema(
+            UNIT_WATT, DEVICE_CLASS_POWER, STATE_CLASS_MEASUREMENT
+        ).extend(
             {
-                cv.GenerateID(): cv.declare_id(sensor.Sensor),
+                cv.GenerateID(): cv.declare_id(sensor.Sensor), # Explicitly generate ID for the sensor
                 cv.Optional(CONF_NAME): cv.string,
                 cv.Optional(CONF_ICON): cv.icon,
-                cv.Optional(CONF_UNIT_OF_MEASUREMENT): UNIT_WATT,
-                cv.Optional(CONF_DEVICE_CLASS): DEVICE_CLASS_POWER,
-                cv.Optional(CONF_STATE_CLASS): STATE_CLASS_MEASUREMENT,
-                cv.Optional(CONF_SORTING_GROUP_ID): cv.string,  # Added here
-                cv.Optional(CONF_SORTING_WEIGHT): cv.int_,      # Added here
                 cv.Optional("web_server"): cv.Schema({}),
             }
         ),
     }
-).extend(uart.UART_DEVICE_SCHEMA)
+).extend(uart.UART_DEVICE_SCHEMA) # Inherit UART device configuration
 
 async def to_code(config):
+    # Determine which class to instantiate based on 'type'
     if config[CONF_TYPE] == "cnt":
         var = cg.new_Pvariable(config[CONF_ID], PanasonicACCNT)
-    else:
+    else: # type == "wlan"
         var = cg.new_Pvariable(config[CONF_ID], PanasonicACWLAN)
 
     await cg.register_component(var, config)
@@ -200,6 +174,7 @@ async def to_code(config):
             conf = config[s_key]
             a_switch = await switch.new_switch(conf)
             await cg.register_component(a_switch, conf)
+            # Use getattr to call the correct setter method dynamically
             cg.add(getattr(var, f"set_{s_key}")(a_switch))
 
     if CONF_CURRENT_POWER_CONSUMPTION in config:
