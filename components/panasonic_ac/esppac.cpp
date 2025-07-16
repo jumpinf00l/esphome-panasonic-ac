@@ -21,14 +21,16 @@ climate::ClimateTraits PanasonicAC::traits() {
   traits.set_supported_modes({climate::CLIMATE_MODE_OFF, climate::CLIMATE_MODE_HEAT_COOL, climate::CLIMATE_MODE_COOL,
                               climate::CLIMATE_MODE_HEAT, climate::CLIMATE_MODE_FAN_ONLY, climate::CLIMATE_MODE_DRY});
 
+  // Re-added CLIMATE_FAN_QUIET to supported fan modes
   traits.set_supported_fan_modes({climate::CLIMATE_FAN_AUTO, climate::CLIMATE_FAN_QUIET, climate::CLIMATE_FAN_DIFFUSE, climate::CLIMATE_FAN_LOW, climate::CLIMATE_FAN_MEDIUM, climate::CLIMATE_FAN_HIGH, climate::CLIMATE_FAN_FOCUS});
   
 /* traits.set_supported_swing_modes({climate::CLIMATE_SWING_OFF, climate::CLIMATE_SWING_BOTH,
                                     climate::CLIMATE_SWING_VERTICAL, climate::CLIMATE_SWING_HORIZONTAL}); */
   
-/* traits.set_supported_custom_presets({"Normal", "Powerful", "Quiet"}); */
+/* Removed custom presets: traits.set_supported_custom_presets({"Normal", "Powerful", "Quiet"}); */
 
-  traits.set_supported_presets({climate::CLIMATE_PRESET_NONE, climate::CLIMATE_PRESET_BOOST, climate::CLIMATE_PRESET_ECO});
+  // Removed CLIMATE_PRESET_SLEEP, as Quiet is now a fan mode
+  traits.set_supported_presets({climate::CLIMATE_PRESET_NONE, climate::CLIMATE_PRESET_BOOST, climate::CLIMATE_PRESET_ECO}); 
   
   return traits;
 }
@@ -216,7 +218,7 @@ void PanasonicAC::set_horizontal_swing_select(select::Select *horizontal_swing_s
 void PanasonicAC::set_nanoex_switch(switch_::Switch *nanoex_switch) {
   this->nanoex_switch_ = nanoex_switch;
   this->nanoex_switch_->add_on_state_callback([this](bool state) {
-    if (state == this->nanoex_state_)
+    if (state == this->nanoex_state_)\
       return;
     this->on_nanoex_change(state);
   });
