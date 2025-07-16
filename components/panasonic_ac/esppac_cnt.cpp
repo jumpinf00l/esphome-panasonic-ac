@@ -100,7 +100,7 @@ void PanasonicACCNT::control(const climate::ClimateCall &call) {
         break;
       case climate::CLIMATE_FAN_QUIET:
         ESP_LOGI(TAG, "Fan mode: Quiet");
-        this->cmd[5] = (this->cmd[5] & 0xF0) + 0x04; // Set the quiet bit in cmd[5] (preset byte)
+        this->cmd[3] = 0x28; // Set fan mode byte to 0x28 for Quiet
         break;
       case climate::CLIMATE_FAN_DIFFUSE:
         ESP_LOGI(TAG, "Fan mode: 1 - Diffuse");
@@ -402,6 +402,9 @@ climate::ClimateFanMode PanasonicACCNT::determine_fan_mode(uint8_t fan_mode) {
     case 0xA0:
       ESP_LOGI(TAG, "Setting fan mode to: Auto");
       return climate::CLIMATE_FAN_AUTO;
+    case 0x28:
+      ESP_LOGI(TAG, "Setting fan mode to: Quiet");
+      return climate::CLIMATE_FAN_QUIET;
     case 0x30:
       ESP_LOGI(TAG, "Setting fan mode to: 1 - Diffuse");
       return climate::CLIMATE_FAN_DIFFUSE;
