@@ -82,7 +82,7 @@ void PanasonicACCNT::control(const climate::ClimateCall &call) {
   }
   
   if (call.get_fan_mode().has_value()) {
-    ESP_LOGI(TAG, "Requested fan mode change to: %s, LOG_STR(*call.get_fan_mode())");
+    ESP_LOGI(TAG, "Requested fan mode change to: %s", LOG_STR(*call.get_fan_mode()));
 
     if (*call.get_fan_mode() == climate::CLIMATE_FAN_QUIET) {
       this->cmd[3] = 0xA0; // Set fan to Auto for Quiet mode
