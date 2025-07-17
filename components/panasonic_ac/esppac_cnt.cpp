@@ -44,7 +44,7 @@ void PanasonicACCNT::control(const climate::ClimateCall &call) {
     return;
 
   if (this->cmd.empty()) {
-    ESP_LOGV(TAG, "Copying data to cmd: No changes");
+    ESP_LOGV(TAG, "Copying data to cmd: Main");
     this->cmd = this->data;
   }
 
@@ -77,11 +77,12 @@ void PanasonicACCNT::control(const climate::ClimateCall &call) {
   }
 
   if (call.get_target_temperature().has_value()) {
+    ESP_LOGV(TAG, "Requested temperature change");
     this->cmd[1] = *call.get_target_temperature() / TEMPERATURE_STEP;
   }
   
   if (call.get_fan_mode().has_value()) {
-    ESP_LOGI(TAG, "Requested fan mode change to: %s", LOG_STR(*call.get_fan_mode()));
+    ESP_LOGI(TAG, "Requested fan mode change");
 
     if (*call.get_fan_mode() == climate::CLIMATE_FAN_QUIET) {
       this->cmd[3] = 0xA0; // Set fan to Auto for Quiet mode
