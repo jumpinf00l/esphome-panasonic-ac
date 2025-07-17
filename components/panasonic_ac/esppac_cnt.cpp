@@ -82,7 +82,7 @@ void PanasonicACCNT::control(const climate::ClimateCall &call) {
   }
   
   if (call.get_fan_mode().has_value()) {
-    ESP_LOGI(TAG, "Requested fan mode change");
+    ESP_LOGI(TAG, "Requested fan mode change %s, *call.get_fan_mode()");
 
     if (*call.get_fan_mode() == climate::CLIMATE_FAN_QUIET) {
       this->cmd[3] = 0xA0; // Set fan to Auto for Quiet mode
@@ -375,7 +375,6 @@ climate::ClimateMode PanasonicACCNT::determine_mode(uint8_t mode) {
       return climate::CLIMATE_MODE_FAN_ONLY;
     default:
       ESP_LOGW(TAG, "Received unknown climate mode");
-      return climate::CLIMATE_MODE_OFF;
   }
 }
 
@@ -389,26 +388,19 @@ climate::ClimateFanMode PanasonicACCNT::determine_fan_mode(uint8_t fan_mode_byte
   // If Quiet bit is not set, then determine based on the actual fan mode byte.
   switch (fan_mode_byte) {
     case 0xA0:
-      ESP_LOGI(TAG, "Setting fan mode to: Auto");
       return climate::CLIMATE_FAN_AUTO;
     case 0x30:
-      ESP_LOGI(TAG, "Setting fan mode to: 1 - Diffuse");
       return climate::CLIMATE_FAN_DIFFUSE;
     case 0x40:
-      ESP_LOGI(TAG, "Setting fan mode to: 2 - Low");
       return climate::CLIMATE_FAN_LOW;
     case 0x50:
-      ESP_LOGI(TAG, "Setting fan mode to: 3 - Medium");
       return climate::CLIMATE_FAN_MEDIUM;
     case 0x60:
-      ESP_LOGI(TAG, "Setting fan mode to: 4 - High");
       return climate::CLIMATE_FAN_HIGH;
     case 0x70:
-      ESP_LOGI(TAG, "Setting fan mode to: 5 - Focus");
       return climate::CLIMATE_FAN_FOCUS;
     default:
-      ESP_LOGW(TAG, "Received unknown fan mode byte: 0x%02X", fan_mode_byte);
-      return climate::CLIMATE_FAN_AUTO; // Default to Auto for unknown
+      ESP_LOGW(TAG, "Received unknown fan mode);
   }
 }
 
@@ -433,8 +425,7 @@ std::string PanasonicACCNT::determine_vertical_swing(uint8_t swing) {
     case 0x00:
       return "unsupported";
     default:
-      ESP_LOGW(TAG, "Received unknown vertical swing mode: 0x%02X", nib);
-      return "Unknown";
+      ESP_LOGW(TAG, "Received unknown vertical swing mode);
   }
 }
 
