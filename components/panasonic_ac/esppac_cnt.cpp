@@ -383,7 +383,6 @@ climate::ClimateFanMode PanasonicACCNT::determine_fan_mode(uint8_t fan_mode_byte
   // Check if the "Quiet" bit (0x04) is set in data[5].
   // This bit determines if Quiet mode is active, regardless of the fan_mode_byte.
   if ((this->data[5] & 0x04) == 0x04) {
-    ESP_LOGI(TAG, "Setting fan mode to: Quiet (from 0x04 bit in preset byte)");
     return climate::CLIMATE_FAN_QUIET;
   }
 
