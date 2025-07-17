@@ -44,7 +44,7 @@ void PanasonicACCNT::control(const climate::ClimateCall &call) {
     return;
 
   if (this->cmd.empty()) {
-    ESP_LOGV(TAG, "Copying data to cmd");
+    ESP_LOGV(TAG, "Copying data to cmd: No changes");
     this->cmd = this->data;
   }
 
@@ -541,7 +541,7 @@ void PanasonicACCNT::on_vertical_swing_change(const std::string &swing) {
   ESP_LOGD(TAG, "Setting vertical swing position");
 
   if (this->cmd.empty()) {
-    ESP_LOGV(TAG, "Copying data to cmd");
+    ESP_LOGV(TAG, "Copying data to cmd: Vertical swing");
     this->cmd = this->data;
   }
 
@@ -573,7 +573,7 @@ void PanasonicACCNT::on_horizontal_swing_change(const std::string &swing) {
   ESP_LOGD(TAG, "Setting horizontal swing position");
 
   if (this->cmd.empty()) {
-    ESP_LOGV(TAG, "Copying data to cmd");
+    ESP_LOGV(TAG, "Copying data to cmd: Horizontal swing");
     this->cmd = this->data;
   }
 
@@ -601,7 +601,7 @@ void PanasonicACCNT::on_nanoex_change(bool state) {
     return;
 
   if (this->cmd.empty()) {
-    ESP_LOGV(TAG, "Copying data to cmd");
+    ESP_LOGV(TAG, "Copying data to cmd: NanoeX switch");
     this->cmd = this->data;
   }
 
@@ -621,7 +621,7 @@ void PanasonicACCNT::on_eco_change(bool state) {
     return;
 
   if (this->cmd.empty()) {
-    ESP_LOGV(TAG, "Copying data to cmd");
+    ESP_LOGV(TAG, "Copying data to cmd: Eco switch");
     this->cmd = this->data;
   }
 
@@ -644,7 +644,7 @@ void PanasonicACCNT::on_econavi_change(bool state) {
     return;
 
   if (this->cmd.empty()) {
-    ESP_LOGV(TAG, "Copying data to cmd");
+    ESP_LOGV(TAG, "Copying data to cmd: Econavi switch");
     this->cmd = this->data;
   }
 
@@ -665,7 +665,7 @@ void PanasonicACCNT::on_mild_dry_change(bool state) {
     return;
 
   if (this->cmd.empty()) {
-    ESP_LOGV(TAG, "Copying data to cmd");
+    ESP_LOGV(TAG, "Copying data to cmd: Mild dry switch");
     this->cmd = this->data;
   }
 
