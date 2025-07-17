@@ -400,7 +400,7 @@ climate::ClimateFanMode PanasonicACCNT::determine_fan_mode(uint8_t fan_mode_byte
     case 0x70:
       return climate::CLIMATE_FAN_FOCUS;
     default:
-      ESP_LOGW(TAG, "Received unknown fan mode);
+      ESP_LOGW(TAG, "Received unknown fan mode");
   }
 }
 
@@ -425,7 +425,7 @@ std::string PanasonicACCNT::determine_vertical_swing(uint8_t swing) {
     case 0x00:
       return "unsupported";
     default:
-      ESP_LOGW(TAG, "Received unknown vertical swing mode);
+      ESP_LOGW(TAG, "Received unknown vertical swing mode");
   }
 }
 
