@@ -82,7 +82,7 @@ void PanasonicACCNT::control(const climate::ClimateCall &call) {
   }
   
   if (call.get_fan_mode().has_value()) {
-    ESP_LOGI(TAG, "Requested fan mode change to: %s", LOG_STR(*call.get_fan_mode()));
+    ESP_LOGI(TAG, "Requested fan mode change");
 
     if (*call.get_fan_mode() == climate::CLIMATE_FAN_QUIET) {
       this->cmd[3] = 0xA0; // Set fan to Auto for Quiet mode
@@ -95,27 +95,21 @@ void PanasonicACCNT::control(const climate::ClimateCall &call) {
       
       switch (*call.get_fan_mode()) {
         case climate::CLIMATE_FAN_AUTO:
-          ESP_LOGI(TAG, "Fan mode: Auto");
           this->cmd[3] = 0xA0;
           break;
         case climate::CLIMATE_FAN_DIFFUSE:
-          ESP_LOGI(TAG, "Fan mode: 1 - Diffuse");
           this->cmd[3] = 0x30;
           break;
         case climate::CLIMATE_FAN_LOW:
-          ESP_LOGI(TAG, "Fan mode: 2 - Low");
           this->cmd[3] = 0x40;
           break;
         case climate::CLIMATE_FAN_MEDIUM:
-          ESP_LOGI(TAG, "Fan mode: 3 - Medium");
           this->cmd[3] = 0x50;
           break;
         case climate::CLIMATE_FAN_HIGH:
-          ESP_LOGI(TAG, "Fan mode: 4 - High");
           this->cmd[3] = 0x60;
           break;
         case climate::CLIMATE_FAN_FOCUS:
-          ESP_LOGI(TAG, "Fan mode: 5 - Focus");
           this->cmd[3] = 0x70;
           break;
         default:
