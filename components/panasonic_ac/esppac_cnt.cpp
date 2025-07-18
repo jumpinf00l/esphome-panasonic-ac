@@ -49,7 +49,6 @@ void PanasonicACCNT::control(const climate::ClimateCall &call) {
   }
 
   bool quiet_active = (this->cmd[5] & 0x04) == 0x04; // Declare and initialise quiet_active boolean
-  ESP_LOGI(TAG, "quiet_active: %s", quiet_active);
   
   if (call.get_mode().has_value()) {
     ESP_LOGV(TAG, "Requested mode change");
@@ -117,7 +116,6 @@ void PanasonicACCNT::control(const climate::ClimateCall &call) {
       }
     }
   quiet_active = (this->cmd[5] & 0x04) == 0x04; // Update quiet_active boolean
-  ESP_LOGI(TAG, "quiet_active: %s", quiet_active);
   }
   
   if (call.get_swing_mode().has_value()) {
