@@ -143,21 +143,30 @@ void PanasonicACCNT::control(const climate::ClimateCall &call) {
 
   if (call.get_preset().has_value()) {
     ESP_LOGV(TAG, "Requested preset change");
-
+    bool quiet_active = (this->cmd[5] & 0x04) == 0x04; // Capture the current state of the Quiet bit before modifying cmd[5]
     switch (*call.get_preset()) {
-      case climate::CLIMATE_PRESET_NONE:
-        // Need a case/if statement here to determine whether fan mode or "preset" is quiet, and if so then turn off eco but leave the quiet fan mode "preset"
-        this->cmd[5] = (this->cmd[5] & 0xF0);             // Clear right nibble of byte 5 (including Boost and Quiet)
-        this->cmd[8] = 0x00;                              // Turn eco OFF
-        break;
       case climate::CLIMATE_PRESET_BOOST:
-        this->cmd[5] = (this->cmd[5] & 0xF0) + 0x02;      // Set Boost bit in byte 5
-        this->cmd[8] = 0x00;                              // Turn eco OFF
+        ESP_LOGV(TAG, "Setting preset to: 'Boost', fan mode: N/A");
+        this->cmd[8] = 0x00; // Turn eco off
+        this->cmd[5] = (this->cmd[5] & 0xF0) | 0x02; // Set preset nibble to Boost
         break;
       case climate::CLIMATE_PRESET_ECO:
-        // Need a case/if statement here to determine whether fan mode or "preset" is quiet, and if so then turn on eco and leave the quiet fan mode "preset"
-        this->cmd[5] = (this->cmd[5] & 0xF0);             // Clear other preset bits in cmd[5] 
-        this->cmd[8] = 0x40;                              // Turn eco ON
+        ESP_LOGV(TAG, "Setting preset to: 'Eco', fan mode: 'Quiet'");
+        this->cmd[8] = 0x40; // Turn eco on
+        if (quiet_active) {
+            this->cmd[5] |= 0x04; // Set preset nibble to Quiet fan mode
+        } else {
+          this->cmd[5] = (this->cmd[5] & 0xF0); // Set preset nibble to Eco
+        }
+        break;
+      case climate::CLIMATE_PRESET_NONE:
+        this->cmd[8] = 0x00; // Turn eco off
+        if (quiet_active) {
+          ESP_LOGI(TAG, "Setting preset to: 'None', fan mode: 'Quiet'");
+          this->cmd[5] |= 0x04; // Set preset nibble to Quiet fan mode
+        } else {
+          this->cmd[5] = (this->cmd[5] & 0xF0); // Set preset nibble to None
+        }
         break;
       default:
         ESP_LOGW(TAG, "Unsupported preset requested");
