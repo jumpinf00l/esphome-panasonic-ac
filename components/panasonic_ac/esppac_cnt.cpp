@@ -48,6 +48,8 @@ void PanasonicACCNT::control(const climate::ClimateCall &call) {
     this->cmd = this->data;
   }
 
+  bool quiet_active = (this->cmd[5] & 0x04) == 0x04; // Declare and initialise quiet_active boolean
+  
   if (call.get_mode().has_value()) {
     ESP_LOGV(TAG, "Requested mode change");
 
@@ -85,15 +87,9 @@ void PanasonicACCNT::control(const climate::ClimateCall &call) {
     ESP_LOGV(TAG, "Requested fan mode change");
 
     if (*call.get_fan_mode() == climate::CLIMATE_FAN_QUIET) {
-      //this->cmd[3] = 0xA0; // Set fan to Auto for Quiet mode
-      bool quiet_active = true;
       this->cmd[5] = (this->cmd[5] & 0xF0) + 0x04; // Set Quiet bit in byte 5
-      //this->cmd[8] = 0x00; // Turn eco OFF when Quiet is active
     } else {
-      bool quiet_active = false;
-      // Clear the Quiet bit (0x04) in byte 5 when a non-Quiet fan mode is selected.
-      // Preserve other bits (like 0x02 for Boost) if they are set in byte 5.
-      this->cmd[5] = this->cmd[5] & (~0x04); 
+      this->cmd[5] = this->cmd[5] & (~0x04); // Clear Quiet bit, preserving Boost if set
       
       switch (*call.get_fan_mode()) {
         case climate::CLIMATE_FAN_AUTO:
@@ -119,6 +115,7 @@ void PanasonicACCNT::control(const climate::ClimateCall &call) {
           break;
       }
     }
+  quiet_active = (this->cmd[5] & 0x04) == 0x04; // Update quiet_active boolean
   }
   
   if (call.get_swing_mode().has_value()) {
@@ -145,7 +142,6 @@ void PanasonicACCNT::control(const climate::ClimateCall &call) {
 
   if (call.get_preset().has_value()) {
     ESP_LOGV(TAG, "Requested preset change");
-    // bool quiet_active = (this->cmd[5] & 0x04) == 0x04; // Capture the current state of the Quiet bit before modifying cmd[5]
     switch (*call.get_preset()) {
       case climate::CLIMATE_PRESET_BOOST:
         ESP_LOGV(TAG, "Setting preset to: 'Boost', fan mode: N/A");
