@@ -86,9 +86,11 @@ void PanasonicACCNT::control(const climate::ClimateCall &call) {
 
     if (*call.get_fan_mode() == climate::CLIMATE_FAN_QUIET) {
       //this->cmd[3] = 0xA0; // Set fan to Auto for Quiet mode
+      bool quiet_active = true;
       this->cmd[5] = (this->cmd[5] & 0xF0) + 0x04; // Set Quiet bit in byte 5
       //this->cmd[8] = 0x00; // Turn eco OFF when Quiet is active
     } else {
+      bool quiet_active = false;
       // Clear the Quiet bit (0x04) in byte 5 when a non-Quiet fan mode is selected.
       // Preserve other bits (like 0x02 for Boost) if they are set in byte 5.
       this->cmd[5] = this->cmd[5] & (~0x04); 
@@ -143,7 +145,7 @@ void PanasonicACCNT::control(const climate::ClimateCall &call) {
 
   if (call.get_preset().has_value()) {
     ESP_LOGV(TAG, "Requested preset change");
-    bool quiet_active = (this->cmd[5] & 0x04) == 0x04; // Capture the current state of the Quiet bit before modifying cmd[5]
+    // bool quiet_active = (this->cmd[5] & 0x04) == 0x04; // Capture the current state of the Quiet bit before modifying cmd[5]
     switch (*call.get_preset()) {
       case climate::CLIMATE_PRESET_BOOST:
         ESP_LOGV(TAG, "Setting preset to: 'Boost', fan mode: N/A");
