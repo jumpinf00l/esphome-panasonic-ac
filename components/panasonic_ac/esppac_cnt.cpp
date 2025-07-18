@@ -147,14 +147,17 @@ void PanasonicACCNT::control(const climate::ClimateCall &call) {
     switch (*call.get_preset()) {
       case climate::CLIMATE_PRESET_NONE:
         this->cmd[5] = (this->cmd[5] & 0xF0);             // Clear right nibble of byte 5 (including Boost and Quiet)
+        ESP_LOGW(TAG, "Turning 'eco' off. What happens?");
         this->cmd[8] = 0x00;                              // Turn eco OFF
         break;
       case climate::CLIMATE_PRESET_BOOST:
         this->cmd[5] = (this->cmd[5] & 0xF0) + 0x02;      // Set Boost bit in byte 5
+        ESP_LOGW(TAG, "Turning 'eco' off. What happens?");
         this->cmd[8] = 0x00;                              // Turn eco OFF
         break;
       case climate::CLIMATE_PRESET_ECO:                              
         this->cmd[5] = (this->cmd[5] & 0xF0);             // Clear other preset bits in cmd[5] 
+        ESP_LOGW(TAG, "Turning 'eco' on! What happens?");
         this->cmd[8] = 0x40;                              // Turn eco ON
         break;
       default:
