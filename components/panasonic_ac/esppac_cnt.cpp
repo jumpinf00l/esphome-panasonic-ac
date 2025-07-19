@@ -13,8 +13,6 @@ void PanasonicACCNT::setup() {
   ESP_LOGD(TAG, "Using CZ-TACG1 protocol via CN-CNT");
 }
 
-bool quiet_active = (this->cmd[5] & 0x04) == 0x04; // Declare and initialise quiet_active boolean
-
 void PanasonicACCNT::loop() {
   PanasonicAC::read_data();
 
@@ -50,12 +48,6 @@ void PanasonicACCNT::control(const climate::ClimateCall &call) {
     this->cmd = this->data;
   }
 
-  if (quiet_active == true) {
-    ESP_LOGI(TAG, "quiet_active boolean is true");
-  } else {
-    ESP_LOGI(TAG, "quiet_active boolean is false");
-  }
-  
   if (call.get_mode().has_value()) {
     ESP_LOGV(TAG, "Requested mode change");
 
@@ -91,15 +83,15 @@ void PanasonicACCNT::control(const climate::ClimateCall &call) {
   
   if (call.get_fan_mode().has_value()) {
     ESP_LOGV(TAG, "Requested fan mode change");
-    if (quiet_active == true) {
-      ESP_LOGI(TAG, "quiet_active boolean is true");
-    } else {
-      ESP_LOGI(TAG, "quiet_active boolean is false");
-    }
+
     if (*call.get_fan_mode() == climate::CLIMATE_FAN_QUIET) {
+      //this->cmd[3] = 0xA0; // Set fan to Auto for Quiet mode
       this->cmd[5] = (this->cmd[5] & 0xF0) + 0x04; // Set Quiet bit in byte 5
+      //this->cmd[8] = 0x00; // Turn eco OFF when Quiet is active
     } else {
-      this->cmd[5] = this->cmd[5] & (~0x04); // Clear Quiet bit, preserving Boost if set
+      // Clear the Quiet bit (0x04) in byte 5 when a non-Quiet fan mode is selected.
+      // Preserve other bits (like 0x02 for Boost) if they are set in byte 5.
+      this->cmd[5] = this->cmd[5] & (~0x04); 
       
       switch (*call.get_fan_mode()) {
         case climate::CLIMATE_FAN_AUTO:
@@ -125,7 +117,6 @@ void PanasonicACCNT::control(const climate::ClimateCall &call) {
           break;
       }
     }
-  bool quiet_active = (this->cmd[5] & 0x04) == 0x04; // Update quiet_active boolean
   }
   
   if (call.get_swing_mode().has_value()) {
@@ -152,62 +143,21 @@ void PanasonicACCNT::control(const climate::ClimateCall &call) {
 
   if (call.get_preset().has_value()) {
     ESP_LOGV(TAG, "Requested preset change");
-    if (quiet_active == true) {
-      ESP_LOGI(TAG, "quiet_active boolean is true");
-    } else {
-      ESP_LOGI(TAG, "quiet_active boolean is false");
-    }
+
     switch (*call.get_preset()) {
+      case climate::CLIMATE_PRESET_NONE:
+        // Need a case/if statement here to determine whether fan mode or "preset" is quiet, and if so then turn off eco but leave the quiet fan mode "preset"
+        this->cmd[5] = (this->cmd[5] & 0xF0);             // Clear right nibble of byte 5 (including Boost and Quiet)
+        this->cmd[8] = 0x00;                              // Turn eco OFF
+        break;
       case climate::CLIMATE_PRESET_BOOST:
-        this->cmd[8] = 0x00; // Turn eco off
-        if (quiet_active == true) {
-          ESP_LOGV(TAG, "Setting preset to: 'Boost', Quiet fan mode: true");
-          this->cmd[5] = (this->cmd[5] & 0xF0) | 0x02; // Set preset nibble to Boost
-          quiet_active = true; // Explicitly set quiet_active boolean
-          if (quiet_active == true) {
-            ESP_LOGI(TAG, "quiet_active boolean is true");
-          } else {
-            ESP_LOGI(TAG, "quiet_active boolean is false");
-          }
-        } else {
-          ESP_LOGV(TAG, "Setting preset to: 'Boost', Quiet fan mode: false");
-          this->cmd[5] = (this->cmd[5] & 0xF0) | 0x02; // Set preset nibble to Boost
-          if (quiet_active == true) {
-            ESP_LOGI(TAG, "quiet_active boolean is true");
-          } else {
-            ESP_LOGI(TAG, "quiet_active boolean is false");
-          }
-        }
+        this->cmd[5] = (this->cmd[5] & 0xF0) + 0x02;      // Set Boost bit in byte 5
+        this->cmd[8] = 0x00;                              // Turn eco OFF
         break;
       case climate::CLIMATE_PRESET_ECO:
-        this->cmd[8] = 0x40; // Turn eco on
-        if (quiet_active == true) {
-          ESP_LOGV(TAG, "Setting preset to: 'Eco', Quiet fan mode: true");
-          this->cmd[5] |= 0x04; // Set preset nibble to Quiet fan mode
-        } else {
-          ESP_LOGV(TAG, "Setting preset to: 'Eco', Quiet fan mode: false");
-          this->cmd[5] = (this->cmd[5] & 0xF0); // Set preset nibble to Eco
-        }
-        break;
-      case climate::CLIMATE_PRESET_NONE:
-        this->cmd[8] = 0x00; // Turn eco off
-        if (quiet_active == true) {
-          ESP_LOGV(TAG, "Setting preset to: 'None', Quiet fan mode: true");
-          this->cmd[5] |= 0x04; // Set preset nibble to Quiet fan mode
-          if (quiet_active == true) {
-            ESP_LOGI(TAG, "quiet_active boolean is true");
-          } else {
-            ESP_LOGI(TAG, "quiet_active boolean is false");
-          }
-        } else {
-          ESP_LOGV(TAG, "Setting preset to: 'None', Quiet fan mode: false");
-          this->cmd[5] = (this->cmd[5] & 0xF0); // Set preset nibble to None
-          if (quiet_active == true) {
-            ESP_LOGI(TAG, "quiet_active boolean is true");
-          } else {
-            ESP_LOGI(TAG, "quiet_active boolean is false");
-          }
-        }
+        // Need a case/if statement here to determine whether fan mode or "preset" is quiet, and if so then turn on eco and leave the quiet fan mode "preset"
+        this->cmd[5] = (this->cmd[5] & 0xF0);             // Clear other preset bits in cmd[5] 
+        this->cmd[8] = 0x40;                              // Turn eco ON
         break;
       default:
         ESP_LOGW(TAG, "Unsupported preset requested");
