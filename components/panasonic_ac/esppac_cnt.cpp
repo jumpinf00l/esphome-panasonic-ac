@@ -162,7 +162,7 @@ void PanasonicACCNT::control(const climate::ClimateCall &call) {
         if (quiet_active == true) {
           ESP_LOGV(TAG, "Setting preset to: 'Boost', Quiet fan mode: true");
           this->cmd[5] = (this->cmd[5] & 0xF0) | 0x02; // Set preset nibble to Boost
-          bool quiet_active = true; // Explicitly set quiet_active boolean
+          quiet_active = true; // Explicitly set quiet_active boolean
         } else {
           ESP_LOGV(TAG, "Setting preset to: 'Boost', Quiet fan mode: false");
           this->cmd[5] = (this->cmd[5] & 0xF0) | 0x02; // Set preset nibble to Boost
