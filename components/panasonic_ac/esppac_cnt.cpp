@@ -159,7 +159,7 @@ void PanasonicACCNT::control(const climate::ClimateCall &call) {
     switch (*call.get_preset()) {
       case climate::CLIMATE_PRESET_BOOST:
         this->cmd[8] = 0x00; // Turn eco off
-        if (quiet_active) {
+        if (quiet_active == true) {
           ESP_LOGV(TAG, "Setting preset to: 'Boost', Quiet fan mode: true");
           this->cmd[5] = (this->cmd[5] & 0xF0) | 0x02; // Set preset nibble to Boost
           bool quiet_active = true; // Explicitly set quiet_active boolean
@@ -170,7 +170,7 @@ void PanasonicACCNT::control(const climate::ClimateCall &call) {
         break;
       case climate::CLIMATE_PRESET_ECO:
         this->cmd[8] = 0x40; // Turn eco on
-        if (quiet_active) {
+        if (quiet_active == true) {
           ESP_LOGV(TAG, "Setting preset to: 'Eco', Quiet fan mode: true");
           this->cmd[5] |= 0x04; // Set preset nibble to Quiet fan mode
         } else {
@@ -180,7 +180,7 @@ void PanasonicACCNT::control(const climate::ClimateCall &call) {
         break;
       case climate::CLIMATE_PRESET_NONE:
         this->cmd[8] = 0x00; // Turn eco off
-        if (quiet_active) {
+        if (quiet_active == true) {
           ESP_LOGV(TAG, "Setting preset to: 'None', Quiet fan mode: true");
           this->cmd[5] |= 0x04; // Set preset nibble to Quiet fan mode
         } else {
