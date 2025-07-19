@@ -146,7 +146,6 @@ void PanasonicACCNT::control(const climate::ClimateCall &call) {
 
     switch (*call.get_preset()) {
       case climate::CLIMATE_PRESET_NONE:
-        // Need a case/if statement here to determine whether fan mode or "preset" is quiet, and if so then turn off eco but leave the quiet fan mode "preset"
         this->cmd[5] = (this->cmd[5] & 0xF0);             // Clear right nibble of byte 5 (including Boost and Quiet)
         this->cmd[8] = 0x00;                              // Turn eco OFF
         break;
@@ -155,7 +154,6 @@ void PanasonicACCNT::control(const climate::ClimateCall &call) {
         this->cmd[8] = 0x00;                              // Turn eco OFF
         break;
       case climate::CLIMATE_PRESET_ECO:
-        // Need a case/if statement here to determine whether fan mode or "preset" is quiet, and if so then turn on eco and leave the quiet fan mode "preset"
         this->cmd[5] = (this->cmd[5] & 0xF0);             // Clear other preset bits in cmd[5] 
         this->cmd[8] = 0x40;                              // Turn eco ON
         break;
