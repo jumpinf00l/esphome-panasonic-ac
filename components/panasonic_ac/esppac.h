@@ -46,8 +46,6 @@ class PanasonicAC : public Component, public uart::UARTDevice, public climate::C
 
   void setup() override;
   void loop() override;
-  void control(const climate::ClimateCall &call) override; //
-
 
  protected:
   sensor::Sensor *outside_temperature_sensor_ = nullptr;        // Sensor to store outside temperature from queries
@@ -103,7 +101,6 @@ class PanasonicAC : public Component, public uart::UARTDevice, public climate::C
   virtual void on_eco_change(bool eco) = 0;
   virtual void on_econavi_change(bool econavi) = 0;
   virtual void on_mild_dry_change(bool mild_dry) = 0;
-  virtual void on_preset_change(climate::ClimatePreset preset) = 0; //
 
   climate::ClimateAction determine_action();
 
