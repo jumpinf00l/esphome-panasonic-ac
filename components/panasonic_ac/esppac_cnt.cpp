@@ -163,9 +163,19 @@ void PanasonicACCNT::control(const climate::ClimateCall &call) {
           ESP_LOGV(TAG, "Setting preset to: 'Boost', Quiet fan mode: true");
           this->cmd[5] = (this->cmd[5] & 0xF0) | 0x02; // Set preset nibble to Boost
           quiet_active = true; // Explicitly set quiet_active boolean
+          if (quiet_active == true) {
+            ESP_LOGI(TAG, "quiet_active boolean is true");
+          } else {
+            ESP_LOGI(TAG, "quiet_active boolean is false");
+          }
         } else {
           ESP_LOGV(TAG, "Setting preset to: 'Boost', Quiet fan mode: false");
           this->cmd[5] = (this->cmd[5] & 0xF0) | 0x02; // Set preset nibble to Boost
+          if (quiet_active == true) {
+            ESP_LOGI(TAG, "quiet_active boolean is true");
+          } else {
+            ESP_LOGI(TAG, "quiet_active boolean is false");
+          }
         }
         break;
       case climate::CLIMATE_PRESET_ECO:
@@ -183,9 +193,19 @@ void PanasonicACCNT::control(const climate::ClimateCall &call) {
         if (quiet_active == true) {
           ESP_LOGV(TAG, "Setting preset to: 'None', Quiet fan mode: true");
           this->cmd[5] |= 0x04; // Set preset nibble to Quiet fan mode
+          if (quiet_active == true) {
+            ESP_LOGI(TAG, "quiet_active boolean is true");
+          } else {
+            ESP_LOGI(TAG, "quiet_active boolean is false");
+          }
         } else {
           ESP_LOGV(TAG, "Setting preset to: 'None', Quiet fan mode: false");
           this->cmd[5] = (this->cmd[5] & 0xF0); // Set preset nibble to None
+          if (quiet_active == true) {
+            ESP_LOGI(TAG, "quiet_active boolean is true");
+          } else {
+            ESP_LOGI(TAG, "quiet_active boolean is false");
+          }
         }
         break;
       default:
