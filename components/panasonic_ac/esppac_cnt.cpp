@@ -11,8 +11,9 @@ void PanasonicACCNT::setup() {
   PanasonicAC::setup();
 
   ESP_LOGD(TAG, "Using CZ-TACG1 protocol via CN-CNT");
-  bool quiet_active = (this->cmd[5] & 0x04) == 0x04; // Declare and initialise quiet_active boolean
 }
+
+bool quiet_active = (this->cmd[5] & 0x04) == 0x04; // Declare and initialise quiet_active boolean
 
 void PanasonicACCNT::loop() {
   PanasonicAC::read_data();
