@@ -49,6 +49,11 @@ void PanasonicACCNT::control(const climate::ClimateCall &call) {
   }
 
   bool quiet_active = (this->cmd[5] & 0x04) == 0x04; // Declare and initialise quiet_active boolean
+  if (quiet_active == true) {
+    ESP_LOGI(TAG, "quiet_active boolean is true");
+  } else {
+    ESP_LOGI(TAG, "quiet_active boolean is false");
+  }
   
   if (call.get_mode().has_value()) {
     ESP_LOGV(TAG, "Requested mode change");
@@ -85,7 +90,11 @@ void PanasonicACCNT::control(const climate::ClimateCall &call) {
   
   if (call.get_fan_mode().has_value()) {
     ESP_LOGV(TAG, "Requested fan mode change");
-
+    if (quiet_active == true) {
+      ESP_LOGI(TAG, "quiet_active boolean is true");
+    } else {
+      ESP_LOGI(TAG, "quiet_active boolean is false");
+    }
     if (*call.get_fan_mode() == climate::CLIMATE_FAN_QUIET) {
       this->cmd[5] = (this->cmd[5] & 0xF0) + 0x04; // Set Quiet bit in byte 5
     } else {
@@ -142,6 +151,11 @@ void PanasonicACCNT::control(const climate::ClimateCall &call) {
 
   if (call.get_preset().has_value()) {
     ESP_LOGV(TAG, "Requested preset change");
+    if (quiet_active == true) {
+      ESP_LOGI(TAG, "quiet_active boolean is true");
+    } else {
+      ESP_LOGI(TAG, "quiet_active boolean is false");
+    }
     switch (*call.get_preset()) {
       case climate::CLIMATE_PRESET_BOOST:
         this->cmd[8] = 0x00; // Turn eco off
