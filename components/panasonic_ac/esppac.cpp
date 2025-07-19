@@ -47,6 +47,30 @@ void PanasonicAC::loop() {
   read_data();  // Read data from UART (if there is any)
 }
 
+void PanasonicAC::control(const climate::ClimateCall &call) { //
+  if (call.get_mode().has_value()) { //
+    this->mode = *call.get_mode(); //
+  } //
+  if (call.get_target_temperature().has_value()) { //
+    this->target_temperature = *call.get_target_temperature(); //
+  } //
+  if (call.get_fan_mode().has_value()) { //
+    this->fan_mode = *call.get_fan_mode(); //
+  } //
+  if (call.get_swing_mode().has_value()) { //
+    this->swing_mode = *call.get_swing_mode(); //
+  } //
+  if (call.get_preset().has_value()) { //
+    climate::ClimatePreset new_preset = *call.get_preset(); //
+    if (this->preset != new_preset) { //
+      this->preset = new_preset; //
+      this->on_preset_change(new_preset); //
+    } //
+  } //
+
+  this->publish_state(); //
+} //
+
 void PanasonicAC::read_data() {
   while (available())  // Read while data is available
   {
