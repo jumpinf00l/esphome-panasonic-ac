@@ -11,6 +11,7 @@ void PanasonicACCNT::setup() {
   PanasonicAC::setup();
 
   ESP_LOGD(TAG, "Using CZ-TACG1 protocol via CN-CNT");
+  bool quiet_active = (this->cmd[5] & 0x04) == 0x04; // Declare and initialise quiet_active boolean
 }
 
 void PanasonicACCNT::loop() {
@@ -48,7 +49,6 @@ void PanasonicACCNT::control(const climate::ClimateCall &call) {
     this->cmd = this->data;
   }
 
-  bool quiet_active = (this->cmd[5] & 0x04) == 0x04; // Declare and initialise quiet_active boolean
   if (quiet_active == true) {
     ESP_LOGI(TAG, "quiet_active boolean is true");
   } else {
