@@ -143,7 +143,8 @@ void PanasonicACCNT::control(const climate::ClimateCall &call) {
 
   if (call.get_preset().has_value()) {
     ESP_LOGV(TAG, "Requested preset change");
-
+    this->cmd[3] = 0xA0;                                  // Set fan mode to Auto (0xA0)
+    
     switch (*call.get_preset()) {
       case climate::CLIMATE_PRESET_NONE:
         // Need a case/if statement here to determine whether fan mode or "preset" is quiet, and if so then turn off eco but leave the quiet fan mode "preset"
