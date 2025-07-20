@@ -233,10 +233,6 @@ void PanasonicACCNT::set_data(bool set) {
 
   this->update_swing_vertical(verticalSwing);
   this->update_swing_horizontal(horizontalSwing);
-
-  // Removed the explicit fan_mode override for CLIMATE_PRESET_SLEEP
-  // because Quiet is now a fan mode and handled by determine_fan_mode.
-
   this->update_nanoex(nanoex);
   this->update_eco(eco);
   this->update_econavi(econavi);
