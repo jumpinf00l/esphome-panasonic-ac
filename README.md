@@ -1,21 +1,5 @@
-# <a name="its-a-fork">It's a fork</a>:
+# <a name="its-a-fork">It's a Fork</a>:
 This is jumpinf00l's super-dodgy hack to add a few nicer sensors and selects, it's only really public so that my ESPHome can reach it to allow for ease of change tracking, but I guess you can use it. No, I don't intend to do a PR because, as previously mentioned, these are super-dodgy hacks and intended only for jumpinf00l. This is specifically to support features of Panasonic CS-Z25XKRW and CS-Z50XKRW, but these changes should be pretty universal
-
-# <a name="table-of-contents">Table of contents</a>:
-| Section | Subsection |
-| ------- | ---------- |
-| Key changes |  |
-|  | Presets |
-|  | Preset notes |
-|  | Fan mode |
-|  | Fan mode notes |
-| Wishlist |  |
-| General notes |  |
-| Example |  |
-| Neat tweaks |  |
-|  | Neat tweaks notes |
-|  | Neat tweaks examples |
-
 
 # <a name="key-changes">Key changes</a>:
  - Preset is now Home Assistant style preset and contains the same options as the IR remote
@@ -27,7 +11,7 @@ This is jumpinf00l's super-dodgy hack to add a few nicer sensors and selects, it
    - This allows the thermostat entity in Apple Home to set Low, Medium, and High fan speeds
    - This has no effect on Google Home
      - See [Fan Mode Notes](#fan-mode-notes) for notes on this
-   - See [Fan mode](#fan-mode) for mapping
+   - See [Fan Mode](#fan-mode) for mapping
  - Added inside temperature as an optional sub-entity under the climate entity rather than relying on the attribute of the climate entity
    - More consistent for Home Assistant dashboard design
    - The inside temperature attribute remains on the climate entity, so can be referenced either way
@@ -61,31 +45,7 @@ This is jumpinf00l's super-dodgy hack to add a few nicer sensors and selects, it
     - There is a clear reason for this and is unfortunately the trade-off between two 'exceptionally Google' style issues. Home Assistant exposes its climate entities as Google Home thermostat devices rather than a Google Home ac_unit devices because the lack of heat mode in a Google Home ac_unit device is more impactful than the lack of fan speed in a Google Home thermostat device
       - Google Home ac_unit devices do not support heat mode
       - Google Home thermostat devices do not support fan speed
-    - See [Wishlist](#wishlist) for a potential workaround through adding a fan entity to the ESPHome device which can be exposed to Apple Home and Google Home as a fan device
-
-# <a name="wishlist">Wishlist</a>:
-There is no ETA on any item on this list, nor an guarantee that these items will ever be available
- - ~Fix deprecation notices when compiling~ ✅ v0.2.x - Fix Deprecated Schema Warnings
- - ~Set Presets as a Home Assistant style options, similar to work completed on custom fan speed to fan mode change~ ✅ v0.3.x - Presets
-   - ~Align presets with the Panasonic IR remote~
-     - ~Set Eco as a preset rather than a switch~
-     - ~Set Quiet as a fan speed rather than a preset~
- - Poll AC unit for update on each front-end change (fan speed, preset, etc), rather than wait for default 5 sec poll
- - Incorporate Fan speed and Mode select entities as sub-entities under the Climate entity
-   - This will neaten the code up, neaten the logs up, reduce Wi-Fi/API activity, and improve performance
-   - Investigate an option for adding custom names to the fan speed sub-entity in the case that the user wants to customise these
- - Add activity attribute to the climate entity
-   - This will indicate the current activity on the AC unit (such as idle once the setpoint temperature has been reached and the AC unit slows down the compressor)
- - Rename horizontal swing/vane modes to align front-end naming conventions, make horizontal and vertical swing modes optional under the climate entity, and add swing modes back to climate entity
-   - This won't support setting fixed swing positions on the climate entity since ESPHome can only toggle horizontal and/or vertical swing on and off
- - Add a fan entity which can be exposed to Apple Home and Google Home to allow controlling of all fan modes
-   - Investigate presenting this as a percentage for better Apple Home and Google Home support, or research supported options for each platform
-     - 0 - 14.28% = auto <> 28.57% = quiet <> 42.85% = diffuse <> 57.14% = low <> 71.42% = medium <> 85.71% = high <> 100% = focus
- - Remove/hide unsupportable options in fan_only mode from Home Assistant
-   - Example: Fan_only doesn't support Eco preset or temperature setpoint
-   - This will be tricky with the climate sub-entities
-   - This is lowest priority since nothing breaks if setting an unsupported option in fan_only mode, it's reverted on the next poll
- - Replicate all changes to WLAN mode
+    - See the [Wishlist](#wishlist) for a potential workaround through adding a fan entity to the ESPHome device which can be exposed to Apple Home and Google Home as a fan device
 
 # <a name="general-notes">General Notes</a>:
  - This has only been tested using CNT mode. WLAN mode is currently untested and mostly unchanged but should work similarly
@@ -93,7 +53,7 @@ There is no ETA on any item on this list, nor an guarantee that these items will
  - Jumpinf00l has zero intention to develop or maintain this code beyond the wishlist
    - If something breaks, it might not be fixed
    - Submit bugs and PRs to the original repo that this was forked from
-   - Please be warned and re-read [It's a fork](#its-a-fork)
+   - Please be warned and re-read [It's a Fork](#its-a-fork)
  - AI technologies have been used in the customisation of this code
    - *Don't Panic*. There are no AI connectors, internal AI process, or any other such nonsense in this code
    - This code has been passed through OpenAI GPT-4o and Google Gemini 2.5 Flash mostly for sanity-checking code as I push the limits of my knowledge
@@ -150,19 +110,19 @@ climate:
 ```
 </details>
 
-## <a name="neat-tweaks">Neat tweaks</a>:
-Below are some neat tweaks inside the ESPHome YAML which you can use to extend the features beyond this custom component. These are not part of the custom component and are entirely optional, but included here because they may be useful. See the [Neat tweaks examples](#neat-tweaks-examples) section for the YAML which you can customise as needed
+# <a name="neat-tweaks">Neat tweaks</a>:
+Below are some neat tweaks inside the ESPHome YAML which you can use to extend the features beyond this custom component. These are not part of the custom component and are entirely optional, but included here because they may be useful. See the [Neat Tweaks Examples](#neat-tweaks-examples) for the YAML which you can customise as needed
 
-### <a name="net-tweaks-notes">Neat tweaks notes</a>:
+## <a name="net-tweaks-notes">Neat Tweaks Notes</a>:
  - These neat tweaks assume that the entity IDs from [Example](#example) are used
 
-### <a name="neat-tweaks-examples">Neat tweaks examples</a>:
+## <a name="neat-tweaks-examples">Neat Tweaks Examples</a>:
 <details>
 <summary>Select entities</summary>
 
  - Select entities for setting Mode, Fan mode, and Preset separate to the Climate entity
    - These are useful for building custom cards or changing the fan mode via the ESPHome device's web UI
-   - These are currently achieved through super-dodgy invervals which run every 1 second. Awful for performance, awful for logging, awful for WiFi/API, but they work for now. See [Wishlist](#wishlist) for a potential fix for this which will move them into the custom component as optional entries under the climate component
+   - These are currently achieved through super-dodgy invervals which run every 1 second. Awful for performance, awful for logging, awful for WiFi/API, but they work for now. See the [Wishlist](#wishlist) for a potential fix for this which will move them into the custom component as optional entries under the climate component
 
 ```
 select:
@@ -415,6 +375,30 @@ interval:
 
 ```
 </details>
+
+# <a name="wishlist">Wishlist</a>:
+There is no ETA on any item on this list, nor an guarantee that these items will ever be available
+ - ~Fix deprecation notices when compiling~ ✅ v0.2.x - Fix Deprecated Schema Warnings
+ - ~Set Presets as a Home Assistant style options, similar to work completed on custom fan speed to fan mode change~ ✅ v0.3.x - Presets
+   - ~Align presets with the Panasonic IR remote~
+     - ~Set Eco as a preset rather than a switch~
+     - ~Set Quiet as a fan speed rather than a preset~
+ - Poll AC unit for update on each front-end change (fan speed, preset, etc), rather than wait for default 5 sec poll
+ - Incorporate Fan speed and Mode select entities as sub-entities under the Climate entity
+   - This will neaten the code up, neaten the logs up, reduce Wi-Fi/API activity, and improve performance
+   - Investigate an option for adding custom names to the fan speed sub-entity in the case that the user wants to customise these
+ - Add activity attribute to the climate entity
+   - This will indicate the current activity on the AC unit (such as idle once the setpoint temperature has been reached and the AC unit slows down the compressor)
+ - Rename horizontal swing/vane modes to align front-end naming conventions, make horizontal and vertical swing modes optional under the climate entity, and add swing modes back to climate entity
+   - This won't support setting fixed swing positions on the climate entity since ESPHome can only toggle horizontal and/or vertical swing on and off
+ - Add a fan entity which can be exposed to Apple Home and Google Home to allow controlling of all fan modes
+   - Investigate presenting this as a percentage for better Apple Home and Google Home support, or research supported options for each platform
+     - 0 - 14.28% = auto <> 28.57% = quiet <> 42.85% = diffuse <> 57.14% = low <> 71.42% = medium <> 85.71% = high <> 100% = focus
+ - Remove/hide unsupportable options in fan_only mode from Home Assistant
+   - Example: Fan_only doesn't support Eco preset or temperature setpoint
+   - This will be tricky with the climate sub-entities
+   - This is lowest priority since nothing breaks if setting an unsupported option in fan_only mode, it's reverted on the next poll
+ - Replicate all changes to WLAN mode
 
 ---
 
