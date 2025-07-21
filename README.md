@@ -1,7 +1,7 @@
-# <a name="its-a-fork">It's a Fork</a>:
+# <a name="its-a-fork">It's a Fork</a>
 This is jumpinf00l's super-dodgy hack to add a few nicer sensors and selects, it's only really public so that my ESPHome can reach it to allow for ease of change tracking, but I guess you can use it. No, I don't intend to do a PR because, as previously mentioned, these are super-dodgy hacks and intended only for jumpinf00l. This is specifically to support features of Panasonic CS-Z25XKRW and CS-Z50XKRW, but these changes should be pretty universal
 
-# <a name="key-changes">Key changes</a>:
+# <a name="key-changes">Key changes</a>
  - Preset is now Home Assistant style preset and contains the same options as the IR remote
    - Quiet is now a fan mode
    - Eco is now a preset
@@ -16,17 +16,17 @@ This is jumpinf00l's super-dodgy hack to add a few nicer sensors and selects, it
    - More consistent for Home Assistant dashboard design
    - The inside temperature attribute remains on the climate entity, so can be referenced either way
 
-## <a name="presets">Presets</a>:
+## <a name="presets">Presets</a>
 | Home Assistant / ESPHome Preset | Panasonic Preset |
 | ------------------------------- | ---------------- |
 | None                            | [Blank]          |
 | Boost                           | Powerful         |
 | Eco                             | Eco              |
 
-### <a name="preset-notes">Preset Notes</a>: 
+### <a name="preset-notes">Preset Notes</a>
  - Changing the preset to any value will change the fan mode to Auto, the same as changing the preset from the IR remote
 
-## <a name="fan-mode">Fan Mode</a>:
+## <a name="fan-mode">Fan Mode</a>
 | Home Assistant / ESPHome Fan Mode  | Panasonic AC Speed | Apple Home                               | Google Home |
 | ---------------------------------- | ------------------ | ---------------------------------------- | ----------- |
 | Auto                               | Auto               | N/A                                      | N/A         |
@@ -37,7 +37,7 @@ This is jumpinf00l's super-dodgy hack to add a few nicer sensors and selects, it
 | High                               | 4                  | 100% (top third of bar                   | N/A         |
 | Focus                              | 5                  | N/A                                      | N/A         |
 
-### <a name="fan-mode-notes">Fan Mode Notes</a>: 
+### <a name="fan-mode-notes">Fan Mode Notes</a>
  - Apple Home will only show three speeds on the thermostat device: Low, Medium, and High which are speeds 2, 3, and 4
     - The experience with setting fan speeds in both Apple Home and Home Assistant changes slightly: Apple Home appears to enforce its last setting when changing via Home Assistant which might not update on the Home Assistant front-end or change on the Panasonic AC
     - Closing the Apple Home app after usage appears to work around this
@@ -47,7 +47,7 @@ This is jumpinf00l's super-dodgy hack to add a few nicer sensors and selects, it
       - Google Home thermostat devices do not support fan speed
     - See the [Wishlist](#wishlist) for a potential workaround through adding a fan entity to the ESPHome device which can be exposed to Apple Home and Google Home as a fan device
 
-# <a name="general-notes">General Notes</a>:
+# <a name="general-notes">General Notes</a>
  - This has only been tested using CNT mode. WLAN mode is currently untested and mostly unchanged but should work similarly
  - This is a zero-ecosystem household; there is no love for or preference over Apple Home or Google Home, nor the products of either of these companies
  - Jumpinf00l has zero intention to develop or maintain this code beyond the wishlist
@@ -59,7 +59,7 @@ This is jumpinf00l's super-dodgy hack to add a few nicer sensors and selects, it
    - This code has been passed through OpenAI GPT-4o and Google Gemini 2.5 Flash mostly for sanity-checking code as I push the limits of my knowledge
    - All returned code has been checked and confirmed safe by a real, squishy, living, breathing human
 
-# <a name="example">Example</a>:
+# <a name="example">Example</a>
 <details>
 <summary>Here's a working cut-down example (add your own esphome, wifi, etc sections)</summary>
 
@@ -110,13 +110,13 @@ climate:
 ```
 </details>
 
-# <a name="neat-tweaks">Neat tweaks</a>:
+# <a name="neat-tweaks">Neat tweaks</a>
 Below are some neat tweaks inside the ESPHome YAML which you can use to extend the features beyond this custom component. These are not part of the custom component and are entirely optional, but included here because they may be useful. See the [Neat Tweaks Examples](#neat-tweaks-examples) for the YAML which you can customise as needed
 
-## <a name="net-tweaks-notes">Neat Tweaks Notes</a>:
+## <a name="net-tweaks-notes">Neat Tweaks Notes</a>
  - These neat tweaks assume that the entity IDs from [Example](#example) are used
 
-## <a name="neat-tweaks-examples">Neat Tweaks Examples</a>:
+## <a name="neat-tweaks-examples">Neat Tweaks Examples</a>
 <details>
 <summary>Select entities</summary>
 
@@ -376,7 +376,7 @@ interval:
 ```
 </details>
 
-# <a name="wishlist">Wishlist</a>:
+# <a name="wishlist">Wishlist</a>
 There is no ETA on any item on this list, nor an guarantee that these items will ever be available
  - ~Fix deprecation notices when compiling~ ✅ v0.2.x - Fix Deprecated Schema Warnings
  - ~Set Presets as a Home Assistant style options, similar to work completed on custom fan speed to fan mode change~ ✅ v0.3.x - Presets
