@@ -7,6 +7,8 @@ This is jumpinf00l's super-dodgy hack to add a few nicer sensors and selects, it
    - Eco is now a preset
      - The optional entity under the climate component remains if you wish to use it
    - See [Presets](#presets) for mapping
+ - Fixed deprecated schema warnings when compiling
+   - Shamelessly copied from PRs on the main repo
  - Fan speed is now a Home Assistant style fan mode
    - This allows the thermostat entity in Apple Home to set Low, Medium, and High fan speeds
    - This has no effect on Google Home
@@ -44,8 +46,8 @@ This is jumpinf00l's super-dodgy hack to add a few nicer sensors and selects, it
  - Google Home will not show fan speeds on the thermostat device at all
     - There is a clear reason for this and is unfortunately the trade-off between two 'exceptionally Google' style issues. Home Assistant exposes its climate entities as Google Home thermostat devices rather than a Google Home ac_unit devices because the lack of heat mode in a Google Home ac_unit device is more impactful than the lack of fan speed in a Google Home thermostat device
       - Google Home ac_unit devices do not support heat mode
-      - Google Home thermostat devices do not support fan speed
-    - See the [Wishlist](#wishlist) for a potential workaround through adding a fan entity to the ESPHome device which can be exposed to Apple Home and Google Home as a fan device
+      - Google Home thermostat devices do not support fan modes
+    - See [Wishlist](#wishlist) for a potential workaround through adding a fan entity to the ESPHome device which can be exposed to Apple Home and Google Home as a fan device
 
 # <a name="general-notes">General Notes</a>
  - This has only been tested using CNT mode. WLAN mode is currently untested and mostly unchanged but should work similarly
