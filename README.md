@@ -66,20 +66,17 @@ This is jumpinf00l's super-dodgy hack to add a few nicer sensors and selects, it
 ```
 ...
 
-# Configure external components
 external_components:
   - source: github://jumpinf00l/esphome-panasonic-ac
     components: [panasonic_ac]
 
-# Configure UART interface
 uart:
-  tx_pin: GPIO7
-  rx_pin: GPIO6
+  tx_pin: GPIO4
+  rx_pin: GPIO5
   id: ac_uart
   baud_rate: 9600
   parity: EVEN
 
-# Configure Climate entity
 climate:
   - platform: panasonic_ac
     id: panasonic_ac_id
