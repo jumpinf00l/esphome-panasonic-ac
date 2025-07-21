@@ -381,11 +381,11 @@ There is no ETA on any item on this list, nor an guarantee that these items will
      - ~Set Eco as a preset rather than a switch~
      - ~Set Quiet as a fan speed rather than a preset~
  - Poll AC unit for update on each front-end change (fan speed, preset, etc), rather than wait for default 5 sec poll
- - Incorporate Fan mode, preset, and Mode select entities as sub-entities under the Climate entity
+ - Incorporate Fan mode, Preset, and Mode select entities and Daily energy sensor as sub-entities under the Climate entity
    - This will neaten the code up, neaten the logs up, reduce Wi-Fi/API activity, and improve performance
    - Investigate an option for adding custom names to the fan speed sub-entity in the case that the user wants to customise these
  - Add activity attribute to the climate entity
-   - This will indicate the current activity on the AC unit (such as idle once the setpoint temperature has been reached and the AC unit slows down the compressor)
+   - This will indicate the current activity on the AC unit (such as idle once the setpoint temperature has been reached and the compressor slows down)
  - Rename horizontal swing/vane modes to align front-end naming conventions, make horizontal and vertical swing modes optional under the climate entity, and add swing modes back to climate entity
    - This won't support setting fixed swing positions on the climate entity since ESPHome can only toggle horizontal and/or vertical swing on and off
  - Add a fan entity which can be exposed to Apple Home and Google Home to allow controlling of all fan modes
