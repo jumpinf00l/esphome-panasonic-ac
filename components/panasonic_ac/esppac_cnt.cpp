@@ -44,7 +44,7 @@ void PanasonicACCNT::control(const climate::ClimateCall &call) {
     return;
 
   if (this->cmd.empty()) {
-    ESP_LOGV(TAG, "Copying data to cmd");
+    ESP_LOGV(TAG, "Copying data to cmd: Main");
     this->cmd = this->data;
   }
 
@@ -77,52 +77,49 @@ void PanasonicACCNT::control(const climate::ClimateCall &call) {
   }
 
   if (call.get_target_temperature().has_value()) {
+    ESP_LOGV(TAG, "Requested temperature change");
     this->cmd[1] = *call.get_target_temperature() / TEMPERATURE_STEP;
   }
   
   if (call.get_fan_mode().has_value()) {
-    ESP_LOGI(TAG, "Requested fan mode change");
+    ESP_LOGV(TAG, "Requested fan mode change");
 
-    if(this->custom_preset != "Normal")
-    {
-      ESP_LOGV(TAG, "Resetting preset");
-      this->cmd[5] = (this->cmd[5] & 0xF0);  // Clear right nib for normal mode
-    }
-    
-    switch (*call.get_fan_mode()) {
-      case climate::CLIMATE_FAN_AUTO:
-        ESP_LOGI(TAG, "Fan mode: Auto");
-        this->cmd[3] = 0xA0;
-        break;
-      case climate::CLIMATE_FAN_DIFFUSE:
-        ESP_LOGI(TAG, "Fan mode: 1 - Diffuse");
-        this->cmd[3] = 0x30;
-        break;
-      case climate::CLIMATE_FAN_LOW:
-        ESP_LOGI(TAG, "Fan mode: 2 - Low");
-        this->cmd[3] = 0x40;
-        break;
-      case climate::CLIMATE_FAN_MEDIUM:
-        ESP_LOGI(TAG, "Fan mode: 3 - Medium");
-        this->cmd[3] = 0x50;
-        break;
-      case climate::CLIMATE_FAN_HIGH:
-        ESP_LOGI(TAG, "Fan mode: 4 - High");
-        this->cmd[3] = 0x60;
-        break;
-      case climate::CLIMATE_FAN_FOCUS:
-        ESP_LOGI(TAG, "Fan mode: 5 - Focus");
-        this->cmd[3] = 0x70;
-        break;
-      default:
-        ESP_LOGW(TAG, "Unsupported fan mode requested");
-        break;
+    if (*call.get_fan_mode() == climate::CLIMATE_FAN_QUIET) {
+      this->cmd[3] = 0xA0; // Set fan to Auto for Quiet mode
+      this->cmd[5] = (this->cmd[5] & 0xF0) + 0x04; // Set Quiet bit in byte 5
+    } else {
+      // Clear the Quiet bit (0x04) in byte 5 when a non-Quiet fan mode is selected.
+      // Preserve other bits (like 0x02 for Boost) if they are set in byte 5.
+      this->cmd[5] = this->cmd[5] & (~0x04); 
+      
+      switch (*call.get_fan_mode()) {
+        case climate::CLIMATE_FAN_AUTO:
+          this->cmd[3] = 0xA0;
+          break;
+        case climate::CLIMATE_FAN_DIFFUSE:
+          this->cmd[3] = 0x30;
+          break;
+        case climate::CLIMATE_FAN_LOW:
+          this->cmd[3] = 0x40;
+          break;
+        case climate::CLIMATE_FAN_MEDIUM:
+          this->cmd[3] = 0x50;
+          break;
+        case climate::CLIMATE_FAN_HIGH:
+          this->cmd[3] = 0x60;
+          break;
+        case climate::CLIMATE_FAN_FOCUS:
+          this->cmd[3] = 0x70;
+          break;
+        default:
+          ESP_LOGW(TAG, "Unsupported fan mode requested");
+          break;
+      }
     }
   }
   
   if (call.get_swing_mode().has_value()) {
     ESP_LOGV(TAG, "Requested swing mode change");
-
     switch (*call.get_swing_mode()) {
       case climate::CLIMATE_SWING_BOTH:
         this->cmd[4] = 0xFD;
@@ -142,21 +139,27 @@ void PanasonicACCNT::control(const climate::ClimateCall &call) {
     }
   }
 
-  if (call.get_custom_preset().has_value()) {
+  if (call.get_preset().has_value()) {
     ESP_LOGV(TAG, "Requested preset change");
-
-    std::string preset = *call.get_custom_preset();
-
-    if (preset.compare("Normal") == 0)
-      this->cmd[5] = (this->cmd[5] & 0xF0);  // Clear right nib for normal mode
-    else if (preset.compare("Powerful") == 0)
-      this->cmd[5] = (this->cmd[5] & 0xF0) + 0x02;  // Clear right nib and set powerful mode
-    else if (preset.compare("Quiet") == 0)
-      this->cmd[5] = (this->cmd[5] & 0xF0) + 0x04;  // Clear right nib and set quiet mode
-    else
-      ESP_LOGV(TAG, "Unsupported preset requested");
+    this->cmd[3] = 0xA0; // Set fan mode to Auto (0xA0)
+    switch (*call.get_preset()) {
+      case climate::CLIMATE_PRESET_NONE:
+        this->cmd[5] = (this->cmd[5] & 0xF0); // Clear right nibble of byte 5 (including Boost and Quiet)
+        this->cmd[8] = 0x00; // Turn eco OFF
+        break;
+      case climate::CLIMATE_PRESET_BOOST:
+        this->cmd[5] = (this->cmd[5] & 0xF0) + 0x02; // Set right nibble of byte 5 to Boost
+        this->cmd[8] = 0x00; // Turn eco OFF
+        break;
+      case climate::CLIMATE_PRESET_ECO:
+        this->cmd[5] = (this->cmd[5] & 0xF0); // Clear right nibble of byte 5 (including Boost and Quiet)
+        this->cmd[8] = 0x40; // Turn eco ON
+        break;
+      default:
+        ESP_LOGW(TAG, "Unsupported preset requested");
+        break;
+    }
   }
-
 }
 
 /*
@@ -164,12 +167,12 @@ void PanasonicACCNT::control(const climate::ClimateCall &call) {
  */
 void PanasonicACCNT::set_data(bool set) {
   this->mode = determine_mode(this->data[0]);
-  this->fan_mode = determine_fan_mode(this->data[3]);
+  this->fan_mode = determine_fan_mode(this->data[3]); // determine_fan_mode now considers data[5]
+  this->preset = determine_preset(this->data[5]); // determine_preset no longer considers 0x04 for Sleep
 
   std::string verticalSwing = determine_vertical_swing(this->data[4]);
   std::string horizontalSwing = determine_horizontal_swing(this->data[4]);
 
-  std::string preset = determine_preset(this->data[5]);
   bool nanoex = determine_preset_nanoex(this->data[5]);
   bool eco = determine_eco(this->data[8]);
   bool econavi = determine_econavi(this->data[5]);
@@ -226,9 +229,6 @@ void PanasonicACCNT::set_data(bool set) {
 
   this->update_swing_vertical(verticalSwing);
   this->update_swing_horizontal(horizontalSwing);
-
-  this->custom_preset = preset;
-
   this->update_nanoex(nanoex);
   this->update_eco(eco);
   this->update_econavi(econavi);
@@ -367,25 +367,26 @@ climate::ClimateMode PanasonicACCNT::determine_mode(uint8_t mode) {
   }
 }
 
-climate::ClimateFanMode PanasonicACCNT::determine_fan_mode(uint8_t fan_mode) {
-  switch (fan_mode) {
+climate::ClimateFanMode PanasonicACCNT::determine_fan_mode(uint8_t fan_mode_byte) {
+  // Check if the "Quiet" bit (0x04) is set in data[5].
+  // This bit determines if Quiet mode is active, regardless of the fan_mode_byte.
+  if ((this->data[5] & 0x04) == 0x04) {
+    return climate::CLIMATE_FAN_QUIET;
+  }
+
+  // If Quiet bit is not set, then determine based on the actual fan mode byte.
+  switch (fan_mode_byte) {
     case 0xA0:
-      ESP_LOGI(TAG, "Setting fan mode to: Auto");
       return climate::CLIMATE_FAN_AUTO;
     case 0x30:
-      ESP_LOGI(TAG, "Setting fan mode to: 1 - Diffuse");
       return climate::CLIMATE_FAN_DIFFUSE;
     case 0x40:
-      ESP_LOGI(TAG, "Setting fan mode to: 2 - Low");
       return climate::CLIMATE_FAN_LOW;
     case 0x50:
-      ESP_LOGI(TAG, "Setting fan mode to: 3 - Medium");
       return climate::CLIMATE_FAN_MEDIUM;
     case 0x60:
-      ESP_LOGI(TAG, "Setting fan mode to: 4 - High");
       return climate::CLIMATE_FAN_HIGH;
     case 0x70:
-      ESP_LOGI(TAG, "Setting fan mode to: 5 - Focus");
       return climate::CLIMATE_FAN_FOCUS;
     default:
       ESP_LOGW(TAG, "Received unknown fan mode");
@@ -414,8 +415,8 @@ std::string PanasonicACCNT::determine_vertical_swing(uint8_t swing) {
     case 0x00:
       return "unsupported";
     default:
-      ESP_LOGW(TAG, "Received unknown vertical swing mode: 0x%02X", nib);
-      return "Unknown";
+      ESP_LOGW(TAG, "Received unknown vertical swing mode");
+      return "Swing";
   }
 }
 
@@ -439,24 +440,24 @@ std::string PanasonicACCNT::determine_horizontal_swing(uint8_t swing) {
       return "unsupported";
     default:
       ESP_LOGW(TAG, "Received unknown horizontal swing mode");
-      return "Unknown";
+      return "Swing";
   }
 }
 
-std::string PanasonicACCNT::determine_preset(uint8_t preset) {
-  uint8_t nib = (preset >> 0) & 0x0F;  // Right nib for preset (Powerful/Quiet)
-
-  switch (nib) {
-    case 0x02:
-      return "Powerful";
-    case 0x04:
-      return "Quiet";
-    case 0x00:
-      return "Normal";
-    default:
-      ESP_LOGW(TAG, "Received unknown preset");
-      return "Normal";
+climate::ClimatePreset PanasonicACCNT::determine_preset(uint8_t preset_byte) {
+  // First, check if eco mode is active via data[8]
+  if ((this->data[8] & 0x40) == 0x40) {
+    return climate::CLIMATE_PRESET_ECO;
   }
+
+  // Then check for Boost preset (0x02 in preset_byte).
+  // Quiet (0x04) is now handled by determine_fan_mode, so it should not be here.
+  if ((preset_byte & 0x02) == 0x02) { 
+      return climate::CLIMATE_PRESET_BOOST;
+  }
+  
+  // If neither Eco nor Boost is active, return NONE.
+  return climate::CLIMATE_PRESET_NONE;
 }
 
 bool PanasonicACCNT::determine_preset_nanoex(uint8_t preset) {
@@ -522,7 +523,7 @@ void PanasonicACCNT::on_vertical_swing_change(const std::string &swing) {
   ESP_LOGD(TAG, "Setting vertical swing position");
 
   if (this->cmd.empty()) {
-    ESP_LOGV(TAG, "Copying data to cmd");
+    ESP_LOGV(TAG, "Copying data to cmd: Vertical swing");
     this->cmd = this->data;
   }
 
@@ -554,7 +555,7 @@ void PanasonicACCNT::on_horizontal_swing_change(const std::string &swing) {
   ESP_LOGD(TAG, "Setting horizontal swing position");
 
   if (this->cmd.empty()) {
-    ESP_LOGV(TAG, "Copying data to cmd");
+    ESP_LOGV(TAG, "Copying data to cmd: Horizontal swing");
     this->cmd = this->data;
   }
 
@@ -582,7 +583,7 @@ void PanasonicACCNT::on_nanoex_change(bool state) {
     return;
 
   if (this->cmd.empty()) {
-    ESP_LOGV(TAG, "Copying data to cmd");
+    ESP_LOGV(TAG, "Copying data to cmd: NanoeX switch");
     this->cmd = this->data;
   }
 
@@ -602,7 +603,7 @@ void PanasonicACCNT::on_eco_change(bool state) {
     return;
 
   if (this->cmd.empty()) {
-    ESP_LOGV(TAG, "Copying data to cmd");
+    ESP_LOGV(TAG, "Copying data to cmd: Eco switch");
     this->cmd = this->data;
   }
 
@@ -625,7 +626,7 @@ void PanasonicACCNT::on_econavi_change(bool state) {
     return;
 
   if (this->cmd.empty()) {
-    ESP_LOGV(TAG, "Copying data to cmd");
+    ESP_LOGV(TAG, "Copying data to cmd: Econavi switch");
     this->cmd = this->data;
   }
 
@@ -633,10 +634,10 @@ void PanasonicACCNT::on_econavi_change(bool state) {
 
   if (state) {
     ESP_LOGV(TAG, "Turning econavi mode on");
-    this->cmd[5] = 0x10;
+    this->cmd[5] = (this->cmd[5] & 0xF0) + 0x10; // Only set the bit, don't clear the entire byte
   } else {
     ESP_LOGV(TAG, "Turning econavi mode off");
-    this->cmd[5] = 0x00;
+    this->cmd[5] = (this->cmd[5] & 0xF0); // Clear the bit, don't clear the entire byte
   }
 
 }
@@ -646,7 +647,7 @@ void PanasonicACCNT::on_mild_dry_change(bool state) {
     return;
 
   if (this->cmd.empty()) {
-    ESP_LOGV(TAG, "Copying data to cmd");
+    ESP_LOGV(TAG, "Copying data to cmd: Mild dry switch");
     this->cmd = this->data;
   }
 
