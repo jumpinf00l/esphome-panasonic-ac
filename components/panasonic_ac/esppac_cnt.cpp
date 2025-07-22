@@ -146,26 +146,24 @@ void PanasonicACCNT::control(const climate::ClimateCall &call) {
       case climate::CLIMATE_PRESET_NONE:
         this->cmd[5] = (this->cmd[5] & 0xF0); // Clear right nibble of byte 5 (including Boost and Quiet)
         this->cmd[8] = 0x00; // Turn eco OFF
+        this->preset = climate::CLIMATE_PRESET_NONE; // Make preset optimistic
         break;
       case climate::CLIMATE_PRESET_BOOST:
         this->cmd[5] = (this->cmd[5] & 0xF0) + 0x02; // Set right nibble of byte 5 to Boost
         this->cmd[8] = 0x00; // Turn eco OFF
+        this->preset = climate::CLIMATE_PRESET_BOOST; // Make preset optimistic
         break;
       case climate::CLIMATE_PRESET_ECO:
         this->cmd[5] = (this->cmd[5] & 0xF0); // Clear right nibble of byte 5 (including Boost and Quiet)
         this->cmd[8] = 0x40; // Turn eco ON
+        this->preset = climate::CLIMATE_PRESET_ECO; // Make preset optimistic
         break;
       default:
         ESP_LOGW(TAG, "Unsupported preset requested");
         break;
     }
+    this->publish_state(); // Publish the climate component's state to reflect the optimistic preset
   }
-
-  // --- Start of added code for optimistic updates ---
-  this->data = this->cmd; // Copy the commanded state to data
-  this->set_data(false); // Update internal climate states based on commanded data (don't update sensors)
-  this->publish_state(); // Publish the climate component's state optimistically
-  // --- End of added code ---
 }
 
 /*
