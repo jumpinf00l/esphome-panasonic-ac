@@ -160,6 +160,12 @@ void PanasonicACCNT::control(const climate::ClimateCall &call) {
         break;
     }
   }
+
+  // --- Start of added code for optimistic updates ---
+  this->data = this->cmd; // Copy the commanded state to data
+  this->set_data(false); // Update internal climate states based on commanded data (don't update sensors)
+  this->publish_state(); // Publish the climate component's state optimistically
+  // --- End of added code ---
 }
 
 /*
