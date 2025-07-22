@@ -611,7 +611,7 @@ void PanasonicACCNT::on_eco_change(bool state) {
     this->cmd = this->data;
   }
 
-  this->eco_state_ = state;
+  this->eco_state_ = state; // Optimistically set the state of the Eco switch
 
   if (state) {
     ESP_LOGV(TAG, "Turning eco mode on");
@@ -621,8 +621,9 @@ void PanasonicACCNT::on_eco_change(bool state) {
     this->cmd[8] = 0x00;  // Clear the byte corresponding to eco mode
   }
 
-  // Optionally, send the modified command immediately
+  // Send the modified command immediately
   send_command(this->cmd, CommandType::Normal, CTRL_HEADER);
+  this->publish_state(); // Publish the climate component's state to reflect the optimistic Eco switch
 }
 
 void PanasonicACCNT::on_econavi_change(bool state) {
