@@ -161,8 +161,7 @@ void PanasonicACCNT::control(const climate::ClimateCall &call) {
     }
   }
 
-handle_cmd();
-handle_poll();
+
   
 }
 
