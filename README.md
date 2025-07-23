@@ -2,6 +2,8 @@
 This is jumpinf00l's super-dodgy hack to add a few nicer sensors and selects, it's only really public so that my ESPHome can reach it to allow for ease of change tracking, but I guess you can use it. No, I don't intend to do a PR because, as previously mentioned, these are super-dodgy hacks and intended only for jumpinf00l. This is specifically to support features of Panasonic CS-Z25XKRW and CS-Z50XKRW, but these changes should be pretty universal
 
 # <a name="key-changes">Key changes</a>
+ - Toggling the Eco preset on and off will no longer quickly revert to the previous state before showing the selected state
+   - Avoids situation where Eco preset goes on-off-on when and off-on-off when user turns it on and off 
  - Preset is now Home Assistant style preset and contains the same options as the IR remote
    - Quiet is now a fan mode
    - Eco is now a preset
