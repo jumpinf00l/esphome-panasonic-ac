@@ -146,23 +146,29 @@ void PanasonicACCNT::control(const climate::ClimateCall &call) {
       case climate::CLIMATE_PRESET_NONE:
         this->cmd[5] = (this->cmd[5] & 0xF0); // Clear right nibble of byte 5 (including Boost and Quiet)
         this->cmd[8] = 0x00; // Turn eco OFF
-        this->preset = climate::CLIMATE_PRESET_NONE; // Make preset optimistic
+        this->preset = climate::CLIMATE_PRESET_NONE; // Optimistic update
         break;
       case climate::CLIMATE_PRESET_BOOST:
         this->cmd[5] = (this->cmd[5] & 0xF0) + 0x02; // Set right nibble of byte 5 to Boost
         this->cmd[8] = 0x00; // Turn eco OFF
-        this->preset = climate::CLIMATE_PRESET_BOOST; // Make preset optimistic
+        this->preset = climate::CLIMATE_PRESET_BOOST; // Optimistic update
         break;
       case climate::CLIMATE_PRESET_ECO:
         this->cmd[5] = (this->cmd[5] & 0xF0); // Clear right nibble of byte 5 (including Boost and Quiet)
         this->cmd[8] = 0x40; // Turn eco ON
-        this->preset = climate::CLIMATE_PRESET_ECO; // Make preset optimistic
+        this->preset = climate::CLIMATE_PRESET_ECO; // Optimistic update
         break;
       default:
         ESP_LOGW(TAG, "Unsupported preset requested");
         break;
     }
     this->publish_state(); // Publish the climate component's state to reflect the optimistic preset
+
+    // If Eco or None (from Eco) preset is involved, activate suppression
+    if (*call.get_preset() == climate::CLIMATE_PRESET_ECO || *call.get_preset() == climate::CLIMATE_PRESET_NONE) {
+      this->suppress_poll_update_for_eco_preset_ = true;
+      this->suppress_poll_timeout_ = millis() + SUPPRESSION_DURATION_MS;
+    }
   }
 }
 
@@ -335,13 +341,46 @@ bool PanasonicACCNT::verify_packet() {
 
 void PanasonicACCNT::handle_packet() {
   if (this->rx_buffer_[0] == POLL_HEADER) {
-    this->data = std::vector<uint8_t>(this->rx_buffer_.begin() + 2, this->rx_buffer_.begin() + 12);
+    // Always extract the polled data into a temporary vector first
+    std::vector<uint8_t> temp_polled_data = std::vector<uint8_t>(this->rx_buffer_.begin() + 2, this->rx_buffer_.begin() + 12);
 
-    this->set_data(true);
-    this->publish_state();
+    // Store original data to restore after checks (if needed)
+    std::vector<uint8_t> original_data = this->data; 
+    this->data = temp_polled_data; // Temporarily make polled data active for determine_preset/eco
 
-    if (this->state_ != ACState::Ready)
-      this->state_ = ACState::Ready;  // Mark as ready after first poll
+    bool should_publish_poll_state = true; // Flag to decide if we publish the polled state
+
+    if (this->suppress_poll_update_for_eco_preset_) {
+        // Check for timeout
+        if (millis() > this->suppress_poll_timeout_) {
+            ESP_LOGW(TAG, "Optimistic Eco/Preset suppression timed out. Publishing polled state.");
+            this->suppress_poll_update_for_eco_preset_ = false; // Reset flag
+        } else {
+            // Determine the polled Eco and Preset states using the temporary data
+            bool current_polled_eco_state = determine_eco(this->data[8]); // Uses temp_polled_data[8]
+            climate::ClimatePreset current_polled_preset = determine_preset(this->data[5]); // Uses temp_polled_data[5] and temp_polled_data[8]
+
+            if ((this->eco_state_ == current_polled_eco_state) && (this->preset == current_polled_preset)) {
+                // Polled state matches optimistic state, so clear the flag and proceed
+                this->suppress_poll_update_for_eco_preset_ = false;
+                ESP_LOGD(TAG, "Poll confirmed optimistic Eco/Preset state, proceeding with update.");
+            } else {
+                // Polled state does not match optimistic state, suppress this update
+                should_publish_poll_state = false;
+                ESP_LOGD(TAG, "Suppressing poll update for Eco/Preset - polled state does not match optimistic.");
+            }
+        }
+    }
+    
+    this->data = original_data; // Restore original data (important!)
+
+    if (should_publish_poll_state) {
+        this->data = temp_polled_data; // Assign the polled data to the actual data member for the real update
+        this->set_data(true);
+        this->publish_state();
+        if (this->state_ != ACState::Ready)
+            this->state_ = ACState::Ready;
+    }
   } else {
     ESP_LOGD(TAG, "Received unknown packet");
   }
@@ -612,6 +651,14 @@ void PanasonicACCNT::on_eco_change(bool state) {
   }
 
   this->eco_state_ = state; // Optimistically set the state of the Eco switch
+  // Also update climate preset optimistically if Eco switch is linked to it
+  if (state) {
+      this->preset = climate::CLIMATE_PRESET_ECO;
+  } else {
+      this->preset = climate::CLIMATE_PRESET_NONE;
+  }
+  
+  this->publish_state(); // Publish the climate component's optimistic state
 
   if (state) {
     ESP_LOGV(TAG, "Turning eco mode on");
@@ -621,9 +668,12 @@ void PanasonicACCNT::on_eco_change(bool state) {
     this->cmd[8] = 0x00;  // Clear the byte corresponding to eco mode
   }
 
+  // Activate suppression for next poll
+  this->suppress_poll_update_for_eco_preset_ = true;
+  this->suppress_poll_timeout_ = millis() + SUPPRESSION_DURATION_MS;
+
   // Send the modified command immediately
   send_command(this->cmd, CommandType::Normal, CTRL_HEADER);
-  this->publish_state(); // Publish the climate component's state to reflect the optimistic Eco switch
 }
 
 void PanasonicACCNT::on_econavi_change(bool state) {
