@@ -61,6 +61,11 @@ class PanasonicACCNT : public PanasonicAC {
   bool determine_econavi(uint8_t value);
   bool determine_mild_dry(uint8_t value);
   uint16_t determine_power_consumption(uint8_t byte_28, uint8_t multiplier, uint8_t offset);
+
+  bool suppress_poll_update_for_eco_preset_ = false;
+  unsigned long suppress_poll_timeout_ = 0;
+  const unsigned long SUPPRESSION_DURATION_MS = 5000; // 5 seconds timeout for optimistic state
+
 };
 
 }  // namespace CNT
