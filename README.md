@@ -384,7 +384,7 @@ There is no ETA on any item on this list, nor an guarantee that these items will
    - ~Align presets with the Panasonic IR remote~
      - ~Set Eco as a preset rather than a switch~
      - ~Set Quiet as a fan speed rather than a preset~
- - Poll AC unit for update on each front-end change (fan speed, preset, etc), rather than wait for default 5 sec poll
+ - ~Poll AC unit for update on each front-end change (fan speed, preset, etc), rather than wait for default 5 sec poll~ ✅ v0.4.x - Polling
  - Incorporate Fan mode, Preset, and Mode select entities and Daily energy sensor as sub-entities under the Climate entity
    - This will neaten the code up, neaten the logs up, reduce Wi-Fi/API activity, and improve performance
    - Investigate an option for adding custom names to the fan speed sub-entity in the case that the user wants to customise these
