@@ -28,9 +28,8 @@ PanasonicACSelect = panasonic_ac_ns.class_(
     "PanasonicACSelect", select.Select, cg.Component
 )
 
-CONF_HORIZONTAL_SWING_ENABLE = "horizontal_swing_enable"
+
 CONF_HORIZONTAL_SWING_SELECT = "horizontal_swing_select"
-CONF_VERTICAL_SWING_ENABLE = "vertical_swing_enable"
 CONF_VERTICAL_SWING_SELECT = "vertical_swing_select"
 CONF_OUTSIDE_TEMPERATURE = "outside_temperature"
 CONF_INSIDE_TEMPERATURE = "inside_temperature"
@@ -52,23 +51,21 @@ SWITCH_SCHEMA = switch.switch_schema(PanasonicACSwitch).extend(cv.COMPONENT_SCHE
 SELECT_SCHEMA = select.select_schema(PanasonicACSelect)
 
 PANASONIC_COMMON_SCHEMA = {
-    cv.Optional(CONF_HORIZONTAL_SWING_ENABLE, default=False): cv.boolean,
     cv.Optional(CONF_HORIZONTAL_SWING_SELECT): SELECT_SCHEMA,
-    cv.Optional(CONF_VERTICAL_SWING_ENABLE, default=False): cv.boolean,
     cv.Optional(CONF_VERTICAL_SWING_SELECT): SELECT_SCHEMA,
-    cv.Optional(CONF_NANOEX_SWITCH): SWITCH_SCHEMA,
     cv.Optional(CONF_OUTSIDE_TEMPERATURE): sensor.sensor_schema(
         unit_of_measurement=UNIT_CELSIUS,
         accuracy_decimals=0,
         device_class=DEVICE_CLASS_TEMPERATURE,
         state_class=STATE_CLASS_MEASUREMENT,
     ),
-    cv.Optional(CONF_INSIDE_TEMPERATURE): sensor.sensor_schema(
+	cv.Optional(CONF_INSIDE_TEMPERATURE): sensor.sensor_schema(
 		unit_of_measurement=UNIT_CELSIUS,
 		accuracy_decimals=0,
 		device_class=DEVICE_CLASS_TEMPERATURE,
 		state_class=STATE_CLASS_MEASUREMENT,
-    ),
+	),
+    cv.Optional(CONF_NANOEX_SWITCH): SWITCH_SCHEMA,
 }
 
 PANASONIC_CNT_SCHEMA = {
@@ -95,18 +92,12 @@ async def to_code(config):
     await cg.register_component(var, config)
     await uart.register_uart_device(var, config)
 
-    if CONF_HORIZONTAL_SWING_ENABLE in config:
-        cg.add(var.set_horizontal_swing_enable(config[CONF_HORIZONTAL_SWING_ENABLE]))
-	
     if CONF_HORIZONTAL_SWING_SELECT in config:
         conf = config[CONF_HORIZONTAL_SWING_SELECT]
         swing_select = await select.new_select(conf, options=HORIZONTAL_SWING_OPTIONS)
         await cg.register_component(swing_select, conf)
         cg.add(var.set_horizontal_swing_select(swing_select))
 
-    if CONF_VERTICAL_SWING_ENABLE in config:
-        cg.add(var.set_vertical_swing_enable(config[CONF_VERTICAL_SWING_ENABLE]))
-	
     if CONF_VERTICAL_SWING_SELECT in config:
         conf = config[CONF_VERTICAL_SWING_SELECT]
         swing_select = await select.new_select(conf, options=VERTICAL_SWING_OPTIONS)
