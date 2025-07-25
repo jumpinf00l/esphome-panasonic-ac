@@ -31,7 +31,7 @@ class PanasonicACCNT : public PanasonicAC {
   void setup() override;
   void loop() override;
 
-  // New method to set vertical_swing_enable from YAML
+  void set_horizontal_swing_enable(bool enable) { this->horizontal_swing_enable_ = enable; }
   void set_vertical_swing_enable(bool enable) { this->vertical_swing_enable_ = enable; }
 
  protected:
@@ -69,7 +69,7 @@ class PanasonicACCNT : public PanasonicAC {
   unsigned long suppress_poll_timeout_ = 0;
   const unsigned long SUPPRESSION_DURATION_MS = 5000; // 5 seconds timeout for optimistic state
 
-  // New member variable to store the state of vertical_swing_enable
+  bool horizontal_swing_enable_{false};
   bool vertical_swing_enable_{false};
 };
 
