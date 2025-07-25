@@ -31,9 +31,6 @@ class PanasonicACCNT : public PanasonicAC {
   void setup() override;
   void loop() override;
 
-  void set_horizontal_swing_enable(bool enable) { this->horizontal_swing_enable_ = enable; }
-  void set_vertical_swing_enable(bool enable) { this->vertical_swing_enable_ = enable; }
-
  protected:
   ACState state_ = ACState::Initializing;  // Stores the internal state of the AC, used during initialization
 
@@ -68,9 +65,6 @@ class PanasonicACCNT : public PanasonicAC {
   bool suppress_poll_update_for_eco_preset_ = false;
   unsigned long suppress_poll_timeout_ = 0;
   const unsigned long SUPPRESSION_DURATION_MS = 5000; // 5 seconds timeout for optimistic state
-
-  bool horizontal_swing_enable_{false};
-  bool vertical_swing_enable_{false};
 };
 
 }  // namespace CNT
