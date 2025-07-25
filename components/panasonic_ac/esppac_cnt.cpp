@@ -284,7 +284,7 @@ void PanasonicACCNT::handle_poll() {
   if (millis() - this->last_packet_sent_ > POLL_INTERVAL) {
     ESP_LOGV(TAG, "Polling AC");
     send_command(CMD_POLL, CommandType::Normal, POLL_HEADER);
-    // Log the state of vertical_swing_enable
+    ESP_LOGI(TAG, "Horizontal swing enable is: %s", this->horizontal_swing_enable_ ? "true" : "false");
     ESP_LOGI(TAG, "Vertical swing enable is: %s", this->vertical_swing_enable_ ? "true" : "false");
   }
 }
@@ -443,10 +443,10 @@ std::string PanasonicACCNT::determine_vertical_swing(uint8_t swing) {
   uint8_t nib = (swing >> 4) & 0x0F;  // Left nib for vertical swing
 
   switch (nib) {
-    case 0x0E:
-      return "Swing";
     case 0x0F:
       return "Auto";
+    case 0x0E:
+      return "Swing";
     case 0x01:
       return "Top";
     case 0x02:
@@ -457,11 +457,12 @@ std::string PanasonicACCNT::determine_vertical_swing(uint8_t swing) {
       return "Bottom Middle";
     case 0x05:
       return "Bottom";
-    case 0x00:
-      return "unsupported";
-    default:
+    case 0x00: // Unsupported
+      ESP_LOGW(TAG, "Received unsupported vertical swing mode");
+      return "Auto";
+    default: // Unknown
       ESP_LOGW(TAG, "Received unknown vertical swing mode");
-      return "Swing";
+      return "Auto";
   }
 }
 
@@ -471,6 +472,10 @@ std::string PanasonicACCNT::determine_horizontal_swing(uint8_t swing) {
   switch (nib) {
     case 0x0D:
       return "Auto";
+    case 0x07:
+      return "Swing"; // Assumed and untested
+    case 0x08:
+      return "Wide"; // Assumed and untested
     case 0x09:
       return "Left";
     case 0x0A:
@@ -481,11 +486,12 @@ std::string PanasonicACCNT::determine_horizontal_swing(uint8_t swing) {
       return "Right Center";
     case 0x0C:
       return "Right";
-    case 0x00:
-      return "unsupported";
-    default:
+    case 0x00: // Unsupported
+      ESP_LOGW(TAG, "Received unsupported horizontal swing mode");
+      return "Auto"; 
+    default: // Unknown
       ESP_LOGW(TAG, "Received unknown horizontal swing mode");
-      return "Swing";
+      return "Auto";
   }
 }
 
