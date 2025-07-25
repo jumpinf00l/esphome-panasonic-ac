@@ -31,6 +31,9 @@ class PanasonicACCNT : public PanasonicAC {
   void setup() override;
   void loop() override;
 
+  // New method to set vertical_swing_enable from YAML
+  void set_vertical_swing_enable(bool enable) { this->vertical_swing_enable_ = enable; }
+
  protected:
   ACState state_ = ACState::Initializing;  // Stores the internal state of the AC, used during initialization
 
@@ -66,6 +69,8 @@ class PanasonicACCNT : public PanasonicAC {
   unsigned long suppress_poll_timeout_ = 0;
   const unsigned long SUPPRESSION_DURATION_MS = 5000; // 5 seconds timeout for optimistic state
 
+  // New member variable to store the state of vertical_swing_enable
+  bool vertical_swing_enable_{false};
 };
 
 }  // namespace CNT
