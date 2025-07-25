@@ -43,7 +43,7 @@ CONF_CURRENT_POWER_CONSUMPTION = "current_power_consumption"
 CONF_WLAN = "wlan"
 CONF_CNT = "cnt"
 
-HORIZONTAL_SWING_OPTIONS = ["Auto", "Swing", "Left", "Left Center", "Center", "Right Center", "Right"]
+HORIZONTAL_SWING_OPTIONS = ["Auto", "Swing", "Wide", "Left", "Left Center", "Center", "Right Center", "Right"]
 
 VERTICAL_SWING_OPTIONS = ["Auto", "Swing", "Top", "Top Middle", "Middle", "Bottom Middle", "Bottom"]
 
