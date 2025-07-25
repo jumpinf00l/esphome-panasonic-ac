@@ -44,6 +44,9 @@ class PanasonicAC : public Component, public uart::UARTDevice, public climate::C
 
   void set_current_temperature_sensor(sensor::Sensor *current_temperature_sensor);
 
+  void set_vertical_swing_enable(bool enable) { this->vertical_swing_enable_ = enable; }
+  void set_horizontal_swing_enable(bool enable) { this->horizontal_swing_enable_ = enable; }
+
   void setup() override;
   void loop() override;
 
@@ -66,6 +69,9 @@ class PanasonicAC : public Component, public uart::UARTDevice, public climate::C
   bool eco_state_ = false;       // Stores the state of eco to prevent duplicate packets
   bool econavi_state_ = false;       // Stores the state of econavi to prevent duplicate packets
   bool mild_dry_state_ = false;  // Stores the state of mild dry to prevent duplicate packets
+
+  bool vertical_swing_enable_{false};
+  bool horizontal_swing_enable_{false};
 
   bool waiting_for_response_ = false;  // Set to true if we are waiting for a response
 
