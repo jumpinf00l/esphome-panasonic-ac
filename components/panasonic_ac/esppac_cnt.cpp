@@ -446,19 +446,19 @@ std::string PanasonicACCNT::determine_vertical_swing(uint8_t swing) {
 
   switch (nib) {
     case 0x0E:
-      return "swing";
+      return "Swing";
     case 0x0F:
-      return "auto";
+      return "Auto";
     case 0x01:
-      return "up";
+      return "Top";
     case 0x02:
-      return "up_center";
+      return "Middle Top";
     case 0x03:
-      return "center";
+      return "Middle";
     case 0x04:
-      return "down_center";
+      return "Middle Bottom";
     case 0x05:
-      return "down";
+      return "Bottom";
     case 0x00:
       return "unsupported";
     default:
@@ -472,17 +472,21 @@ std::string PanasonicACCNT::determine_horizontal_swing(uint8_t swing) {
 
   switch (nib) {
     case 0x0D:
-      return "auto";
+      return "Auto";
+    case 0x07:
+      return "Swing"; // Untested
+    case 0x08:
+      return "Wide"; // Untested
     case 0x09:
-      return "left";
+      return "Left";
     case 0x0A:
-      return "left_center";
+      return "Center Left";
     case 0x06:
-      return "center";
+      return "Center";
     case 0x0B:
-      return "right_center";
+      return "Center Right";
     case 0x0C:
-      return "right";
+      return "Right";
     case 0x00:
       return "unsupported";
     default:
