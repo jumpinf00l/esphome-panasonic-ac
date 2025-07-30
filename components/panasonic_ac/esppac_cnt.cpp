@@ -120,6 +120,7 @@ void PanasonicACCNT::control(const climate::ClimateCall &call) {
   
   if (call.get_swing_mode().has_value()) {
     ESP_LOGV(TAG, "Requested swing mode change");
+
     switch (*call.get_swing_mode()) {
       case climate::CLIMATE_SWING_BOTH:
         this->cmd[4] = 0xFD;
@@ -131,7 +132,7 @@ void PanasonicACCNT::control(const climate::ClimateCall &call) {
         this->cmd[4] = 0xF6;  // Swing vertical, horizontal center
         break;
       case climate::CLIMATE_SWING_HORIZONTAL:
-        this->cmd[4] = 0x3D;  // Swing horizontal, vertical center
+        this->cmd[4] = 0x3D;  // Swing horizontal, vertical middle
         break;
       default:
         ESP_LOGV(TAG, "Unsupported swing mode requested");
@@ -236,6 +237,9 @@ void PanasonicACCNT::set_data(bool set) {
     this->swing_mode = climate::CLIMATE_SWING_HORIZONTAL;
   else
     this->swing_mode = climate::CLIMATE_SWING_OFF;
+
+  this->update_swing_vertical(verticalSwing);
+  this->update_swing_horizontal(horizontalSwing);
 
   this->update_swing_vertical(verticalSwing);
   this->update_swing_horizontal(horizontalSwing);
@@ -443,10 +447,10 @@ std::string PanasonicACCNT::determine_vertical_swing(uint8_t swing) {
   uint8_t nib = (swing >> 4) & 0x0F;  // Left nib for vertical swing
 
   switch (nib) {
-    case 0x0F:
-      return "Auto";
     case 0x0E:
       return "Swing";
+    case 0x0F:
+      return "Auto";
     case 0x01:
       return "Top";
     case 0x02:
@@ -457,12 +461,11 @@ std::string PanasonicACCNT::determine_vertical_swing(uint8_t swing) {
       return "Bottom Middle";
     case 0x05:
       return "Bottom";
-    case 0x00: // Unsupported
-      ESP_LOGW(TAG, "Received unsupported vertical swing mode");
-      return "Auto";
+    case 0x00:
+      return "unsupported";
     default: // Unknown
-      ESP_LOGW(TAG, "Received unknown vertical swing mode");
-      return "Auto";
+      ESP_LOGW(TAG, "Received unknown vertical swing mode: 0x%02X", nib);
+      return "unknown";
   }
 }
 
@@ -472,10 +475,10 @@ std::string PanasonicACCNT::determine_horizontal_swing(uint8_t swing) {
   switch (nib) {
     case 0x0D:
       return "Auto";
-    case 0x07:
-      return "Swing";
-    case 0x08:
-      return "Wide";
+//    case 0x07:
+//      return "Swing";
+//    case 0x08:
+//      return "Wide";
     case 0x09:
       return "Left";
     case 0x0A:
