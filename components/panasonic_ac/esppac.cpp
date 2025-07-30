@@ -110,7 +110,7 @@ void PanasonicAC::update_target_temperature(uint8_t raw_value) {
 }
 
 void PanasonicAC::update_swing_horizontal(const std::string &swing) {
-  this->horizontal_swing_state_ = Swing;
+  this->horizontal_swing_state_ = swing;
 
   if (this->horizontal_swing_select_ != nullptr &&
       this->horizontal_swing_select_->state != this->horizontal_swing_state_) {
@@ -120,7 +120,7 @@ void PanasonicAC::update_swing_horizontal(const std::string &swing) {
 }
 
 void PanasonicAC::update_swing_vertical(const std::string &swing) {
-  this->vertical_swing_state_ = Swing;
+  this->vertical_swing_state_ = swing;
 
   if (this->vertical_swing_select_ != nullptr && this->vertical_swing_select_->state != this->vertical_swing_state_)
     this->vertical_swing_select_->publish_state(this->vertical_swing_state_);  // Set current vertical swing position
