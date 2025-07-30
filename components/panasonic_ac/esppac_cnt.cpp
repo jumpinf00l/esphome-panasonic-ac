@@ -129,7 +129,7 @@ void PanasonicACCNT::control(const climate::ClimateCall &call) {
         this->cmd[4] = 0x36;  // Reset both to center
         break;
       case climate::CLIMATE_SWING_VERTICAL:
-        this->cmd[4] = 0xF6;  // Swing vertical, horizontal center
+        this->cmd[4] = 0xE6;  // Swing vertical, horizontal center
         break;
       case climate::CLIMATE_SWING_HORIZONTAL:
         this->cmd[4] = 0x3D;  // Swing horizontal, vertical center
@@ -231,7 +231,7 @@ void PanasonicACCNT::set_data(bool set) {
 
   if (verticalSwing == "auto" && horizontalSwing == "auto")
     this->swing_mode = climate::CLIMATE_SWING_BOTH;
-  else if (verticalSwing == "auto")
+  else if (verticalSwing == "swing")
     this->swing_mode = climate::CLIMATE_SWING_VERTICAL;
   else if (horizontalSwing == "auto")
     this->swing_mode = climate::CLIMATE_SWING_HORIZONTAL;
