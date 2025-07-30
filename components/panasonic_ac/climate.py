@@ -52,9 +52,9 @@ SWITCH_SCHEMA = switch.switch_schema(PanasonicACSwitch).extend(cv.COMPONENT_SCHE
 SELECT_SCHEMA = select.select_schema(PanasonicACSelect)
 
 PANASONIC_COMMON_SCHEMA = {
-    cv.Optional(CONF_VERTICAL_SWING_ENABLE): cv.boolean,
+    cv.Optional(CONF_VERTICAL_SWING_ENABLE, default=True): cv.boolean,
     cv.Optional(CONF_HORIZONTAL_SWING_SELECT): SELECT_SCHEMA,
-    cv.Optional(CONF_HORIZONTAL_SWING_ENABLE): cv.boolean,
+    cv.Optional(CONF_HORIZONTAL_SWING_ENABLE, default=True): cv.boolean,
     cv.Optional(CONF_VERTICAL_SWING_SELECT): SELECT_SCHEMA,
     cv.Optional(CONF_OUTSIDE_TEMPERATURE): sensor.sensor_schema(
         unit_of_measurement=UNIT_CELSIUS,
