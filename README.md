@@ -2,13 +2,17 @@
 This is jumpinf00l's super-dodgy hack to add a few nicer sensors and selects, it's only really public so that my ESPHome can reach it to allow for ease of change tracking, but I guess you can use it. No, I don't intend to do a PR because, as previously mentioned, these are super-dodgy hacks and intended only for jumpinf00l. This is specifically to support features of Panasonic CS-Z25XKRW and CS-Z50XKRW, but these changes should be pretty universal
 
 # <a name="key-changes">Key changes</a>
+ - Horizontal and vertical swing mode select entities have nicer names to reflect the swing modes
+   - See [Swing Mode](#swing_mode) for mapping
+ - Horizontal and vertical swing mode can be selectively disabled for systems which don't support horizontal and/or vertical swing modes
+   - See [Syntax](#syntax) for options
  - Toggling the Eco preset on and off will no longer quickly revert to the previous state before showing the selected state
    - Avoids situation where Eco preset goes on-off-on when and off-on-off when user turns it on and off 
  - Preset is now Home Assistant style preset and contains the same options as the IR remote
    - Quiet is now a fan mode
    - Eco is now a preset
      - The optional entity under the climate component remains if you wish to use it
-   - See [Presets](#presets) for mapping
+   - See [Preset](#preset) for mapping
  - Fixed deprecated schema warnings when compiling
    - Shamelessly copied from PRs on the main repo
  - Fan speed is now a Home Assistant style fan mode
@@ -19,6 +23,31 @@ This is jumpinf00l's super-dodgy hack to add a few nicer sensors and selects, it
  - Added inside temperature as an optional sub-entity under the climate entity rather than relying on the attribute of the climate entity
    - More consistent for Home Assistant dashboard design
    - The inside temperature attribute remains on the climate entity, so can be referenced either way
+
+## <a name="swing_mode">Swing Mode</a>
+| Type       | Home Assistant / ESPHome Swing Mode | Panasonic Remote           | Previous Name |
+| ---------- | ----------------------------------- | -------------------------- | ------------- |
+| Horizontal | Swing                               | All segments               | auto          |
+| Horizontal | Left                                | Both left                  | left          |
+| Horizontal | Left Middle                         | Left and middle            | left_center   |
+| Horizontal | Middle                              | Both middle                | center        |
+| Horizontal | Right Middle                        | Middle and right           | right_center  |
+| Horizontal | Right                               | Both right                 | right         |
+| Vertical   | Swing                               | All segments               | swing         |
+| Vertical   | Auto                                | All segments plus 'Auto'   | auto          |
+| Vertical   | Top                                 | Top segment                | up            |
+| Vertical   | Top Middle                          | Second from top segment    | up_center     |
+| Vertical   | Middle                              | Middle segment             | center        |
+| Vertical   | Bottom Middle                       | Second from bottom segment | bottom_center |
+| Vertical   | Bottom                              | Bottom segment             | bottom        |
+
+### <a name="swing_mode-notes">Swing Mode Notes</a>
+ - It isn't currently possible to add custom swing modes to the Swing dropdown in Home Assistant
+   - Only horizontal and vertical toggles (Off, Vertical, Horizontal, Both) are supported
+ - There isn't an auto horizontal swing mode
+   - 'Auto' was a misnomer in the original release and refers to 'Swing'
+ - Horizontal and vertical swing modes are selectively disabled separate to the select entities
+   - This allows for disabling the horizontal and vertical swing mode dropdown on the Home Assistant climate entity (since it can only toggle between 'Swing' and 'Middle'/'Center'), while still being able to use the swing mode select entities to pick a specific swing mode
 
 ## <a name="presets">Presets</a>
 | Home Assistant / ESPHome Preset | Panasonic Preset |
@@ -62,6 +91,55 @@ This is jumpinf00l's super-dodgy hack to add a few nicer sensors and selects, it
    - *Don't Panic*. There are no AI connectors, internal AI process, or any other such nonsense in this code
    - This code has been passed through OpenAI GPT-4o and Google Gemini 2.5 Flash mostly for sanity-checking code as I push the limits of my knowledge
    - All returned code has been checked and confirmed safe by a real, squishy, living, breathing human
+ - My natural language is EN_AU (similar to EN_GB with some flairs) so we use 'Centre', but Home Assistant and ESPHome seem to use EN_Simplified, so we'll continue that theme here and use 'Center' for consistency
+ - If Apple Home and Google Home don't immediately reflect changes to the climate entity in their own apps, restart those integrations in Home Assistant (ie restart Home Assistant)
+
+# <a name="syntax">Syntax</a>
+| Option                    | Sub-option | Requirement | Valid options     | Default        | Notes                                                                                                                    |
+| ------------------------- | ---------- | ----------- | ----------------- | -------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| platform                  |            | Required    | panasonic_ac      | [blank]        | Sets the climate entity to use the panasonic_ac custom component                                                         |
+| id                        |            | Optional    | [Text]            | [blank]        | The ID to use for the climate entity in ESPHome and Home Assistant (will be used to generate the name if not set)        |
+| name                      |            | Optional    | [Text]            | [blank]        | The name to use for the climate entity in ESPHome and Home Assistant (will be used to generate the entity ID if not set) |
+| icon                      |            | Optional    | [mdi:icon format] | mdi:thermostat | The icon to use for the climate entity (used by Home Assistant and the web UI                                            |
+| type                      |            | Required    | cnt, wlan         | [blank]        | sets the component to CN-CNT or CN-WLAN mode                                                                             |
+| horizontal_swing_enable   |            | Optional    | true, false       | true           | Selectively disable horizontal swing mode on the Home Assistant climate entity                                           |
+| vertical_swing_enable     |            | Optional    | true, false       | true           | Selectively disable vertical swing mode on the Home Assistant climate entity                                             |
+| horizontal_swing_select   |            | Optional    |                   |                | Enable the Horizontal swing select entity containing individual horizontal swing modes                                   |
+|                           | name       | Required    | [Text]            | [blank]        | The name of the horizontal swing select entity (will be used to generate the entity ID)                                  |
+|                           | icon       | Optional    | [mdi:icon format] | [blank]        | The icon to use for the horizontal swing mode select entity (used by Home Assistant and the web UI                       |
+|                           | id         | optional    | [Text]            | [blank]        | The ID to use in ESPHome (doesn't appear to influence the Home Assistant entity ID)                                      |
+| vertical_swing_select     |            | Optional    |                   |                | Enable the vertical swing select entity containing individual vertical swing modes                                       |
+|                           | name       | Required    | [Text]            | [blank]        | The name of the vertical swing select entity (will be used to generate the entity ID)                                    |
+|                           | icon       | Optional    | [mdi:icon format] | [blank]        | The icon to use for the vertical swing mode select entity (used by Home Assistant and the web UI                         |
+|                           | id         | optional    | [Text]            | [blank]        | The ID to use in ESPHome (doesn't appear to influence the Home Assistant entity ID)                                      |
+| outside_temperature       |            | Optional    |                   |                | Enable the outside temperature entity                                                                                    |
+|                           | name       | Required    | [Text]            | [blank]        | The name of the outside temperature entity (will be used to generate the entity ID)                                      |
+|                           | icon       | Optional    | [mdi:icon format] | [blank]        | The icon to use for the outside temperature entity (used by Home Assistant and the web UI                                |
+|                           | id         | optional    | [Text]            | [blank]        | The ID to use in ESPHome (doesn't appear to influence the Home Assistant entity ID)                                      |
+| inside_temperature        |            | Optional    |                   |                | Enable the inside temperature entity                                                                                     |
+|                           | name       | Required    | [Text]            | [blank]        | The name of the inside temperature entity (will be used to generate the entity ID)                                       |
+|                           | icon       | Optional    | [mdi:icon format] | [blank]        | The icon to use for the inside temperature entity (used by Home Assistant and the web UI                                 |
+|                           | id         | optional    | [Text]            | [blank]        | The ID to use in ESPHome (doesn't appear to influence the Home Assistant entity ID)                                      |
+| nanoex_switch             |            | Optional    |                   |                | Enable the NanoeX switch entity                                                                                          |
+|                           | name       | Required    | [Text]            | [blank]        | The name of the NanoeX switch entity (will be used to generate the entity ID)                                            |
+|                           | icon       | Optional    | [mdi:icon format] | [blank]        | The icon to use for the NanoeX switch entity (used by Home Assistant and the web UI                                      |
+|                           | id         | optional    | [Text]            | [blank]        | The ID to use in ESPHome (doesn't appear to influence the Home Assistant entity ID)                                      |
+| eco_switch                |            | Optional    |                   |                | Enable the eco switch entity                                                                                             |
+|                           | name       | Required    | [Text]            | [blank]        | The name of the eco switch entity (will be used to generate the entity ID)                                               |
+|                           | icon       | Optional    | [mdi:icon format] | [blank]        | The icon to use for the eco switch entity (used by Home Assistant and the web UI                                         |
+|                           | id         | optional    | [Text]            | [blank]        | The ID to use in ESPHome (doesn't appear to influence the Home Assistant entity ID)                                      |
+| mild_dry_switch           |            | Optional    |                   |                | Enable the mild dry switch entity                                                                                        |
+|                           | name       | Required    | [Text]            | [blank]        | The name of the mild dry switch entity (will be used to generate the entity ID)                                          |
+|                           | icon       | Optional    | [mdi:icon format] | [blank]        | The icon to use for the mild dry switch entity (used by Home Assistant and the web UI                                    |
+|                           | id         | optional    | [Text]            | [blank]        | The ID to use in ESPHome (doesn't appear to influence the Home Assistant entity ID)                                      |
+| econavi_switch            |            | Optional    |                   |                | Enable the Econavi switch entity                                                                                         |
+|                           | name       | Required    | [Text]            | [blank]        | The name of the Econavi switch entity (will be used to generate the entity ID)                                           |
+|                           | icon       | Optional    | [mdi:icon format] | [blank]        | The icon to use for the Econavi switch entity (used by Home Assistant and the web UI                                     |
+|                           | id         | optional    | [Text]            | [blank]        | The ID to use in ESPHome (doesn't appear to influence the Home Assistant entity ID)                                      |
+| current_power_consumption |            | Optional    |                   |                | Enable the current power consumption entity, which reports in Watts (W)                                                  |
+|                           | name       | Required    | [Text]            | [blank]        | The name of the Econavi switch entity (will be used to generate the entity ID)                                           |
+|                           | icon       | Optional    | [mdi:icon format] | [blank]        | The icon to use for the Econavi switch entity (used by Home Assistant and the web UI                                     |
+|                           | id         | optional    | [Text]            | [blank]        | The ID to use in ESPHome (doesn't appear to influence the Home Assistant entity ID)                                      |
 
 # <a name="example">Example</a>
 <details>
@@ -87,6 +165,8 @@ climate:
     name: "Climate"
     icon: mdi:thermostat
     type: cnt
+    horizontal_swing_enable: false
+    vertical_swing_enable: true
     vertical_swing_select:
       name: "Vertical Swing Mode"
       icon: mdi:arrow-up-down
@@ -385,13 +465,13 @@ There is no ETA on any item on this list, nor an guarantee that these items will
      - ~Set Eco as a preset rather than a switch~
      - ~Set Quiet as a fan speed rather than a preset~
  - ~Poll AC unit for update on each front-end change (fan speed, preset, etc), rather than wait for default 5 sec poll~ ✅ v0.4.x - Polling
+ - ~Rename horizontal swing/vane modes to align front-end naming conventions, make horizontal and vertical swing modes optional under the climate entity, and add swing modes back to climate entity~ ✅ v0.5.x - Swing Modes
+   - ~This won't support setting fixed swing positions on the climate entity since ESPHome can only toggle horizontal and/or vertical swing on and off~
  - Incorporate Fan mode, Preset, and Mode select entities and Daily energy sensor as sub-entities under the Climate entity
    - This will neaten the code up, neaten the logs up, reduce Wi-Fi/API activity, and improve performance
    - Investigate an option for adding custom names to the fan speed sub-entity in the case that the user wants to customise these
  - Add activity attribute to the climate entity
    - This will indicate the current activity on the AC unit (such as idle once the setpoint temperature has been reached and the compressor slows down)
- - Rename horizontal swing/vane modes to align front-end naming conventions, make horizontal and vertical swing modes optional under the climate entity, and add swing modes back to climate entity
-   - This won't support setting fixed swing positions on the climate entity since ESPHome can only toggle horizontal and/or vertical swing on and off
  - Add a fan entity which can be exposed to Apple Home and Google Home to allow controlling of all fan modes
    - Investigate presenting this as a percentage for better Apple Home and Google Home support, or research supported options for each platform
      - 0 - 14.28% = auto <> 28.57% = quiet <> 42.85% = diffuse <> 57.14% = low <> 71.42% = medium <> 85.71% = high <> 100% = focus
