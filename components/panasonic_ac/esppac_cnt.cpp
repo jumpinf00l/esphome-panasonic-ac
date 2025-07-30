@@ -132,7 +132,7 @@ void PanasonicACCNT::control(const climate::ClimateCall &call) {
         this->cmd[4] = 0xF6;  // Swing vertical, horizontal center
         break;
       case climate::CLIMATE_SWING_HORIZONTAL:
-        this->cmd[4] = 0x3D;  // Swing horizontal, vertical middle
+        this->cmd[4] = 0x3D;  // Swing horizontal, vertical center
         break;
       default:
         ESP_LOGV(TAG, "Unsupported swing mode requested");
@@ -241,8 +241,6 @@ void PanasonicACCNT::set_data(bool set) {
   this->update_swing_vertical(verticalSwing);
   this->update_swing_horizontal(horizontalSwing);
 
-  this->update_swing_vertical(verticalSwing);
-  this->update_swing_horizontal(horizontalSwing);
   this->update_nanoex(nanoex);
   this->update_eco(eco);
   this->update_econavi(econavi);
@@ -448,24 +446,24 @@ std::string PanasonicACCNT::determine_vertical_swing(uint8_t swing) {
 
   switch (nib) {
     case 0x0E:
-      return "Swing";
+      return "swing";
     case 0x0F:
-      return "Auto";
+      return "auto";
     case 0x01:
-      return "Top";
+      return "up";
     case 0x02:
-      return "Top Middle";
+      return "up_center";
     case 0x03:
-      return "Middle";
+      return "center";
     case 0x04:
-      return "Bottom Middle";
+      return "down_center";
     case 0x05:
-      return "Bottom";
+      return "down";
     case 0x00:
       return "unsupported";
-    default: // Unknown
+    default:
       ESP_LOGW(TAG, "Received unknown vertical swing mode: 0x%02X", nib);
-      return "unknown";
+      return "Unknown";
   }
 }
 
@@ -474,26 +472,22 @@ std::string PanasonicACCNT::determine_horizontal_swing(uint8_t swing) {
 
   switch (nib) {
     case 0x0D:
-      return "Auto";
-//    case 0x07:
-//      return "Swing";
-//    case 0x08:
-//      return "Wide";
+      return "auto";
     case 0x09:
-      return "Left";
+      return "left";
     case 0x0A:
-      return "Left Center";
+      return "left_center";
     case 0x06:
-      return "Center";
+      return "center";
     case 0x0B:
-      return "Right Center";
+      return "right_center";
     case 0x0C:
-      return "Right";
+      return "right";
     case 0x00:
-      return "unsupported"; 
-    default: // Unknown
+      return "unsupported";
+    default:
       ESP_LOGW(TAG, "Received unknown horizontal swing mode");
-      return "unknown";
+      return "Unknown";
   }
 }
 
@@ -576,23 +570,23 @@ void PanasonicACCNT::on_vertical_swing_change(const std::string &swing) {
   ESP_LOGD(TAG, "Setting vertical swing position");
 
   if (this->cmd.empty()) {
-    ESP_LOGV(TAG, "Copying data to cmd: Vertical swing");
+    ESP_LOGV(TAG, "Copying data to cmd");
     this->cmd = this->data;
   }
 
-  if (swing == "Bottom")
+  if (swing == "down")
     this->cmd[4] = (this->cmd[4] & 0x0F) + 0x50;
-  else if (swing == "Bottom Middle")
+  else if (swing == "down_center")
     this->cmd[4] = (this->cmd[4] & 0x0F) + 0x40;
-  else if (swing == "Middle")
+  else if (swing == "center")
     this->cmd[4] = (this->cmd[4] & 0x0F) + 0x30;
-  else if (swing == "Top Middle")
+  else if (swing == "up_center")
     this->cmd[4] = (this->cmd[4] & 0x0F) + 0x20;
-  else if (swing == "Top")
+  else if (swing == "up")
     this->cmd[4] = (this->cmd[4] & 0x0F) + 0x10;
-  else if (swing == "Swing")
+  else if (swing == "swing")
     this->cmd[4] = (this->cmd[4] & 0x0F) + 0xE0;
-  else if (swing == "Auto")
+  else if (swing == "auto")
     this->cmd[4] = (this->cmd[4] & 0x0F) + 0xF0;
   else {
     ESP_LOGW(TAG, "Unsupported vertical swing position received");
@@ -608,21 +602,21 @@ void PanasonicACCNT::on_horizontal_swing_change(const std::string &swing) {
   ESP_LOGD(TAG, "Setting horizontal swing position");
 
   if (this->cmd.empty()) {
-    ESP_LOGV(TAG, "Copying data to cmd: Horizontal swing");
+    ESP_LOGV(TAG, "Copying data to cmd");
     this->cmd = this->data;
   }
 
-  if (swing == "Left")
+  if (swing == "left")
     this->cmd[4] = (this->cmd[4] & 0xF0) + 0x09;
-  else if (swing == "Left Center")
+  else if (swing == "left_center")
     this->cmd[4] = (this->cmd[4] & 0xF0) + 0x0A;
-  else if (swing == "Center")
+  else if (swing == "center")
     this->cmd[4] = (this->cmd[4] & 0xF0) + 0x06;
-  else if (swing == "Right Center")
+  else if (swing == "right_center")
     this->cmd[4] = (this->cmd[4] & 0xF0) + 0x0B;
-  else if (swing == "Right")
+  else if (swing == "right")
     this->cmd[4] = (this->cmd[4] & 0xF0) + 0x0C;
-  else if (swing == "Auto")
+  else if (swing == "auto")
     this->cmd[4] = (this->cmd[4] & 0xF0) + 0x0D;
   else {
     ESP_LOGW(TAG, "Unsupported horizontal swing position received");
