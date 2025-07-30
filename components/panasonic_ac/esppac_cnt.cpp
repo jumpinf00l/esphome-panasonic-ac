@@ -123,19 +123,19 @@ void PanasonicACCNT::control(const climate::ClimateCall &call) {
 
     switch (*call.get_swing_mode()) {
       case climate::CLIMATE_SWING_BOTH:
-        this->cmd[4] = 0xFD;
+        this->cmd[4] = 0xFD;  // Vertical: Swing, Horizontal: Swing
         break;
       case climate::CLIMATE_SWING_OFF:
-        this->cmd[4] = 0x36;  // Reset both to center
+        this->cmd[4] = 0x36;  // Vertical: Middle, Horizontal: Center
         break;
       case climate::CLIMATE_SWING_VERTICAL:
-        this->cmd[4] = 0xE6;  // Swing vertical, horizontal center
+        this->cmd[4] = 0xE6;  // Vertical: swing, Horizontal: Center
         break;
       case climate::CLIMATE_SWING_HORIZONTAL:
-        this->cmd[4] = 0x3D;  // Swing horizontal, vertical center
+        this->cmd[4] = 0x3D;  // Vertical: Middle, Horizontal: Swing
         break;
       default:
-        ESP_LOGV(TAG, "Unsupported swing mode requested");
+        ESP_LOGW(TAG, "Unsupported swing mode requested");
         break;
     }
   }
@@ -229,11 +229,11 @@ void PanasonicACCNT::set_data(bool set) {
     }
   }
 
-  if (verticalSwing == "auto" && horizontalSwing == "auto")
+  if (verticalSwing == "Swing" && horizontalSwing == "Swing")
     this->swing_mode = climate::CLIMATE_SWING_BOTH;
-  else if (verticalSwing == "swing")
+  else if (verticalSwing == "Swing")
     this->swing_mode = climate::CLIMATE_SWING_VERTICAL;
-  else if (horizontalSwing == "auto")
+  else if (horizontalSwing == "Swing")
     this->swing_mode = climate::CLIMATE_SWING_HORIZONTAL;
   else
     this->swing_mode = climate::CLIMATE_SWING_OFF;
