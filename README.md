@@ -81,8 +81,7 @@ This is jumpinf00l's super-dodgy hack to add a few nicer sensors and selects, it
     - See [Wishlist](#wishlist) for a potential workaround through adding a fan entity to the ESPHome device which can be exposed to Apple Home and Google Home as a fan device
 
 # <a name="general-notes">General Notes</a>
- - This has only been tested using CNT mode. WLAN mode is currently untested and mostly unchanged but should work similarly
- - This is a zero-ecosystem household; there is no love for or preference over Apple Home or Google Home, nor the products of either of these companies
+ - This has only been tested using CNT mode. WLAN mode is currently untested and mostly unchanged but should work similarly to the original code
  - Jumpinf00l has zero intention to develop or maintain this code beyond the wishlist
    - If something breaks, it might not be fixed
    - Submit bugs and PRs to the original repo that this was forked from
@@ -91,10 +90,16 @@ This is jumpinf00l's super-dodgy hack to add a few nicer sensors and selects, it
    - *Don't Panic*. There are no AI connectors, internal AI process, or any other such nonsense in this code
    - This code has been passed through OpenAI GPT-4o and Google Gemini 2.5 Flash mostly for sanity-checking code as I push the limits of my knowledge
    - All returned code has been checked and confirmed safe by a real, squishy, living, breathing human
- - My natural language is EN_AU (similar to EN_GB with some flairs) so we use 'Centre', but Home Assistant and ESPHome seem to use EN_Simplified, so we'll continue that theme here and use 'Center' for consistency
  - If Apple Home and Google Home don't immediately reflect changes to the climate entity in their own apps, restart those integrations in Home Assistant (ie restart Home Assistant)
 
+# <a name="snark">Snark</a>
+ - My natural language is EN_AU (similar to EN_GB with some flairs) so we use 'Centre', but Home Assistant and ESPHome seem to use EN_Simplified, so we'll continue that theme here and use 'Center' for consistency
+ - This is a zero-ecosystem household; there is no love for or preference over Apple Home or Google Home, nor the products of either of these companies
+
 # <a name="syntax">Syntax</a>
+<details>
+<summary>Expand for syntax (it's long)</summary>
+ 
 | Option                    | Sub-option | Requirement | Valid options     | Default        | Notes                                                                                                                    |
 | ------------------------- | ---------- | ----------- | ----------------- | -------------- | ------------------------------------------------------------------------------------------------------------------------ |
 | platform                  |            | Required    | panasonic_ac      | [blank]        | Sets the climate entity to use the panasonic_ac custom component                                                         |
@@ -140,6 +145,8 @@ This is jumpinf00l's super-dodgy hack to add a few nicer sensors and selects, it
 |                           | name       | Required    | [Text]            | [blank]        | The name of the Econavi switch entity (will be used to generate the entity ID)                                           |
 |                           | icon       | Optional    | [mdi:icon format] | [blank]        | The icon to use for the Econavi switch entity (used by Home Assistant and the web UI                                     |
 |                           | id         | optional    | [Text]            | [blank]        | The ID to use in ESPHome (doesn't appear to influence the Home Assistant entity ID)                                      |
+
+</details>
 
 # <a name="example">Example</a>
 <details>
