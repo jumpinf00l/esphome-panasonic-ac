@@ -491,7 +491,7 @@ std::string PanasonicACCNT::determine_horizontal_swing(uint8_t swing) {
       return "unsupported"; 
     default: // Unknown
       ESP_LOGW(TAG, "Received unknown horizontal swing mode");
-      return "Auto";
+      return "unknown";
   }
 }
 
