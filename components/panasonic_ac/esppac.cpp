@@ -120,9 +120,8 @@ void PanasonicAC::update_swing_horizontal(const std::string &swing) {
 void PanasonicAC::update_swing_vertical(const std::string &swing) {
   this->vertical_swing_state_ = swing;
 
-  if (this->vertical_swing_select_ != nullptr && this->vertical_swing_select_->state != this->vertical_swing_state_) {
+  if (this->vertical_swing_select_ != nullptr && this->vertical_swing_select_->state != this->vertical_swing_state_)
     this->vertical_swing_select_->publish_state(this->vertical_swing_state_);  // Set current vertical swing position
-  }
 }
 
 void PanasonicAC::update_nanoex(bool nanoex) {
@@ -221,7 +220,7 @@ void PanasonicAC::set_horizontal_swing_select(select::Select *horizontal_swing_s
 void PanasonicAC::set_nanoex_switch(switch_::Switch *nanoex_switch) {
   this->nanoex_switch_ = nanoex_switch;
   this->nanoex_switch_->add_on_state_callback([this](bool state) {
-    if (state == this->nanoex_state_)\
+    if (state == this->nanoex_state_)
       return;
     this->on_nanoex_change(state);
   });
