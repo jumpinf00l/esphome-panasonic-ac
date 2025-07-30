@@ -11,6 +11,8 @@ void PanasonicACCNT::setup() {
   PanasonicAC::setup();
 
   ESP_LOGD(TAG, "Using CZ-TACG1 protocol via CN-CNT");
+  ESP_LOGI(TAG, "Horizontal swing enable is: %s", this->horizontal_swing_enable_ ? "true" : "false");
+  ESP_LOGI(TAG, "Vertical swing enable is: %s", this->vertical_swing_enable_ ? "true" : "false");
 }
 
 void PanasonicACCNT::loop() {
@@ -286,8 +288,6 @@ void PanasonicACCNT::handle_poll() {
   if (millis() - this->last_packet_sent_ > POLL_INTERVAL) {
     ESP_LOGV(TAG, "Polling AC");
     send_command(CMD_POLL, CommandType::Normal, POLL_HEADER);
-    ESP_LOGI(TAG, "Horizontal swing enable is: %s", this->horizontal_swing_enable_ ? "true" : "false");
-    ESP_LOGI(TAG, "Vertical swing enable is: %s", this->vertical_swing_enable_ ? "true" : "false");
   }
 }
 
