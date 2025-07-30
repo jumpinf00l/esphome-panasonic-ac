@@ -43,9 +43,9 @@ CONF_CURRENT_POWER_CONSUMPTION = "current_power_consumption"
 CONF_WLAN = "wlan"
 CONF_CNT = "cnt"
 
-HORIZONTAL_SWING_OPTIONS = ["auto", "left", "left_center", "center", "right_center", "right"]
+HORIZONTAL_SWING_OPTIONS = ["Auto", "Swing", "Wide", "Left", "Left Center", "Center", "Right Center", "Right"]
 
-VERTICAL_SWING_OPTIONS = ["swing", "auto", "up", "up_center", "center", "down_center", "down"]
+VERTICAL_SWING_OPTIONS = ["Auto", "Swing", "Top", "Top Middle", "Middle", "Bottom Middle", "Bottom"]
 
 SWITCH_SCHEMA = switch.switch_schema(PanasonicACSwitch).extend(cv.COMPONENT_SCHEMA)
 
