@@ -65,7 +65,6 @@ class PanasonicACCNT : public PanasonicAC {
   bool suppress_poll_update_for_eco_preset_ = false;
   unsigned long suppress_poll_timeout_ = 0;
   const unsigned long SUPPRESSION_DURATION_MS = 5000; // 5 seconds timeout for optimistic state
-
 };
 
 }  // namespace CNT

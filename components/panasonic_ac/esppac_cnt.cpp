@@ -11,6 +11,8 @@ void PanasonicACCNT::setup() {
   PanasonicAC::setup();
 
   ESP_LOGD(TAG, "Using CZ-TACG1 protocol via CN-CNT");
+  ESP_LOGD(TAG, "horizontal_swing_enable: %s", this->horizontal_swing_enable_ ? "true" : "false");
+  ESP_LOGD(TAG, "vertical_swing_enable: %s", this->vertical_swing_enable_ ? "true" : "false");
 }
 
 void PanasonicACCNT::loop() {
@@ -120,21 +122,22 @@ void PanasonicACCNT::control(const climate::ClimateCall &call) {
   
   if (call.get_swing_mode().has_value()) {
     ESP_LOGV(TAG, "Requested swing mode change");
+
     switch (*call.get_swing_mode()) {
       case climate::CLIMATE_SWING_BOTH:
-        this->cmd[4] = 0xFD;
+        this->cmd[4] = 0xFD;  // Vertical: Swing, Horizontal: Swing
         break;
       case climate::CLIMATE_SWING_OFF:
-        this->cmd[4] = 0x36;  // Reset both to center
+        this->cmd[4] = 0x36;  // Vertical: Middle, Horizontal: Center
         break;
       case climate::CLIMATE_SWING_VERTICAL:
-        this->cmd[4] = 0xF6;  // Swing vertical, horizontal center
+        this->cmd[4] = 0xE6;  // Vertical: swing, Horizontal: Center
         break;
       case climate::CLIMATE_SWING_HORIZONTAL:
-        this->cmd[4] = 0x3D;  // Swing horizontal, vertical center
+        this->cmd[4] = 0x3D;  // Vertical: Middle, Horizontal: Swing
         break;
       default:
-        ESP_LOGV(TAG, "Unsupported swing mode requested");
+        ESP_LOGW(TAG, "Unsupported swing mode requested");
         break;
     }
   }
@@ -228,17 +231,18 @@ void PanasonicACCNT::set_data(bool set) {
     }
   }
 
-  if (verticalSwing == "auto" && horizontalSwing == "auto")
+  if (verticalSwing == "Swing" && horizontalSwing == "Swing")
     this->swing_mode = climate::CLIMATE_SWING_BOTH;
-  else if (verticalSwing == "auto")
+  else if (verticalSwing == "Swing")
     this->swing_mode = climate::CLIMATE_SWING_VERTICAL;
-  else if (horizontalSwing == "auto")
+  else if (horizontalSwing == "Swing")
     this->swing_mode = climate::CLIMATE_SWING_HORIZONTAL;
   else
     this->swing_mode = climate::CLIMATE_SWING_OFF;
 
   this->update_swing_vertical(verticalSwing);
   this->update_swing_horizontal(horizontalSwing);
+
   this->update_nanoex(nanoex);
   this->update_eco(eco);
   this->update_econavi(econavi);
@@ -458,8 +462,8 @@ std::string PanasonicACCNT::determine_vertical_swing(uint8_t swing) {
     case 0x00:
       return "unsupported";
     default:
-      ESP_LOGW(TAG, "Received unknown vertical swing mode");
-      return "Swing";
+      ESP_LOGW(TAG, "Received unknown vertical swing mode: 0x%02X", nib);
+      return "Unknown";
   }
 }
 
@@ -468,7 +472,7 @@ std::string PanasonicACCNT::determine_horizontal_swing(uint8_t swing) {
 
   switch (nib) {
     case 0x0D:
-      return "Auto";
+      return "Swing";
     case 0x09:
       return "Left";
     case 0x0A:
@@ -483,7 +487,7 @@ std::string PanasonicACCNT::determine_horizontal_swing(uint8_t swing) {
       return "unsupported";
     default:
       ESP_LOGW(TAG, "Received unknown horizontal swing mode");
-      return "Swing";
+      return "Unknown";
   }
 }
 
@@ -566,7 +570,7 @@ void PanasonicACCNT::on_vertical_swing_change(const std::string &swing) {
   ESP_LOGD(TAG, "Setting vertical swing position");
 
   if (this->cmd.empty()) {
-    ESP_LOGV(TAG, "Copying data to cmd: Vertical swing");
+    ESP_LOGV(TAG, "Copying data to cmd");
     this->cmd = this->data;
   }
 
@@ -598,7 +602,7 @@ void PanasonicACCNT::on_horizontal_swing_change(const std::string &swing) {
   ESP_LOGD(TAG, "Setting horizontal swing position");
 
   if (this->cmd.empty()) {
-    ESP_LOGV(TAG, "Copying data to cmd: Horizontal swing");
+    ESP_LOGV(TAG, "Copying data to cmd");
     this->cmd = this->data;
   }
 
@@ -612,7 +616,7 @@ void PanasonicACCNT::on_horizontal_swing_change(const std::string &swing) {
     this->cmd[4] = (this->cmd[4] & 0xF0) + 0x0B;
   else if (swing == "Right")
     this->cmd[4] = (this->cmd[4] & 0xF0) + 0x0C;
-  else if (swing == "Auto")
+  else if (swing == "Swing")
     this->cmd[4] = (this->cmd[4] & 0xF0) + 0x0D;
   else {
     ESP_LOGW(TAG, "Unsupported horizontal swing position received");

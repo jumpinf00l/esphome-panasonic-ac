@@ -11,26 +11,30 @@ climate::ClimateTraits PanasonicAC::traits() {
   auto traits = climate::ClimateTraits();
 
   traits.set_supports_action(false);
-
   traits.set_supports_current_temperature(true);
   traits.set_supports_two_point_target_temperature(false);
   traits.set_visual_min_temperature(MIN_TEMPERATURE);
   traits.set_visual_max_temperature(MAX_TEMPERATURE);
   traits.set_visual_temperature_step(TEMPERATURE_STEP);
-
-  traits.set_supported_modes({climate::CLIMATE_MODE_OFF, climate::CLIMATE_MODE_HEAT_COOL, climate::CLIMATE_MODE_COOL,
-                              climate::CLIMATE_MODE_HEAT, climate::CLIMATE_MODE_FAN_ONLY, climate::CLIMATE_MODE_DRY});
-
-  // Re-added CLIMATE_FAN_QUIET to supported fan modes
+  traits.set_supported_modes({climate::CLIMATE_MODE_OFF, climate::CLIMATE_MODE_HEAT_COOL, climate::CLIMATE_MODE_COOL, climate::CLIMATE_MODE_HEAT, climate::CLIMATE_MODE_FAN_ONLY, climate::CLIMATE_MODE_DRY});
   traits.set_supported_fan_modes({climate::CLIMATE_FAN_AUTO, climate::CLIMATE_FAN_QUIET, climate::CLIMATE_FAN_DIFFUSE, climate::CLIMATE_FAN_LOW, climate::CLIMATE_FAN_MEDIUM, climate::CLIMATE_FAN_HIGH, climate::CLIMATE_FAN_FOCUS});
-  
-/* traits.set_supported_swing_modes({climate::CLIMATE_SWING_OFF, climate::CLIMATE_SWING_BOTH,
-                                    climate::CLIMATE_SWING_VERTICAL, climate::CLIMATE_SWING_HORIZONTAL}); */
-  
-/* Removed custom presets: traits.set_supported_custom_presets({"Normal", "Powerful", "Quiet"}); */
+  traits.set_supported_presets({climate::CLIMATE_PRESET_NONE, climate::CLIMATE_PRESET_BOOST, climate::CLIMATE_PRESET_ECO});
 
-  // Removed CLIMATE_PRESET_SLEEP, as Quiet is now a fan mode
-  traits.set_supported_presets({climate::CLIMATE_PRESET_NONE, climate::CLIMATE_PRESET_BOOST, climate::CLIMATE_PRESET_ECO}); 
+  // Dynamically set supported swing modes based on enable flags
+  std::set<climate::ClimateSwingMode> supported_swing_modes;
+  if (this->vertical_swing_enable_ || this->horizontal_swing_enable_) {
+      supported_swing_modes.insert(climate::CLIMATE_SWING_OFF);
+  }
+  if (this->vertical_swing_enable_) {
+      supported_swing_modes.insert(climate::CLIMATE_SWING_VERTICAL);
+  }
+  if (this->horizontal_swing_enable_) {
+      supported_swing_modes.insert(climate::CLIMATE_SWING_HORIZONTAL);
+  }
+  if (this->vertical_swing_enable_ && this->horizontal_swing_enable_) {
+      supported_swing_modes.insert(climate::CLIMATE_SWING_BOTH);
+  }
+  traits.set_supported_swing_modes(supported_swing_modes);
   
   return traits;
 }
@@ -105,8 +109,8 @@ void PanasonicAC::update_target_temperature(uint8_t raw_value) {
   this->target_temperature = temperature;
 }
 
-void PanasonicAC::update_swing_horizontal(const std::string &swing) {
-  this->horizontal_swing_state_ = swing;
+void PanasonicAC::update_swing_horizontal(const std::string &Swing) {
+  this->horizontal_swing_state_ = Swing;
 
   if (this->horizontal_swing_select_ != nullptr &&
       this->horizontal_swing_select_->state != this->horizontal_swing_state_) {
@@ -115,8 +119,8 @@ void PanasonicAC::update_swing_horizontal(const std::string &swing) {
   }
 }
 
-void PanasonicAC::update_swing_vertical(const std::string &swing) {
-  this->vertical_swing_state_ = swing;
+void PanasonicAC::update_swing_vertical(const std::string &Swing) {
+  this->vertical_swing_state_ = Swing;
 
   if (this->vertical_swing_select_ != nullptr && this->vertical_swing_select_->state != this->vertical_swing_state_)
     this->vertical_swing_select_->publish_state(this->vertical_swing_state_);  // Set current vertical swing position
@@ -218,7 +222,7 @@ void PanasonicAC::set_horizontal_swing_select(select::Select *horizontal_swing_s
 void PanasonicAC::set_nanoex_switch(switch_::Switch *nanoex_switch) {
   this->nanoex_switch_ = nanoex_switch;
   this->nanoex_switch_->add_on_state_callback([this](bool state) {
-    if (state == this->nanoex_state_)\
+    if (state == this->nanoex_state_)
       return;
     this->on_nanoex_change(state);
   });
