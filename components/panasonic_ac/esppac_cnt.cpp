@@ -452,11 +452,11 @@ std::string PanasonicACCNT::determine_vertical_swing(uint8_t swing) {
     case 0x01:
       return "Top";
     case 0x02:
-      return "Top Middle";
+      return "Middle Top";
     case 0x03:
       return "Middle";
     case 0x04:
-      return "Bottom Middle";
+      return "Middle Bottom";
     case 0x05:
       return "Bottom";
     case 0x00:
@@ -576,11 +576,11 @@ void PanasonicACCNT::on_vertical_swing_change(const std::string &swing) {
 
   if (swing == "Bottom")
     this->cmd[4] = (this->cmd[4] & 0x0F) + 0x50;
-  else if (swing == "Bottom Middle")
+  else if (swing == "Middle Bottom")
     this->cmd[4] = (this->cmd[4] & 0x0F) + 0x40;
   else if (swing == "Middle")
     this->cmd[4] = (this->cmd[4] & 0x0F) + 0x30;
-  else if (swing == "Top Middle")
+  else if (swing == "Middle Top")
     this->cmd[4] = (this->cmd[4] & 0x0F) + 0x20;
   else if (swing == "Top")
     this->cmd[4] = (this->cmd[4] & 0x0F) + 0x10;
