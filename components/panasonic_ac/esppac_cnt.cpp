@@ -476,11 +476,11 @@ std::string PanasonicACCNT::determine_horizontal_swing(uint8_t swing) {
     case 0x09:
       return "Left";
     case 0x0A:
-      return "Left Center";
+      return "Center Left";
     case 0x06:
       return "Center";
     case 0x0B:
-      return "Right Center";
+      return "Center Right";
     case 0x0C:
       return "Right";
     case 0x00:
@@ -608,11 +608,11 @@ void PanasonicACCNT::on_horizontal_swing_change(const std::string &swing) {
 
   if (swing == "Left")
     this->cmd[4] = (this->cmd[4] & 0xF0) + 0x09;
-  else if (swing == "Left Center")
+  else if (swing == "Center Left")
     this->cmd[4] = (this->cmd[4] & 0xF0) + 0x0A;
   else if (swing == "Center")
     this->cmd[4] = (this->cmd[4] & 0xF0) + 0x06;
-  else if (swing == "Right Center")
+  else if (swing == "Center Right")
     this->cmd[4] = (this->cmd[4] & 0xF0) + 0x0B;
   else if (swing == "Right")
     this->cmd[4] = (this->cmd[4] & 0xF0) + 0x0C;
