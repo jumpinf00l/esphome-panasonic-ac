@@ -29,16 +29,16 @@ This is jumpinf00l's super-dodgy hack to add a few nicer sensors and selects, it
 | ---------- | ----------------------------------- | -------------------------- | ------------- |
 | Horizontal | Swing                               | All segments               | auto          |
 | Horizontal | Left                                | Both left                  | left          |
-| Horizontal | Left Middle                         | Left and middle            | left_center   |
-| Horizontal | Middle                              | Both middle                | center        |
-| Horizontal | Right Middle                        | Middle and right           | right_center  |
+| Horizontal | Center Left                         | Left and center            | left_center   |
+| Horizontal | Center                              | Both center                | center        |
+| Horizontal | Center Right                        | Right and center           | right_center  |
 | Horizontal | Right                               | Both right                 | right         |
 | Vertical   | Swing                               | All segments               | swing         |
 | Vertical   | Auto                                | All segments plus 'Auto'   | auto          |
 | Vertical   | Top                                 | Top segment                | up            |
-| Vertical   | Top Middle                          | Second from top segment    | up_center     |
+| Vertical   | Middle Top                          | Second from top segment    | up_center     |
 | Vertical   | Middle                              | Middle segment             | center        |
-| Vertical   | Bottom Middle                       | Second from bottom segment | bottom_center |
+| Vertical   | Middle Bottom                       | Second from bottom segment | bottom_center |
 | Vertical   | Bottom                              | Bottom segment             | bottom        |
 
 ### <a name="swing_mode-notes">Swing Mode Notes</a>
