@@ -108,6 +108,17 @@ static const char *determine_horizontal_swing(uint8_t swing) {
   }
 }
 
+static bool determine_eco(uint8_t value) {
+  if (value == 0x40)
+    return true;
+  else if (value == 0x00)
+    return false;
+  else {
+    ESP_LOGW(TAG, "Received unknown eco value");
+    return false;
+  }
+}
+
 static climate::ClimatePreset determine_preset(uint8_t preset_byte, uint8_t eco_byte) {
   if (determine_eco(eco_byte)) {
     return climate::CLIMATE_PRESET_ECO;
@@ -133,17 +144,6 @@ static bool determine_preset_nanoex(uint8_t preset) {
     return false;
   else {
     ESP_LOGW(TAG, "Received unknown nanoex value");
-    return false;
-  }
-}
-
-static bool determine_eco(uint8_t value) {
-  if (value == 0x40)
-    return true;
-  else if (value == 0x00)
-    return false;
-  else {
-    ESP_LOGW(TAG, "Received unknown eco value");
     return false;
   }
 }
