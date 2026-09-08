@@ -507,7 +507,18 @@ bool PanasonicACCNT::verify_packet() {
 
 void PanasonicACCNT::handle_packet() {
   if (this->rx_buffer_[0] == POLL_HEADER) {
+    // Save current pending state overrides if a command is queued
+    bool has_pending_cmd = !this->cmd.empty();
+    uint8_t pending_preset_byte = has_pending_cmd ? this->cmd[5] : 0;
+    uint8_t pending_eco_byte = has_pending_cmd ? this->cmd[8] : 0;
+
     this->data = std::vector<uint8_t>(this->rx_buffer_.begin() + 2, this->rx_buffer_.begin() + 12);
+
+    // Re-apply pending command bytes to prevent state rubber-banding before AC updates
+    if (has_pending_cmd) {
+      this->data[5] = pending_preset_byte;
+      this->data[8] = pending_eco_byte;
+    }
 
     this->set_data(true);
     this->publish_state();
