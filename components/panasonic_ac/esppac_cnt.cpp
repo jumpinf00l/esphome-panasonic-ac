@@ -313,27 +313,29 @@ if (call.get_preset().has_value()) {
 
     switch (*call.get_preset()) {
       case climate::CLIMATE_PRESET_NONE:
-        this->cmd[5] = (this->cmd[5] & 0xF0);  // Clear powerful/quiet nib
-        this->cmd[8] = 0x00;                   // Clear eco byte
+        this->cmd[5] = (this->cmd[5] & 0xF0);
+        this->cmd[8] = 0x00;
         break;
       case climate::CLIMATE_PRESET_BOOST:
-        this->cmd[5] = (this->cmd[5] & 0xF0) + 0x02;  // Set powerful mode
-        this->cmd[8] = 0x00;                          // Clear eco byte
+        this->cmd[5] = (this->cmd[5] & 0xF0) + 0x02;
+        this->cmd[8] = 0x00;
         break;
       case climate::CLIMATE_PRESET_ECO:
-        this->cmd[5] = (this->cmd[5] & 0xF0);  // Clear powerful/quiet nib
-        this->cmd[8] = 0x40;                   // Set eco byte
+        this->cmd[5] = (this->cmd[5] & 0xF0);
+        this->cmd[8] = 0x40;
         break;
       default:
-        ESP_LOGV(TAG, "Unsupported preset requested");
         break;
     }
 
-    // Mirror changes to local data cache immediately so poll responses don't overwrite it
+    // Set pending target state
+    this->target_preset_byte_ = this->cmd[5];
+    this->target_eco_byte_ = this->cmd[8];
+    this->pending_preset_change_ = true;
+
+    // Apply optimistic update immediately
     this->data[5] = this->cmd[5];
     this->data[8] = this->cmd[8];
-
-    // Re-evaluate traits and publish optimistic state
     this->set_data(false);
     this->publish_state();
   }
@@ -447,10 +449,6 @@ void PanasonicACCNT::send_packet(const std::vector<uint8_t> &packet, CommandType
  */
 
 void PanasonicACCNT::handle_poll() {
-  // Do not poll if we are waiting for a response to a command
-  if (this->waiting_for_response_)
-    return;
-
   if (millis() - this->last_packet_sent_ > POLL_INTERVAL) {
     ESP_LOGV(TAG, "Polling AC");
     send_command(CMD_POLL, CommandType::Normal, POLL_HEADER);
@@ -511,24 +509,27 @@ bool PanasonicACCNT::verify_packet() {
 
 void PanasonicACCNT::handle_packet() {
   if (this->rx_buffer_[0] == POLL_HEADER) {
-    // Save current pending state overrides if a command is queued
-    bool has_pending_cmd = !this->cmd.empty();
-    uint8_t pending_preset_byte = has_pending_cmd ? this->cmd[5] : 0;
-    uint8_t pending_eco_byte = has_pending_cmd ? this->cmd[8] : 0;
+    uint8_t rx_preset_byte = this->rx_buffer_[7]; // Byte index corresponding to preset/nanoex
+    uint8_t rx_eco_byte = this->rx_buffer_[10];   // Byte index corresponding to eco
 
     this->data = std::vector<uint8_t>(this->rx_buffer_.begin() + 2, this->rx_buffer_.begin() + 12);
 
-    // Re-apply pending command bytes to prevent state rubber-banding before AC updates
-    if (has_pending_cmd) {
-      this->data[5] = pending_preset_byte;
-      this->data[8] = pending_eco_byte;
+    if (this->pending_preset_change_) {
+      // Check if AC has confirmed our target state
+      if (rx_preset_byte == this->target_preset_byte_ && rx_eco_byte == this->target_eco_byte_) {
+        this->pending_preset_change_ = false; // Confirmed by hardware
+      } else {
+        // AC hasn't updated its status packet yet; keep optimistic values
+        this->data[5] = this->target_preset_byte_;
+        this->data[8] = this->target_eco_byte_;
+      }
     }
 
     this->set_data(true);
     this->publish_state();
 
     if (this->state_ != ACState::Ready)
-      this->state_ = ACState::Ready;  // Mark as ready after first poll
+      this->state_ = ACState::Ready;
   } else {
     ESP_LOGD(TAG, "Received unknown packet");
   }
