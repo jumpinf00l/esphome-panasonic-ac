@@ -33,7 +33,7 @@ static climate::ClimateMode determine_mode(uint8_t mode) {
   }
 }
 
-static climate::ClimateFanMode determine_fan_speed(uint8_t speed) {
+static climate::ClimateFanMode PanasonicACCNT::determine_fan_speed(uint8_t speed) {
   switch (speed) {
     case 0xA0:
       return climate::CLIMATE_FAN_AUTO;
