@@ -248,18 +248,10 @@ void PanasonicACCNT::control(const climate::ClimateCall &call) {
 if (call.get_fan_mode().has_value()) {
     ESP_LOGV(TAG, "Requested fan mode change");
 
-    if (*call.get_fan_mode() == climate::CLIMATE_FAN_QUIET) {
-      this->cmd[3] = 0xA0; // Set fan to Auto for Quiet mode
-      this->cmd[5] = (this->cmd[5] & 0xF0) + 0x04; // Set Quiet bit in byte 5
-    } else {
-      // Clear the Quiet bit (0x04) in byte 5 when a non-Quiet fan mode is selected.
-      // Preserve other bits (like 0x02 for Boost) if they are set in byte 5.
-      this->cmd[5] = this->cmd[5] & (~0x04); 
-
-//    if (this->get_custom_preset() != "Normal") {
-//      ESP_LOGV(TAG, "Resetting preset");
-//      this->cmd[5] = (this->cmd[5] & 0xF0);  // Clear right nib for normal mode
-//    }
+    if (this->get_custom_preset() != "Normal") {
+      ESP_LOGV(TAG, "Resetting preset");
+      this->cmd[5] = (this->cmd[5] & 0xF0);  // Clear right nib for normal mode
+    }
 
     switch (*call.get_fan_mode()) {
       case climate::CLIMATE_FAN_AUTO:
@@ -283,7 +275,6 @@ if (call.get_fan_mode().has_value()) {
       default:
         ESP_LOGV(TAG, "Unsupported fan mode requested");
         break;
-	  }
     }
   }
 
