@@ -24,6 +24,7 @@ climate::ClimateTraits PanasonicAC::traits() {
 
   traits.set_supported_fan_modes({
       climate::CLIMATE_FAN_AUTO,
+	  climate::CLIMATE_FAN_QUIET,
       climate::CLIMATE_FAN_DIFFUSE,
       climate::CLIMATE_FAN_LOW,
       climate::CLIMATE_FAN_MEDIUM,
