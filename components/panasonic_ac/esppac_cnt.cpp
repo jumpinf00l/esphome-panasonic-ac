@@ -33,7 +33,7 @@ static climate::ClimateMode determine_mode(uint8_t mode) {
   }
 }
 
-static climate::ClimateFanMode PanasonicACCNT::determine_fan_speed(uint8_t speed) {
+static climate::ClimateFanMode determine_fan_speed(uint8_t speed) {
   switch (speed) {
     case 0xA0:
       return climate::CLIMATE_FAN_AUTO;
@@ -323,7 +323,7 @@ void PanasonicACCNT::control(const climate::ClimateCall &call) {
  */
 void PanasonicACCNT::set_data(bool set) {
   this->mode = determine_mode(this->data[0]);
-  this->set_custom_fan_mode_(determine_fan_speed(this->data[3]));
+  this->speed = determine_fan_speed(this->data[3]);
 
   StringRef verticalSwing(determine_vertical_swing(this->data[4]));
   StringRef horizontalSwing(determine_horizontal_swing(this->data[4]));
