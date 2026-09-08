@@ -308,33 +308,29 @@ void PanasonicACCNT::control(const climate::ClimateCall &call) {
     }
   }
 
-if (call.get_preset().has_value()) {
+  if (call.get_preset().has_value()) {
     ESP_LOGV(TAG, "Requested preset change");
 
     switch (*call.get_preset()) {
       case climate::CLIMATE_PRESET_NONE:
         this->cmd[5] = (this->cmd[5] & 0xF0);  // Clear powerful/quiet nib
         this->cmd[8] = 0x00;                   // Clear eco byte
+        this->preset = climate::CLIMATE_PRESET_NONE;
         break;
       case climate::CLIMATE_PRESET_BOOST:
         this->cmd[5] = (this->cmd[5] & 0xF0) + 0x02;  // Set powerful mode
         this->cmd[8] = 0x00;                          // Clear eco byte
+        this->preset = climate::CLIMATE_PRESET_BOOST;
         break;
       case climate::CLIMATE_PRESET_ECO:
         this->cmd[5] = (this->cmd[5] & 0xF0);  // Clear powerful/quiet nib
         this->cmd[8] = 0x40;                   // Set eco byte
+        this->preset = climate::CLIMATE_PRESET_ECO;
         break;
       default:
         ESP_LOGV(TAG, "Unsupported preset requested");
         break;
     }
-
-    // Mirror changes to local data cache immediately so poll responses don't overwrite it
-    this->data[5] = this->cmd[5];
-    this->data[8] = this->cmd[8];
-
-    // Re-evaluate traits and publish optimistic state
-    this->set_data(false);
     this->publish_state();
   }
 }
@@ -617,15 +613,14 @@ void PanasonicACCNT::on_eco_change(bool state) {
   if (state) {
     ESP_LOGV(TAG, "Turning eco mode on");
     this->cmd[8] = 0x40;
+    this->preset = climate::CLIMATE_PRESET_ECO;
   } else {
     ESP_LOGV(TAG, "Turning eco mode off");
     this->cmd[8] = 0x00;
+    if (this->preset == climate::CLIMATE_PRESET_ECO) {
+      this->preset = climate::CLIMATE_PRESET_NONE;
+    }
   }
-
-  // Update data array immediately
-  this->data[8] = this->cmd[8];
-
-  this->set_data(false);
   this->publish_state();
 }
 
