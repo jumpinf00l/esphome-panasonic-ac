@@ -283,6 +283,7 @@ if (call.get_fan_mode().has_value()) {
       default:
         ESP_LOGV(TAG, "Unsupported fan mode requested");
         break;
+	  }
     }
   }
 
