@@ -447,10 +447,6 @@ void PanasonicACCNT::send_packet(const std::vector<uint8_t> &packet, CommandType
  */
 
 void PanasonicACCNT::handle_poll() {
-  // Do not poll if we are waiting for a response to a command
-  if (this->waiting_for_response_)
-    return;
-
   if (millis() - this->last_packet_sent_ > POLL_INTERVAL) {
     ESP_LOGV(TAG, "Polling AC");
     send_command(CMD_POLL, CommandType::Normal, POLL_HEADER);
