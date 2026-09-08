@@ -35,21 +35,21 @@ static climate::ClimateMode determine_mode(uint8_t mode) {
 
 static const char *determine_fan_speed(uint8_t speed) {
   switch (speed) {
-    case 0xA0:  // Auto
-      return "Automatic";
-    case 0x30:  // 1
-      return "1";
-    case 0x40:  // 2
-      return "2";
-    case 0x50:  // 3
-      return "3";
-    case 0x60:  // 4
-      return "4";
-    case 0x70:  // 5
-      return "5";
+    case 0xA0:
+      return climate::CLIMATE_FAN_AUTO;
+    case 0x30:
+      return climate::CLIMATE_FAN_DIFFUSE;
+    case 0x40:
+      return climate::CLIMATE_FAN_LOW;
+    case 0x50:
+      return climate::CLIMATE_FAN_MEDIUM;
+    case 0x60:
+      return climate::CLIMATE_FAN_HIGH;
+    case 0x70:
+      return climate::CLIMATE_FAN_FOCUS;
     default:
-      ESP_LOGW(TAG, "Received unknown fan speed");
-      return "Unknown";
+      ESP_LOGW(TAG, "Received unknown fan mode");
+      return climate::CLIMATE_FAN_AUTO;
   }
 }
 
@@ -255,20 +255,29 @@ void PanasonicACCNT::control(const climate::ClimateCall &call) {
 
     const auto fanMode = call.get_custom_fan_mode();
 
-    if (fanMode == "Automatic")
-      this->cmd[3] = 0xA0;
-    else if (fanMode == "1")
-      this->cmd[3] = 0x30;
-    else if (fanMode == "2")
-      this->cmd[3] = 0x40;
-    else if (fanMode == "3")
-      this->cmd[3] = 0x50;
-    else if (fanMode == "4")
-      this->cmd[3] = 0x60;
-    else if (fanMode == "5")
-      this->cmd[3] = 0x70;
-    else
-      ESP_LOGV(TAG, "Unsupported fan mode requested");
+    switch (*call.get_fan_mode()) {
+      case climate::CLIMATE_FAN_AUTO:
+        this->cmd[3] = 0xA0;
+        break;
+      case climate::CLIMATE_FAN_DIFFUSE:
+        this->cmd[3] = 0x30;
+        break;
+      case climate::CLIMATE_FAN_LOW:
+        this->cmd[3] = 0x40;
+        break;
+      case climate::CLIMATE_FAN_MEDIUM:
+        this->cmd[3] = 0x50;
+        break;
+      case climate::CLIMATE_FAN_HIGH:
+        this->cmd[3] = 0x60;
+        break;
+      case climate::CLIMATE_FAN_FOCUS:
+        this->cmd[3] = 0x70;
+        break;
+      default:
+        ESP_LOGW(TAG, "Unsupported fan mode requested");
+        break;
+    }
   }
 
   if (call.get_swing_mode().has_value()) {
