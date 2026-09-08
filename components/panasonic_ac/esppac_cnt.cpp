@@ -315,23 +315,19 @@ void PanasonicACCNT::control(const climate::ClimateCall &call) {
       case climate::CLIMATE_PRESET_NONE:
         this->cmd[5] = (this->cmd[5] & 0xF0);  // Clear powerful/quiet nib
         this->cmd[8] = 0x00;                   // Clear eco byte
-        this->preset = climate::CLIMATE_PRESET_NONE;
         break;
       case climate::CLIMATE_PRESET_BOOST:
         this->cmd[5] = (this->cmd[5] & 0xF0) + 0x02;  // Set powerful mode
         this->cmd[8] = 0x00;                          // Clear eco byte
-        this->preset = climate::CLIMATE_PRESET_BOOST;
         break;
       case climate::CLIMATE_PRESET_ECO:
         this->cmd[5] = (this->cmd[5] & 0xF0);  // Clear powerful/quiet nib
         this->cmd[8] = 0x40;                   // Set eco byte
-        this->preset = climate::CLIMATE_PRESET_ECO;
         break;
       default:
         ESP_LOGV(TAG, "Unsupported preset requested");
         break;
     }
-    this->publish_state();
   }
 }
 
@@ -613,15 +609,10 @@ void PanasonicACCNT::on_eco_change(bool state) {
   if (state) {
     ESP_LOGV(TAG, "Turning eco mode on");
     this->cmd[8] = 0x40;
-    this->preset = climate::CLIMATE_PRESET_ECO;
   } else {
     ESP_LOGV(TAG, "Turning eco mode off");
     this->cmd[8] = 0x00;
-    if (this->preset == climate::CLIMATE_PRESET_ECO) {
-      this->preset = climate::CLIMATE_PRESET_NONE;
-    }
   }
-  this->publish_state();
 }
 
 void PanasonicACCNT::on_econavi_change(bool state) {
