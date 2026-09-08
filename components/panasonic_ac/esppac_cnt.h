@@ -48,11 +48,6 @@ class PanasonicACCNT : public PanasonicAC {
 
   bool verify_packet();
   void handle_packet();
-  
-  bool pending_preset_change_ = false;
-  uint8_t target_preset_byte_ = 0x00;
-  uint8_t target_eco_byte_ = 0x00;
-  
 };
 
 }  // namespace CNT
