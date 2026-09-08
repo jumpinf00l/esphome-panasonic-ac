@@ -35,20 +35,20 @@ static climate::ClimateMode determine_mode(uint8_t mode) {
 
 static climate::ClimateFanMode determine_fan_speed(uint8_t speed) {
   switch (speed) {
-    case 0xA0:
+    case 0xA0:  // Automatic
       return climate::CLIMATE_FAN_AUTO;
-    case 0x30:
+    case 0x30:  // 1
       return climate::CLIMATE_FAN_DIFFUSE;
-    case 0x40:
+    case 0x40:  // 2
       return climate::CLIMATE_FAN_LOW;
-    case 0x50:
+    case 0x50:  // 3
       return climate::CLIMATE_FAN_MEDIUM;
-    case 0x60:
+    case 0x60:  // 4
       return climate::CLIMATE_FAN_HIGH;
-    case 0x70:
+    case 0x70:  // 5
       return climate::CLIMATE_FAN_FOCUS;
     default:
-      ESP_LOGW(TAG, "Received unknown fan mode");
+      ESP_LOGW(TAG, "Received unknown fan speed");
       return climate::CLIMATE_FAN_AUTO;
   }
 }
@@ -245,15 +245,13 @@ void PanasonicACCNT::control(const climate::ClimateCall &call) {
     this->cmd[1] = (*call.get_target_temperature() - this->current_temperature_offset_) / TEMPERATURE_STEP;
   }
 
-  if (call.has_custom_fan_mode()) {
+if (call.get_fan_mode().has_value()) {
     ESP_LOGV(TAG, "Requested fan mode change");
 
     if (this->get_custom_preset() != "Normal") {
       ESP_LOGV(TAG, "Resetting preset");
       this->cmd[5] = (this->cmd[5] & 0xF0);  // Clear right nib for normal mode
     }
-
-    const auto fanMode = call.get_custom_fan_mode();
 
     switch (*call.get_fan_mode()) {
       case climate::CLIMATE_FAN_AUTO:
@@ -275,7 +273,7 @@ void PanasonicACCNT::control(const climate::ClimateCall &call) {
         this->cmd[3] = 0x70;
         break;
       default:
-        ESP_LOGW(TAG, "Unsupported fan mode requested");
+        ESP_LOGV(TAG, "Unsupported fan mode requested");
         break;
     }
   }
@@ -323,7 +321,7 @@ void PanasonicACCNT::control(const climate::ClimateCall &call) {
  */
 void PanasonicACCNT::set_data(bool set) {
   this->mode = determine_mode(this->data[0]);
-  this->speed = determine_fan_speed(this->data[3]);
+  this->fan_mode = determine_fan_speed(this->data[3]);
 
   StringRef verticalSwing(determine_vertical_swing(this->data[4]));
   StringRef horizontalSwing(determine_horizontal_swing(this->data[4]));
