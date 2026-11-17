@@ -16,6 +16,7 @@ static const char *const VERSION = "2.5.1";
 
 static const uint8_t BUFFER_SIZE = 128;  // The maximum size of a single packet (both receive and transmit)
 static const uint8_t READ_TIMEOUT = 20;  // The maximum time to wait before considering a packet complete
+static const uint32_t ECO_CONFIRMATION_TIMEOUT = 15000;  // Keep the requested eco state for three CNT polling intervals
 
 static const uint8_t MIN_TEMPERATURE = 16;     // Minimum temperature as reported by Panasonic app
 static const uint8_t MAX_TEMPERATURE = 30;     // Maximum temperature as supported by Panasonic app
@@ -69,6 +70,8 @@ class PanasonicAC : public Component, public uart::UARTDevice, public climate::C
   int8_t outside_temperature_offset_ = 0;  // outside temperature offset to compensate internal sensor values
   bool nanoex_state_ = false;    // Stores the state of nanoex to prevent duplicate packets
   bool eco_state_ = false;       // Stores the state of eco to prevent duplicate packets
+  bool eco_pending_confirmation_ = false;
+  uint32_t eco_request_time_ = 0;
   bool econavi_state_ = false;       // Stores the state of econavi to prevent duplicate packets
   bool mild_dry_state_ = false;  // Stores the state of mild dry to prevent duplicate packets
 

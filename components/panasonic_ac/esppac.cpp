@@ -156,6 +156,12 @@ void PanasonicAC::update_nanoex(bool nanoex) {
 
 void PanasonicAC::update_eco(bool eco) {
   if (this->eco_switch_ != nullptr) {
+    if (this->eco_pending_confirmation_) {
+      if (eco != this->eco_state_ && millis() - this->eco_request_time_ < ECO_CONFIRMATION_TIMEOUT)
+        return;
+      this->eco_pending_confirmation_ = false;
+    }
+
     this->eco_state_ = eco;
     this->eco_switch_->publish_state(this->eco_state_);
   }
@@ -275,6 +281,9 @@ void PanasonicAC::set_eco_switch(switch_::Switch *eco_switch) {
   this->eco_switch_->add_on_state_callback([this](bool state) {
     if (state == this->eco_state_)
       return;
+    this->eco_state_ = state;
+    this->eco_pending_confirmation_ = true;
+    this->eco_request_time_ = millis();
     this->on_eco_change(state);
   });
 }
