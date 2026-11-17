@@ -157,7 +157,7 @@ void PanasonicAC::update_nanoex(bool nanoex) {
 void PanasonicAC::update_eco(bool eco) {
   if (this->eco_switch_ != nullptr) {
     if (this->eco_pending_confirmation_) {
-      if (eco != this->eco_state_ && millis() - this->eco_request_time_ < ECO_CONFIRMATION_TIMEOUT)
+      if (eco != this->eco_state_ && millis() - this->eco_request_time_ < STATE_CONFIRMATION_TIMEOUT)
         return;
       this->eco_pending_confirmation_ = false;
     }

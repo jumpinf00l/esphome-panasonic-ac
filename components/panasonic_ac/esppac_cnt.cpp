@@ -311,22 +311,33 @@ void PanasonicACCNT::control(const climate::ClimateCall &call) {
   if (call.get_preset().has_value()) {
     ESP_LOGV(TAG, "Requested preset change");
 
+    bool preset_supported = true;
     switch (*call.get_preset()) {
       case climate::CLIMATE_PRESET_NONE:
         this->cmd[5] = (this->cmd[5] & 0xF0);  // Clear powerful/quiet nib
         this->cmd[8] = 0x00;                   // Clear eco byte
+        this->preset = climate::CLIMATE_PRESET_NONE;
         break;
       case climate::CLIMATE_PRESET_BOOST:
         this->cmd[5] = (this->cmd[5] & 0xF0) + 0x02;  // Set powerful mode
         this->cmd[8] = 0x00;                          // Clear eco byte
+        this->preset = climate::CLIMATE_PRESET_BOOST;
         break;
       case climate::CLIMATE_PRESET_ECO:
         this->cmd[5] = (this->cmd[5] & 0xF0);  // Clear powerful/quiet nib
         this->cmd[8] = 0x40;                   // Set eco byte
+        this->preset = climate::CLIMATE_PRESET_ECO;
         break;
       default:
         ESP_LOGV(TAG, "Unsupported preset requested");
+        preset_supported = false;
         break;
+    }
+
+    if (preset_supported) {
+      this->preset_pending_confirmation_ = true;
+      this->preset_request_time_ = millis();
+      this->publish_state();
     }
   }
 }
@@ -337,7 +348,12 @@ void PanasonicACCNT::control(const climate::ClimateCall &call) {
 void PanasonicACCNT::set_data(bool set) {
   this->mode = determine_mode(this->data[0]);
   this->fan_mode = determine_fan_speed(this->data[3], this->data[5]);
-  this->preset = determine_preset(this->data[5], this->data[8]);
+  climate::ClimatePreset reported_preset = determine_preset(this->data[5], this->data[8]);
+  if (!this->preset_pending_confirmation_ || reported_preset == this->preset ||
+      millis() - this->preset_request_time_ >= STATE_CONFIRMATION_TIMEOUT) {
+    this->preset_pending_confirmation_ = false;
+    this->preset = reported_preset;
+  }
 
   StringRef verticalSwing(determine_vertical_swing(this->data[4]));
   StringRef horizontalSwing(determine_horizontal_swing(this->data[4]));
