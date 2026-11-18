@@ -98,6 +98,7 @@ class PanasonicAC : public Component, public uart::UARTDevice, public climate::C
   void update_swing_vertical(const StringRef &swing);
   void update_nanoex(bool nanoex);
   void update_eco(bool eco);
+  void set_eco_state_optimistic(bool eco, bool publish_switch);
   void update_econavi(bool econavi);
   void update_mild_dry(bool mild_dry);
   void update_current_power_consumption(int16_t power);

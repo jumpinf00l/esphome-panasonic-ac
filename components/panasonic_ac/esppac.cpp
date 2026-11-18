@@ -167,6 +167,15 @@ void PanasonicAC::update_eco(bool eco) {
   }
 }
 
+void PanasonicAC::set_eco_state_optimistic(bool eco, bool publish_switch) {
+  this->eco_state_ = eco;
+  this->eco_pending_confirmation_ = true;
+  this->eco_request_time_ = millis();
+
+  if (publish_switch && this->eco_switch_ != nullptr)
+    this->eco_switch_->publish_state(eco);
+}
+
 void PanasonicAC::update_econavi(bool econavi) {
   if (this->econavi_switch_ != nullptr) {
     this->econavi_state_ = econavi;
@@ -281,9 +290,7 @@ void PanasonicAC::set_eco_switch(switch_::Switch *eco_switch) {
   this->eco_switch_->add_on_state_callback([this](bool state) {
     if (state == this->eco_state_)
       return;
-    this->eco_state_ = state;
-    this->eco_pending_confirmation_ = true;
-    this->eco_request_time_ = millis();
+    this->set_eco_state_optimistic(state, false);
     this->on_eco_change(state);
   });
 }

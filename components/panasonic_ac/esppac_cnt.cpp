@@ -337,6 +337,7 @@ void PanasonicACCNT::control(const climate::ClimateCall &call) {
     if (preset_supported) {
       this->preset_pending_confirmation_ = true;
       this->preset_request_time_ = millis();
+      this->set_eco_state_optimistic(*call.get_preset() == climate::CLIMATE_PRESET_ECO, true);
       this->publish_state();
     }
   }
@@ -612,6 +613,11 @@ void PanasonicACCNT::on_nanoex_change(bool state) {
 }
 
 void PanasonicACCNT::on_eco_change(bool state) {
+  this->preset = state ? climate::CLIMATE_PRESET_ECO : climate::CLIMATE_PRESET_NONE;
+  this->preset_pending_confirmation_ = true;
+  this->preset_request_time_ = millis();
+  this->publish_state();
+
   if (this->state_ != ACState::Ready)
     return;
 
@@ -624,9 +630,11 @@ void PanasonicACCNT::on_eco_change(bool state) {
 
   if (state) {
     ESP_LOGV(TAG, "Turning eco mode on");
+    this->cmd[5] = this->cmd[5] & 0xF0;
     this->cmd[8] = 0x40;
   } else {
     ESP_LOGV(TAG, "Turning eco mode off");
+    this->cmd[5] = this->cmd[5] & 0xF0;
     this->cmd[8] = 0x00;
   }
 }
