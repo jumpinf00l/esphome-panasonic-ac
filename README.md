@@ -464,12 +464,15 @@ There is no ETA on any item on this list, nor an guarantee that these items will
  - Add a fan entity which can be exposed to Apple Home and Google Home to allow controlling of all fan modes
    - Investigate presenting this as a percentage for better Apple Home and Google Home support, or research supported options for each platform
      - 0 - 14.28% = auto <> 28.57% = quiet <> 42.85% = diffuse <> 57.14% = low <> 71.42% = medium <> 85.71% = high <> 100% = focus
+ - Incorporate Fan mode, Preset, and Mode select entities and Daily energy sensor as sub-entities under the Climate entity
+   - This will neaten the code up, neaten the logs up, reduce Wi-Fi/API activity, and improve performance
+   - Investigate an option for adding custom names to the fan speed sub-entity in the case that the user wants to customise these
  - Remove/hide unsupportable options in fan_only mode from Home Assistant
    - Example: Fan_only doesn't support Eco preset or temperature setpoint
    - This will be tricky with the climate sub-entities
    - This is lowest priority since nothing breaks if setting an unsupported option in fan_only mode, it's reverted on the next poll
  - Replicate all changes to WLAN mode
-~Fix deprecation notices when compiling~ ✅ v0.2.x - Fix Deprecated Schema Warnings
+ - ~Fix deprecation notices when compiling~ ✅ v0.2.x - Fix Deprecated Schema Warnings
  - ~Set Presets as a Home Assistant style options, similar to work completed on custom fan speed to fan mode change~ ✅ v0.3.x - Presets
    - ~Align presets with the Panasonic IR remote~
      - ~Set Eco as a preset rather than a switch~
@@ -477,9 +480,6 @@ There is no ETA on any item on this list, nor an guarantee that these items will
  - ~Poll AC unit for update on each front-end change (fan speed, preset, etc), rather than wait for default 5 sec poll~ ✅ v0.4.x - Polling
  - ~Rename horizontal swing/vane modes to align front-end naming conventions, make horizontal and vertical swing modes optional under the climate entity, and add swing modes back to climate entity~ ✅ v0.5.x - Swing Modes
    - ~This won't support setting fixed swing positions on the climate entity since ESPHome can only toggle horizontal and/or vertical swing on and off~
- - Incorporate Fan mode, Preset, and Mode select entities and Daily energy sensor as sub-entities under the Climate entity
-   - This will neaten the code up, neaten the logs up, reduce Wi-Fi/API activity, and improve performance
-   - Investigate an option for adding custom names to the fan speed sub-entity in the case that the user wants to customise these
  - ~Add action attribute to the climate entity~ ✅ v0.6.x - Actions and Modernisation
    - ~This will indicate the current action on the AC unit (such as idle once the setpoint temperature has been reached and the compressor slows down)~
 
