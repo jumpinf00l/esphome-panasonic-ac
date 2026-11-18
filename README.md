@@ -1,3 +1,490 @@
+# <a name="its-a-fork">It's a Fork</a>
+This is jumpinf00l's super-dodgy hack to add a few nicer sensors and selects, it's only really public so that my ESPHome can reach it to allow for ease of change tracking, but I guess you can use it. No, I don't intend to do a PR because, as previously mentioned, these are super-dodgy hacks and intended only for jumpinf00l. This is specifically to support features of Panasonic CS-Z25XKRW and CS-Z50XKRW, but these changes should be pretty universal
+
+# <a name="key-changes">Key changes</a>
+ - Added activity attribute to the climate entity
+   - This indicates the current activity on the AC unit (such as idle once the setpoint temperature has been reached and the compressor slows down)
+ - Horizontal and vertical swing mode select entities have nicer names to reflect the swing modes
+   - See [Swing Mode](#swing_mode) for mapping
+ - Horizontal and vertical swing mode can be selectively disabled for systems which don't support horizontal and/or vertical swing modes
+   - See [Syntax](#syntax) for options
+ - Toggling the Eco preset on and off will no longer quickly revert to the previous state before showing the selected state
+   - Avoids situation where Eco preset goes on-off-on when and off-on-off when user turns it on and off 
+ - Preset is now Home Assistant style preset and contains the same options as the IR remote
+   - Quiet is now a fan mode
+   - Eco is now a preset
+     - The optional entity under the climate component remains if you wish to use it
+   - See [Preset](#preset) for mapping
+ - Fixed deprecated schema warnings when compiling
+   - Shamelessly copied from PRs on the main repo
+ - Fan speed is now a Home Assistant style fan mode
+   - This allows the thermostat entity in Apple Home to set Low, Medium, and High fan speeds
+   - This has no effect on Google Home
+     - See [Fan Mode Notes](#fan-mode-notes) for notes on this
+   - See [Fan Mode](#fan-mode) for mapping
+ - Added inside temperature as an optional sub-entity under the climate entity rather than relying on the attribute of the climate entity
+   - More consistent for Home Assistant dashboard design
+   - The inside temperature attribute remains on the climate entity, so can be referenced either way
+
+## <a name="swing_mode">Swing Mode</a>
+| Type       | Home Assistant / ESPHome Swing Mode | Panasonic Remote           | Previous Name |
+| ---------- | ----------------------------------- | -------------------------- | ------------- |
+| Horizontal | Swing                               | All segments               | auto          |
+| Horizontal | Left                                | Both left                  | left          |
+| Horizontal | Center Left                         | Left and center            | left_center   |
+| Horizontal | Center                              | Both center                | center        |
+| Horizontal | Center Right                        | Right and center           | right_center  |
+| Horizontal | Right                               | Both right                 | right         |
+| Vertical   | Swing                               | All segments               | swing         |
+| Vertical   | Auto                                | All segments plus 'Auto'   | auto          |
+| Vertical   | Top                                 | Top segment                | up            |
+| Vertical   | Middle Top                          | Second from top segment    | up_center     |
+| Vertical   | Middle                              | Middle segment             | center        |
+| Vertical   | Middle Bottom                       | Second from bottom segment | bottom_center |
+| Vertical   | Bottom                              | Bottom segment             | bottom        |
+
+### <a name="swing_mode-notes">Swing Mode Notes</a>
+ - It isn't currently possible to add custom swing modes to the Swing dropdown in Home Assistant
+   - Only horizontal and vertical toggles (Off, Vertical, Horizontal, Both) are supported
+ - There isn't an auto horizontal swing mode
+   - 'Auto' was a misnomer in the original release and refers to 'Swing'
+ - Horizontal and vertical swing modes are selectively disabled separate to the select entities
+   - This allows for disabling the horizontal and vertical swing mode dropdown on the Home Assistant climate entity (since it can only toggle between 'Swing' and 'Middle'/'Center'), while still being able to use the swing mode select entities to pick a specific swing mode
+
+## <a name="presets">Presets</a>
+| Home Assistant / ESPHome Preset | Panasonic Preset |
+| ------------------------------- | ---------------- |
+| None                            | [Blank]          |
+| Boost                           | Powerful         |
+| Eco                             | Eco              |
+
+### <a name="preset-notes">Preset Notes</a>
+ - Changing the preset to any value will change the fan mode to Auto, the same as changing the preset from the IR remote
+
+## <a name="fan-mode">Fan Mode</a>
+| Home Assistant / ESPHome Fan Mode  | Panasonic AC Speed | Apple Home                               | Google Home |
+| ---------------------------------- | ------------------ | ---------------------------------------- | ----------- |
+| Auto                               | Auto               | N/A                                      | N/A         |
+| Quiet                              | Quiet              | N/A                                      | N/A         |
+| Diffuse                            | 1                  | N/A                                      | N/A         |
+| Low                                | 2                  | 33.3% (bottom third of bar including 0%) | N/A         |
+| Medium                             | 3                  | 66.6% (middle third of bar)              | N/A         |
+| High                               | 4                  | 100% (top third of bar                   | N/A         |
+| Focus                              | 5                  | N/A                                      | N/A         |
+
+### <a name="fan-mode-notes">Fan Mode Notes</a>
+ - Apple Home will only show three speeds on the thermostat device: Low, Medium, and High which are speeds 2, 3, and 4
+    - The experience with setting fan speeds in both Apple Home and Home Assistant changes slightly: Apple Home appears to enforce its last setting when changing via Home Assistant which might not update on the Home Assistant front-end or change on the Panasonic AC
+    - Closing the Apple Home app after usage appears to work around this
+ - Google Home will not show fan speeds on the thermostat device at all
+    - There is a clear reason for this and is unfortunately the trade-off between two 'exceptionally Google' style issues. Home Assistant exposes its climate entities as Google Home thermostat devices rather than a Google Home ac_unit devices because the lack of heat mode in a Google Home ac_unit device is more impactful than the lack of fan speed in a Google Home thermostat device
+      - Google Home ac_unit devices do not support heat mode
+      - Google Home thermostat devices do not support fan modes
+    - See [Wishlist](#wishlist) for a potential workaround through adding a fan entity to the ESPHome device which can be exposed to Apple Home and Google Home as a fan device
+
+# <a name="general-notes">General Notes</a>
+ - This has only been tested using CNT mode. WLAN mode is currently untested and mostly unchanged but should work similarly to the original code
+ - Jumpinf00l has zero intention to develop or maintain this code beyond the wishlist
+   - If something breaks, it might not be fixed
+   - Submit bugs and PRs to the original repo that this was forked from
+   - Please be warned and re-read [It's a Fork](#its-a-fork)
+ - AI technologies have been used in the customisation of this code
+   - *Don't Panic*. There are no AI connectors, internal AI process, or any other such nonsense in this code
+   - This code has been passed through OpenAI GPT-4o and Google Gemini 2.5 Flash mostly for sanity-checking code as I push the limits of my knowledge
+   - All returned code has been checked and confirmed safe by a real, squishy, living, breathing human
+ - If Apple Home and Google Home don't immediately reflect changes to the climate entity in their own apps, restart those integrations in Home Assistant (ie restart Home Assistant)
+
+# <a name="snark">Snark</a>
+ - My natural language is EN_AU (similar to EN_GB with some flairs) so we use 'Centre', but Home Assistant and ESPHome seem to use EN_Simplified, so we'll continue that theme here and use 'Center' for consistency
+ - This is a zero-ecosystem household; there is no love for or preference over Apple Home or Google Home, nor the products of either of these companies
+
+# <a name="syntax">Syntax</a>
+<details>
+<summary>Expand for syntax (it's long)</summary>
+ 
+| Option                    | Sub-option | Requirement | Valid options     | Default        | Notes                                                                                                                    |
+| ------------------------- | ---------- | ----------- | ----------------- | -------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| platform                  |            | Required    | panasonic_ac      | [blank]        | Sets the climate entity to use the panasonic_ac custom component                                                         |
+| id                        |            | Optional    | [Text]            | [blank]        | The ID to use for the climate entity in ESPHome and Home Assistant (will be used to generate the name if not set)        |
+| name                      |            | Optional    | [Text]            | [blank]        | The name to use for the climate entity in ESPHome and Home Assistant (will be used to generate the entity ID if not set) |
+| icon                      |            | Optional    | [mdi:icon format] | mdi:thermostat | The icon to use for the climate entity (used by Home Assistant and the web UI                                            |
+| type                      |            | Required    | cnt, wlan         | [blank]        | sets the component to CN-CNT or CN-WLAN mode                                                                             |
+| horizontal_swing_enable   |            | Optional    | true, false       | true           | Selectively disable horizontal swing mode on the Home Assistant climate entity                                           |
+| vertical_swing_enable     |            | Optional    | true, false       | true           | Selectively disable vertical swing mode on the Home Assistant climate entity                                             |
+| horizontal_swing_select   |            | Optional    |                   |                | Enable the Horizontal swing select entity containing individual horizontal swing modes                                   |
+|                           | name       | Required    | [Text]            | [blank]        | The name of the horizontal swing select entity (will be used to generate the entity ID)                                  |
+|                           | icon       | Optional    | [mdi:icon format] | [blank]        | The icon to use for the horizontal swing mode select entity (used by Home Assistant and the web UI                       |
+|                           | id         | optional    | [Text]            | [blank]        | The ID to use in ESPHome (doesn't appear to influence the Home Assistant entity ID)                                      |
+| vertical_swing_select     |            | Optional    |                   |                | Enable the vertical swing select entity containing individual vertical swing modes                                       |
+|                           | name       | Required    | [Text]            | [blank]        | The name of the vertical swing select entity (will be used to generate the entity ID)                                    |
+|                           | icon       | Optional    | [mdi:icon format] | [blank]        | The icon to use for the vertical swing mode select entity (used by Home Assistant and the web UI                         |
+|                           | id         | optional    | [Text]            | [blank]        | The ID to use in ESPHome (doesn't appear to influence the Home Assistant entity ID)                                      |
+| outside_temperature       |            | Optional    |                   |                | Enable the outside temperature entity                                                                                    |
+|                           | name       | Required    | [Text]            | [blank]        | The name of the outside temperature entity (will be used to generate the entity ID)                                      |
+|                           | icon       | Optional    | [mdi:icon format] | [blank]        | The icon to use for the outside temperature entity (used by Home Assistant and the web UI                                |
+|                           | id         | optional    | [Text]            | [blank]        | The ID to use in ESPHome (doesn't appear to influence the Home Assistant entity ID)                                      |                               |
+| nanoex_switch             |            | Optional    |                   |                | Enable the NanoeX switch entity                                                                                          |
+|                           | name       | Required    | [Text]            | [blank]        | The name of the NanoeX switch entity (will be used to generate the entity ID)                                            |
+|                           | icon       | Optional    | [mdi:icon format] | [blank]        | The icon to use for the NanoeX switch entity (used by Home Assistant and the web UI                                      |
+|                           | id         | optional    | [Text]            | [blank]        | The ID to use in ESPHome (doesn't appear to influence the Home Assistant entity ID)                                      |
+| eco_switch                |            | Optional    |                   |                | Enable the eco switch entity                                                                                             |
+|                           | name       | Required    | [Text]            | [blank]        | The name of the eco switch entity (will be used to generate the entity ID)                                               |
+|                           | icon       | Optional    | [mdi:icon format] | [blank]        | The icon to use for the eco switch entity (used by Home Assistant and the web UI                                         |
+|                           | id         | optional    | [Text]            | [blank]        | The ID to use in ESPHome (doesn't appear to influence the Home Assistant entity ID)                                      |
+| mild_dry_switch           |            | Optional    |                   |                | Enable the mild dry switch entity                                                                                        |
+|                           | name       | Required    | [Text]            | [blank]        | The name of the mild dry switch entity (will be used to generate the entity ID)                                          |
+|                           | icon       | Optional    | [mdi:icon format] | [blank]        | The icon to use for the mild dry switch entity (used by Home Assistant and the web UI                                    |
+|                           | id         | optional    | [Text]            | [blank]        | The ID to use in ESPHome (doesn't appear to influence the Home Assistant entity ID)                                      |
+| econavi_switch            |            | Optional    |                   |                | Enable the Econavi switch entity                                                                                         |
+|                           | name       | Required    | [Text]            | [blank]        | The name of the Econavi switch entity (will be used to generate the entity ID)                                           |
+|                           | icon       | Optional    | [mdi:icon format] | [blank]        | The icon to use for the Econavi switch entity (used by Home Assistant and the web UI                                     |
+|                           | id         | optional    | [Text]            | [blank]        | The ID to use in ESPHome (doesn't appear to influence the Home Assistant entity ID)                                      |
+| current_power_consumption |            | Optional    |                   |                | Enable the current power consumption entity, which reports in Watts (W)                                                  |
+|                           | name       | Required    | [Text]            | [blank]        | The name of the Econavi switch entity (will be used to generate the entity ID)                                           |
+|                           | icon       | Optional    | [mdi:icon format] | [blank]        | The icon to use for the Econavi switch entity (used by Home Assistant and the web UI                                     |
+|                           | id         | optional    | [Text]            | [blank]        | The ID to use in ESPHome (doesn't appear to influence the Home Assistant entity ID)                                      |
+
+</details>
+
+# <a name="example">Example</a>
+<details>
+<summary>Here's a working cut-down example (add your own esphome, wifi, etc sections)</summary>
+
+```
+...
+
+external_components:
+  - source: github://jumpinf00l/esphome-panasonic-ac
+    components: [panasonic_ac]
+
+uart:
+  tx_pin: GPIO4
+  rx_pin: GPIO5
+  id: ac_uart
+  baud_rate: 9600
+  parity: EVEN
+
+climate:
+  - platform: panasonic_ac
+    id: panasonic_ac_id
+    name: "Climate"
+    icon: mdi:thermostat
+    type: cnt
+    horizontal_swing_enable: false
+    vertical_swing_enable: true
+    vertical_swing_select:
+      name: "Vertical Swing Mode"
+      icon: mdi:arrow-up-down
+    outside_temperature:
+      name: "Outside Temperature"
+      icon: mdi:thermometer
+    nanoex_switch:
+      name: "NanoeX"
+      icon: mdi:shimmer
+    eco_switch:
+      name: "Eco"
+      icon: mdi:leaf
+    current_power_consumption:
+      name: "Current Power"
+      id: power
+      icon: mdi:flash
+
+...
+```
+</details>
+
+# <a name="neat-tweaks">Neat tweaks</a>
+Below are some neat tweaks inside the ESPHome YAML which you can use to extend the features beyond this custom component. These are not part of the custom component and are entirely optional, but included here because they may be useful. See the [Neat Tweaks Examples](#neat-tweaks-examples) for the YAML which you can customise as needed
+
+## <a name="net-tweaks-notes">Neat Tweaks Notes</a>
+ - These neat tweaks assume that the entity IDs from [Example](#example) are used
+
+## <a name="neat-tweaks-examples">Neat Tweaks Examples</a>
+<details>
+<summary>Select entities</summary>
+
+ - Select entities for setting Mode, Fan mode, and Preset separate to the Climate entity
+   - These are useful for building custom cards or changing the fan mode via the ESPHome device's web UI
+   - These are currently achieved through super-dodgy invervals which run every 1 second. Awful for performance, awful for logging, awful for WiFi/API, but they work for now. See the [Wishlist](#wishlist) for a potential fix for this which will move them into the custom component as optional entries under the climate component
+
+```
+select:
+  - platform: template
+    name: "Fan Mode"
+    icon: mdi:fan
+    id: fan_mode_select
+    options:
+      - "Auto"
+      - "Quiet"
+      - "1 - Diffuse"
+      - "2 - Low"
+      - "3 - Medium"
+      - "4 - High"
+      - "5 - Focus"
+    initial_option: "Auto"
+    optimistic: true
+    set_action:
+      - lambda: |-
+          auto call = id(panasonic_ac_id).make_call();
+          if (x == "Auto") {
+            call.set_fan_mode(climate::CLIMATE_FAN_AUTO);
+          } else if (x == "Quiet") {
+            call.set_fan_mode(climate::CLIMATE_FAN_QUIET);
+          } else if (x == "1 - Diffuse") {
+            call.set_fan_mode(climate::CLIMATE_FAN_DIFFUSE);
+          } else if (x == "2 - Low") {
+            call.set_fan_mode(climate::CLIMATE_FAN_LOW);
+          } else if (x == "3 - Medium") {
+            call.set_fan_mode(climate::CLIMATE_FAN_MEDIUM);
+          } else if (x == "4 - High") {
+            call.set_fan_mode(climate::CLIMATE_FAN_HIGH);
+          } else if (x == "5 - Focus") {
+            call.set_fan_mode(climate::CLIMATE_FAN_FOCUS);
+          }
+          call.perform();
+  - platform: template
+    name: "Mode"
+    icon: mdi:order-alphabetical-ascending
+    id: mode_select
+    options:
+      - Heat/Cool
+      - Heat
+      - Cool
+      - Dry
+      - Fan Only
+      - "Off"
+    initial_option: "Off"
+    optimistic: true
+    set_action:
+      - lambda: |-
+          auto call = id(panasonic_ac_id).make_call();
+          if (x == "Heat/Cool") {
+            call.set_mode(climate::CLIMATE_MODE_HEAT_COOL);
+          } else if (x == "Heat") {
+            call.set_mode(climate::CLIMATE_MODE_HEAT);
+          } else if (x == "Cool") {
+            call.set_mode(climate::CLIMATE_MODE_COOL);
+          } else if (x == "Dry") {
+            call.set_mode(climate::CLIMATE_MODE_DRY);
+          } else if (x == "Fan Only") {
+            call.set_mode(climate::CLIMATE_MODE_FAN_ONLY);
+          } else if (x == "Off") {
+            call.set_mode(climate::CLIMATE_MODE_OFF);
+          }
+          call.perform();
+  - platform: template
+    name: "Preset"
+    icon: mdi:format-list-bulleted
+    id: preset_select
+    options:
+      - "None"
+      - "Boost"
+      - "Eco"
+    initial_option: "None"
+    optimistic: true
+    set_action:
+      - lambda: |-
+          auto call = id(panasonic_ac_id).make_call();
+          if (x == "None") {
+            call.set_preset(climate::CLIMATE_PRESET_NONE);
+          } else if (x == "Boost") {
+            call.set_preset(climate::CLIMATE_PRESET_BOOST);
+          } else if (x == "Eco") {
+            call.set_preset(climate::CLIMATE_PRESET_ECO);
+          }
+          call.perform();
+
+interval:
+  - interval: 1s
+    then:
+      - lambda: |-
+          auto current_fan_mode = id(panasonic_ac_id).fan_mode;
+          if (current_fan_mode == climate::CLIMATE_FAN_AUTO) {
+              id(fan_mode_select).publish_state("Auto");
+          } else if (current_fan_mode == climate::CLIMATE_FAN_QUIET) {
+              id(fan_mode_select).publish_state("Quiet");
+          } else if (current_fan_mode == climate::CLIMATE_FAN_DIFFUSE) {
+              id(fan_mode_select).publish_state("1 - Diffuse");
+          } else if (current_fan_mode == climate::CLIMATE_FAN_LOW) {
+              id(fan_mode_select).publish_state("2 - Low");
+          } else if (current_fan_mode == climate::CLIMATE_FAN_MEDIUM) {
+              id(fan_mode_select).publish_state("3 - Medium");
+          } else if (current_fan_mode == climate::CLIMATE_FAN_HIGH) {
+              id(fan_mode_select).publish_state("4 - High");
+          } else if (current_fan_mode == climate::CLIMATE_FAN_FOCUS) {
+              id(fan_mode_select).publish_state("5 - Focus");
+          }
+  - interval: 1s
+    then:
+      - lambda: |-
+          auto current_mode = id(panasonic_ac_id).mode;
+          if (current_mode == climate::CLIMATE_MODE_HEAT_COOL) {
+            id(mode_select).publish_state("Heat/Cool");
+          } else if (current_mode == climate::CLIMATE_MODE_HEAT) {
+            id(mode_select).publish_state("Heat");
+          } else if (current_mode == climate::CLIMATE_MODE_COOL) {
+            id(mode_select).publish_state("Cool");
+          } else if (current_mode == climate::CLIMATE_MODE_DRY) {
+            id(mode_select).publish_state("Dry");
+          } else if (current_mode == climate::CLIMATE_MODE_FAN_ONLY) {
+            id(mode_select).publish_state("Fan Only");
+          } else if (current_mode == climate::CLIMATE_MODE_OFF) {
+            id(mode_select).publish_state("Off");
+          }
+  - interval: 1s
+    then:
+      - lambda: |-
+          auto current_preset = id(panasonic_ac_id).preset;
+          if (current_preset == climate::CLIMATE_PRESET_NONE) {
+            id(preset_select).publish_state("None");
+          } else if (current_preset == climate::CLIMATE_PRESET_BOOST) {
+            id(preset_select).publish_state("Boost");
+          } else if (current_preset == climate::CLIMATE_PRESET_ECO) {
+            id(preset_select).publish_state("Eco");
+          }
+```
+</details>
+
+<details>
+<summary>Daily energy sensor</summary>
+
+ - Daily Energy sensor as a measurement of power usage over the day. Adds functionality for use with the Home Assistant Energy Dashboard
+
+```
+sensor:
+  - platform: total_daily_energy
+    name: "Daily Energy"
+    icon: mdi:lightning-bolt
+    power_id: power
+    id: energy # The ID of the 'current_power_consumption' entity in the climate component
+    unit_of_measurement: 'kWh'
+    state_class: total_increasing
+    device_class: energy
+    accuracy_decimals: 3
+    filters:
+      - multiply: 0.001 # Multiplication factor from W to kW is 0.001
+```
+</details>
+
+<details>
+<summary>Filter maintenance entities</summary>
+
+ - Entities and button that you can use to trigger an automation to remind you to clean the filter at least a few times in its life
+ - Entities:
+   - Sensor: Total Runtime
+     - Reports runtimesince the ESPHome device started tracking it - this isn't a value provided by the AC unit itself as far as known
+     - This sensor will reset to 0 if the entity ID is changed
+   - Sensor: Filter remaining hours
+     - Set the 'initial_filter_remaining_hours' substitution to something useful to get a time remaining indication of the filter in hours
+   - Sensor: Filter remaining percent
+     - Set the 'initial_filter_remaining_hours' substitution to something useful to get a percentage remaining indication of the filter in percent
+   - Reset button to mark the filter as cleaned and return it to 100%
+     - Also press this if changing the 'initial_filter_remaining_hours' substitution
+
+```
+substitutions:
+  initial_filter_remaining_hours: "500.0" # hours until filter needs cleaning. Remember to press "Filter Remaining Reset" after changing
+
+globals:
+  - id: glob_runtime_minutes
+    type: float
+    restore_value: yes
+    initial_value: "0.0"
+  - id: glob_filter_remaining_hours
+    type: float
+    restore_value: yes
+    initial_value: "${initial_filter_remaining_hours}"
+  - id: glob_filter_remaining_percent
+    type: float
+    restore_value: yes
+    initial_value: "100.0"
+
+button:
+  - platform: template
+    name: "Filter Remaining Reset"
+    icon: mdi:air-filter
+    id: filter_remaining_reset
+    on_press:
+      then:
+        - lambda: |-
+            id(glob_filter_remaining_hours) = ${initial_filter_remaining_hours};
+            id(glob_filter_remaining_percent) = 100.0;
+            id(filter_remaining_hours).publish_state(id(glob_filter_remaining_hours));
+            id(filter_remaining_percent).publish_state(id(glob_filter_remaining_percent));
+
+sensor:
+  - platform: template
+    name: "Runtime Hours"
+    icon: mdi:timer-outline
+    id: runtime_hours
+    unit_of_measurement: "h"
+    accuracy_decimals: 1
+    update_interval: 60s
+    lambda: |-
+      return id(glob_runtime_minutes) / 60.0;
+  - platform: template
+    name: "Filter Remaining Hours"
+    icon: mdi:timer-outline
+    id: filter_remaining_hours
+    unit_of_measurement: "h"
+    accuracy_decimals: 1
+    update_interval: never
+    lambda: |-
+      return id(glob_filter_remaining_hours);
+  - platform: template
+    name: "Filter Remaining Percent"
+    icon: mdi:air-filter
+    id: filter_remaining_percent
+    unit_of_measurement: "%"
+    accuracy_decimals: 2
+    update_interval: never
+    lambda: |-
+      return id(glob_filter_remaining_percent);
+
+interval:
+  - interval: 60s
+    then:
+      - if:
+          condition:
+            lambda: |-
+              return id(panasonic_ac_id).mode != CLIMATE_MODE_OFF;
+          then:
+            - lambda: |-
+                id(glob_runtime_minutes) += 1.0f;
+                id(glob_filter_remaining_hours) = std::max(0.0f, id(glob_filter_remaining_hours) - 1.0f / 60.0f);
+                id(glob_filter_remaining_percent) = (id(glob_filter_remaining_hours) / ${initial_filter_remaining_hours}) * 100.0;
+                id(filter_remaining_hours).publish_state(id(glob_filter_remaining_hours));
+                id(filter_remaining_percent).publish_state(id(glob_filter_remaining_percent));
+
+```
+</details>
+
+# <a name="wishlist">Wishlist</a>
+There is no ETA on any item on this list, nor an guarantee that these items will ever be available
+ - Add a fan entity which can be exposed to Apple Home and Google Home to allow controlling of all fan modes
+   - Investigate presenting this as a percentage for better Apple Home and Google Home support, or research supported options for each platform
+     - 0 - 14.28% = auto <> 28.57% = quiet <> 42.85% = diffuse <> 57.14% = low <> 71.42% = medium <> 85.71% = high <> 100% = focus
+ - Remove/hide unsupportable options in fan_only mode from Home Assistant
+   - Example: Fan_only doesn't support Eco preset or temperature setpoint
+   - This will be tricky with the climate sub-entities
+   - This is lowest priority since nothing breaks if setting an unsupported option in fan_only mode, it's reverted on the next poll
+ - Replicate all changes to WLAN mode
+~Fix deprecation notices when compiling~ ✅ v0.2.x - Fix Deprecated Schema Warnings
+ - ~Set Presets as a Home Assistant style options, similar to work completed on custom fan speed to fan mode change~ ✅ v0.3.x - Presets
+   - ~Align presets with the Panasonic IR remote~
+     - ~Set Eco as a preset rather than a switch~
+     - ~Set Quiet as a fan speed rather than a preset~
+ - ~Poll AC unit for update on each front-end change (fan speed, preset, etc), rather than wait for default 5 sec poll~ ✅ v0.4.x - Polling
+ - ~Rename horizontal swing/vane modes to align front-end naming conventions, make horizontal and vertical swing modes optional under the climate entity, and add swing modes back to climate entity~ ✅ v0.5.x - Swing Modes
+   - ~This won't support setting fixed swing positions on the climate entity since ESPHome can only toggle horizontal and/or vertical swing on and off~
+ - Incorporate Fan mode, Preset, and Mode select entities and Daily energy sensor as sub-entities under the Climate entity
+   - This will neaten the code up, neaten the logs up, reduce Wi-Fi/API activity, and improve performance
+   - Investigate an option for adding custom names to the fan speed sub-entity in the case that the user wants to customise these
+ - ~Add action attribute to the climate entity~ ✅ v0.6.x - Actions and Modernisation
+   - ~This will indicate the current action on the AC unit (such as idle once the setpoint temperature has been reached and the compressor slows down)~
+
+---
+
 # Overview
 
 An open source alternative for the Panasonic wi-fi adapter that works locally without the cloud.
@@ -12,7 +499,7 @@ An open source alternative for the Panasonic wi-fi adapter that works locally wi
 
 # Supported hardware
 
-This library works with both the CN-CNT port and the CN-WLAN port. CN-WLAN is only available on newer units. Either port can be used on units that have both ports regardless of the usage of the other port (ie. it is possible to leave the DNSK-P11 connected to CN-WLAN and connect the ESP to CN-CNT).
+This library works with both the CN-CNT port and the CN-WLAN port. CN-WLAN is only available on newer units. Either port can be used on units that have both ports regardless of the usage of the other port (ie. it is possible to leave the DNSK-P11 connected to CN-WLAN and connect the ESP to CN-CNT). 
 
 Works on the ESP8266 but ESP32 is preferred for the multiple hardware serial ports.
 
@@ -24,8 +511,8 @@ Works on the ESP8266 but ESP32 is preferred for the multiple hardware serial por
 * Soldering iron
 * Wires to solder from Logic converter to ESP
 * Heat shrink
-* ESPHome 2025.11.0 or newer
-* Home Assistant 2025.11.0 or newer
+* ESPHome 2022.5.0 or newer
+* Home Assistant 2021.8.0 or newer
 
 # Notes
 
@@ -70,25 +557,9 @@ In order to find out which features are supported by your AC, check the remote t
 **Enabling unsupported features can lead to undefined behavior and may damage your AC. Make sure to check your remote or manual first.**
 **current_power_consumption is just as ESTIMATED value by the AC**
 
-## Setting temperature offsets
+## Upgrading from 1.x to 2.x
 
-As the internal sensors reading might not reflect the actual temperature in the room or outside, you can optionally define a fixed offset for both sensors.
-This offset is internally applied to both, the reported temperature in ESPHome/HomeAssistant as well as to the target temperature. Any shown values always include the defined offset.
-
-- Temperature readings of the AC will be reported as (reading + offset)
-- Target temperatures will be set as (target - offset)
-
-```
-    # Adapt according to your measurements
-    current_temperature_offset: 0 
-    outside_temperature_offset: 0
-```
-
-Examples:
-- If the temperature is actually higher than measured by the AC, set the difference as a positive offset.
-  - E.g. actual temperature = 23°, AC measured temperature = 20° --> offset = 3°
-- If the temperature is actually lower than measured by the AC, set the difference as a negative offset.
-  - E.g. actual temperature = 20°, AC measured temperature = 22° --> offset = -2°
+[Upgrade instructions](README.UPGRADING.md)
 
 # Hardware installation
 
