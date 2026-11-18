@@ -401,16 +401,6 @@ void PanasonicACCNT::set_data(bool set) {
       }
     }
 
-    // Determine the real hvac_action from the unit's own operational state byte
-    // (byte 12), instead of the generic temperature-delta heuristic that the WLAN
-    // protocol falls back to. Mapping based on research from ssjoholm/panasonic-cn-cnt
-    // (https://github.com/ssjoholm/panasonic-cn-cnt), empirically confirmed on real
-    // CZ-TACG1 hardware: 0x30/0x38/0x3C (cool idle/start/run) and 0x40/0x48/0x4C
-    // (heat idle/start/run). The 0x44 heat sub-state is inferred by symmetry, not
-    // yet observed live. Any non-idle value within a mode's range is treated as
-    // actively running. Defrost takes priority over the state-byte mapping: the
-    // unit reports itself as heating (0x4x) while defrosting, but ESPHome/HA has a
-    // dedicated action for this, independent of whether defrost_sensor is configured.
     if (this->rx_buffer_.size() >= 13) {
       uint8_t state_byte = this->rx_buffer_[12];
       if (is_defrosting) {
