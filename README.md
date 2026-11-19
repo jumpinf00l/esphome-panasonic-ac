@@ -29,25 +29,24 @@ This is jumpinf00l's super-dodgy hack to add a few nicer sensors and selects, it
 ## <a name="swing_mode">Swing Mode</a>
 | Type       | Home Assistant / ESPHome Swing Mode | Panasonic Remote           | Previous Name |
 | ---------- | ----------------------------------- | -------------------------- | ------------- |
-| Horizontal | Swing                               | All segments               | auto          |
-| Horizontal | Left                                | Both left                  | left          |
-| Horizontal | Center Left                         | Left and center            | left_center   |
+| Horizontal | Auto                                | All segments               | auto          |
+| Horizontal | Left                                | Left segment               | left          |
+| Horizontal | Left Center                         | Left and center            | left_center   |
 | Horizontal | Center                              | Both center                | center        |
-| Horizontal | Center Right                        | Right and center           | right_center  |
+| Horizontal | Right Center                        | Right and center           | right_center  |
 | Horizontal | Right                               | Both right                 | right         |
 | Vertical   | Swing                               | All segments               | swing         |
 | Vertical   | Auto                                | All segments plus 'Auto'   | auto          |
 | Vertical   | Top                                 | Top segment                | up            |
-| Vertical   | Middle Top                          | Second from top segment    | up_center     |
+| Vertical   | Top Middle                          | Second from top segment    | up_center     |
 | Vertical   | Middle                              | Middle segment             | center        |
-| Vertical   | Middle Bottom                       | Second from bottom segment | bottom_center |
-| Vertical   | Bottom                              | Bottom segment             | bottom        |
+| Vertical   | Bottom Middle                       | Second from bottom segment | down_center   |
+| Vertical   | Bottom                              | Bottom segment             | down          |
 
 ### <a name="swing_mode-notes">Swing Mode Notes</a>
  - It isn't currently possible to add custom swing modes to the Swing dropdown in Home Assistant
    - Only horizontal and vertical toggles (Off, Vertical, Horizontal, Both) are supported
- - There isn't an auto horizontal swing mode
-   - 'Auto' was a misnomer in the original release and refers to 'Swing'
+ - The horizontal swing select uses 'Auto' to match the Panasonic position label
  - Horizontal and vertical swing modes are selectively disabled separate to the select entities
    - This allows for disabling the horizontal and vertical swing mode dropdown on the Home Assistant climate entity (since it can only toggle between 'Swing' and 'Middle'/'Center'), while still being able to use the swing mode select entities to pick a specific swing mode
 
@@ -480,7 +479,7 @@ There is no ETA on any item on this list, nor an guarantee that these items will
  - ~Poll AC unit for update on each front-end change (fan speed, preset, etc), rather than wait for default 5 sec poll~ ✅ v0.4.x - Polling
  - ~Rename horizontal swing/vane modes to align front-end naming conventions, make horizontal and vertical swing modes optional under the climate entity, and add swing modes back to climate entity~ ✅ v0.5.x - Swing Modes
    - ~This won't support setting fixed swing positions on the climate entity since ESPHome can only toggle horizontal and/or vertical swing on and off~
- - ~Add action attribute to the climate entity~ ✅ v0.6.x - Actions and Modernisation
+ - ~Add action attribute to the climate entity~ ✅ v0.6.x - Actions
    - ~This will indicate the current action on the AC unit (such as idle once the setpoint temperature has been reached and the compressor slows down)~
 
 ---

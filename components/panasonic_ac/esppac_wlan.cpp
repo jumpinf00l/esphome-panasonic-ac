@@ -356,15 +356,15 @@ static const char *determine_preset(uint8_t preset) {
 static const char *determine_swing_vertical(uint8_t swing) {
   switch (swing) {
     case 0x42:  // Down
-      return "down";
+      return "Bottom";
     case 0x45:  // Down center
-      return "down_center";
+      return "Bottom Middle";
     case 0x43:  // Center
-      return "center";
+      return "Middle";
     case 0x44:  // Up Center
-      return "up_center";
+      return "Top Middle";
     case 0x41:  // Up
-      return "up";
+      return "Top";
     default:
       ESP_LOGW(TAG, "Received unknown vertical swing position");
       return "Unknown";
@@ -374,15 +374,15 @@ static const char *determine_swing_vertical(uint8_t swing) {
 static const char *determine_swing_horizontal(uint8_t swing) {
   switch (swing) {
     case 0x42:  // Left
-      return "left";
+      return "Left";
     case 0x5C:  // Left center
-      return "left_center";
+      return "Left Center";
     case 0x43:  // Center
-      return "center";
+      return "Center";
     case 0x56:  // Right center
-      return "right_center";
+      return "Right Center";
     case 0x41:  // Right
-      return "right";
+      return "Right";
     default:
       ESP_LOGW(TAG, "Received unknown horizontal swing position");
       return "Unknown";
@@ -755,15 +755,15 @@ void PanasonicACWLAN::on_vertical_swing_change(const StringRef& swing) {
 
   ESP_LOGD(TAG, "Setting vertical swing position");
 
-  if (swing == "down")
+  if (swing == "Bottom")
     set_value(0xA4, 0x42);
-  else if (swing == "down_center")
+  else if (swing == "Bottom Middle")
     set_value(0xA4, 0x45);
-  else if (swing == "center")
+  else if (swing == "Middle")
     set_value(0xA4, 0x43);
-  else if (swing == "up_center")
+  else if (swing == "Top Middle")
     set_value(0xA4, 0x44);
-  else if (swing == "up")
+  else if (swing == "Top")
     set_value(0xA4, 0x41);
 
   send_set_command();
@@ -775,15 +775,15 @@ void PanasonicACWLAN::on_horizontal_swing_change(const StringRef &swing) {
 
   ESP_LOGD(TAG, "Setting horizontal swing position");
 
-  if (swing == "left")
+  if (swing == "Left")
     set_value(0xA5, 0x42);
-  else if (swing == "left_center")
+  else if (swing == "Left Center")
     set_value(0xA5, 0x5C);
-  else if (swing == "center")
+  else if (swing == "Center")
     set_value(0xA5, 0x43);
-  else if (swing == "right_center")
+  else if (swing == "Right Center")
     set_value(0xA5, 0x56);
-  else if (swing == "right")
+  else if (swing == "Right")
     set_value(0xA5, 0x41);
 
   send_set_command();
