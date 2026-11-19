@@ -113,7 +113,7 @@ async def to_code(config):
         cg.add(var.set_vertical_swing_select(swing_select))
 
     if CONF_INSIDE_TEMPERATURE in config:
-        sens = await cg.get_variable(config[CONF_CURRENT_TEMPERATURE_SENSOR])
+        sens = await sensor.new_sensor(config[CONF_INSIDE_TEMPERATURE])
         cg.add(var.set_current_temperature_sensor(sens))
 
     if CONF_OUTSIDE_TEMPERATURE in config:
