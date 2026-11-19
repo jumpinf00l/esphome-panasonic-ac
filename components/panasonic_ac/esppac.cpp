@@ -103,11 +103,12 @@ void PanasonicAC::update_current_temperature(int8_t temperature) {
   temperature += this->current_temperature_offset_;
 
   if (temperature > TEMPERATURE_THRESHOLD) {
-    ESP_LOGW(TAG, "Received out of range inside temperature: %d", temperature);
+    ESP_LOGW(TAG, "Received out of range current temperature: %d", temperature);
     return;
   }
 
   this->current_temperature = temperature;
+  this->publish_inside_temperature();
   ESP_LOGV(TAG, "Current temperature incl. offset: %d", temperature);
 }
 
@@ -229,6 +230,17 @@ void PanasonicAC::set_outside_temperature_sensor(sensor::Sensor *outside_tempera
   this->outside_temperature_sensor_ = outside_temperature_sensor;
 }
 
+void PanasonicAC::set_inside_temperature_sensor(sensor::Sensor *inside_temperature_sensor) {
+  this->inside_temperature_sensor_ = inside_temperature_sensor;
+}
+
+void PanasonicAC::publish_inside_temperature() {
+  if (this->inside_temperature_sensor_ != nullptr &&
+      this->inside_temperature_sensor_->state != this->current_temperature) {
+    this->inside_temperature_sensor_->publish_state(this->current_temperature);
+  }
+}
+
 void PanasonicAC::set_outside_temperature_offset(int8_t outside_temperature_offset) {
   ESP_LOGV(TAG, "Outside temperature offset %d", outside_temperature_offset);
   this->outside_temperature_offset_ = outside_temperature_offset;
@@ -251,11 +263,11 @@ void PanasonicAC::set_current_temperature_offset(int8_t current_temperature_offs
 void PanasonicAC::set_current_temperature_sensor(sensor::Sensor *current_temperature_sensor)
 {
   this->current_temperature_sensor_ = current_temperature_sensor;
-  this->current_temperature_sensor_->add_on_state_callback([this](float state)
-                                                           {
-                                                             this->current_temperature = state + this->current_temperature_offset_;
-                                                             this->publish_state();
-                                                           });
+  this->current_temperature_sensor_->add_on_state_callback([this](float state) {
+    this->current_temperature = state + this->current_temperature_offset_;
+    this->publish_inside_temperature();
+    this->publish_state();
+  });
 }
 
 void PanasonicAC::set_vertical_swing_select(select::Select *vertical_swing_select) {

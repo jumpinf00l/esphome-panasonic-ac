@@ -122,6 +122,10 @@ This is jumpinf00l's super-dodgy hack to add a few nicer sensors and selects, it
 |                           | name       | Required    | [Text]            | [blank]        | The name of the outside temperature entity (will be used to generate the entity ID)                                      |
 |                           | icon       | Optional    | [mdi:icon format] | [blank]        | The icon to use for the outside temperature entity (used by Home Assistant and the web UI                                |
 |                           | id         | optional    | [Text]            | [blank]        | The ID to use in ESPHome (doesn't appear to influence the Home Assistant entity ID)                                      |                               |
+| inside_temperature        |            | Optional    |                   |                | Enable the inside (current) temperature entity                                                                            |
+|                           | name       | Required    | [Text]            | [blank]        | The name of the inside temperature entity (will be used to generate the entity ID)                                        |
+|                           | icon       | Optional    | [mdi:icon format] | [blank]        | The icon to use for the inside temperature entity (used by Home Assistant and the web UI)                                |
+|                           | id         | optional    | [Text]            | [blank]        | The ID to use in ESPHome (doesn't appear to influence the Home Assistant entity ID)                                      |
 | nanoex_switch             |            | Optional    |                   |                | Enable the NanoeX switch entity                                                                                          |
 |                           | name       | Required    | [Text]            | [blank]        | The name of the NanoeX switch entity (will be used to generate the entity ID)                                            |
 |                           | icon       | Optional    | [mdi:icon format] | [blank]        | The icon to use for the NanoeX switch entity (used by Home Assistant and the web UI                                      |
@@ -176,6 +180,9 @@ climate:
       icon: mdi:arrow-up-down
     outside_temperature:
       name: "Outside Temperature"
+      icon: mdi:thermometer
+    inside_temperature:
+      name: "Inside Temperature"
       icon: mdi:thermometer
     nanoex_switch:
       name: "NanoeX"

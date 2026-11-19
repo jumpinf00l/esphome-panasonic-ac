@@ -31,8 +31,8 @@ PanasonicACSelect = panasonic_ac_ns.class_(
 
 CONF_HORIZONTAL_SWING_SELECT = "horizontal_swing_select"
 CONF_VERTICAL_SWING_SELECT = "vertical_swing_select"
-CONF_INSIDE_TEMPERATURE = "inside_temperature"
 CONF_OUTSIDE_TEMPERATURE = "outside_temperature"
+CONF_INSIDE_TEMPERATURE = "inside_temperature"
 CONF_OUTSIDE_TEMPERATURE_OFFSET = "outside_temperature_offset"
 CONF_CURRENT_TEMPERATURE_SENSOR = "current_temperature_sensor"
 CONF_CURRENT_TEMPERATURE_OFFSET = "current_temperature_offset"
@@ -56,13 +56,13 @@ SELECT_SCHEMA = select.select_schema(PanasonicACSelect)
 PANASONIC_COMMON_SCHEMA = {
     cv.Optional(CONF_HORIZONTAL_SWING_SELECT): SELECT_SCHEMA,
     cv.Optional(CONF_VERTICAL_SWING_SELECT): SELECT_SCHEMA,
-    cv.Optional(CONF_INSIDE_TEMPERATURE): sensor.sensor_schema(
+    cv.Optional(CONF_OUTSIDE_TEMPERATURE): sensor.sensor_schema(
         unit_of_measurement=UNIT_CELSIUS,
         accuracy_decimals=0,
         device_class=DEVICE_CLASS_TEMPERATURE,
         state_class=STATE_CLASS_MEASUREMENT,
     ),
-    cv.Optional(CONF_OUTSIDE_TEMPERATURE): sensor.sensor_schema(
+    cv.Optional(CONF_INSIDE_TEMPERATURE): sensor.sensor_schema(
         unit_of_measurement=UNIT_CELSIUS,
         accuracy_decimals=0,
         device_class=DEVICE_CLASS_TEMPERATURE,
@@ -112,13 +112,13 @@ async def to_code(config):
         await cg.register_component(swing_select, conf)
         cg.add(var.set_vertical_swing_select(swing_select))
 
-    if CONF_INSIDE_TEMPERATURE in config:
-        sens = await sensor.new_sensor(config[CONF_INSIDE_TEMPERATURE])
-        cg.add(var.set_current_temperature_sensor(sens))
-
     if CONF_OUTSIDE_TEMPERATURE in config:
         sens = await sensor.new_sensor(config[CONF_OUTSIDE_TEMPERATURE])
         cg.add(var.set_outside_temperature_sensor(sens))
+
+    if CONF_INSIDE_TEMPERATURE in config:
+        sens = await sensor.new_sensor(config[CONF_INSIDE_TEMPERATURE])
+        cg.add(var.set_inside_temperature_sensor(sens))
 
     if CONF_DEFROST_SENSOR in config:
         sens = await binary_sensor.new_binary_sensor(config[CONF_DEFROST_SENSOR])
