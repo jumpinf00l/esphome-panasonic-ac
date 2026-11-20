@@ -107,6 +107,7 @@ void PanasonicACWLAN::control(const climate::ClimateCall &call) {
 
     this->mode =
         *call.get_mode();   // Set mode manually since we won't receive a report from the AC if its the same mode again
+    this->update_mode_select();
     this->publish_state();  // Send this state, will get updated once next poll is executed
   }
 
@@ -453,9 +454,12 @@ void PanasonicACWLAN::handle_packet() {
     update_nanoex(nanoex);
 
     this->set_custom_fan_mode_(determine_fan_speed(this->rx_buffer_[26]));
+    this->update_fan_mode_select(StringRef(determine_fan_speed(this->rx_buffer_[26])));
     this->set_custom_preset_(determine_preset(this->rx_buffer_[42]));
+    this->update_preset_select(StringRef(determine_preset(this->rx_buffer_[42])));
 
     this->swing_mode = determine_swing(this->rx_buffer_[30]);
+    this->update_mode_select();
 
     // climate::ClimateAction action = determine_action(); // Determine the current action of the AC
     // this->action = action;
@@ -504,6 +508,7 @@ void PanasonicACWLAN::handle_packet() {
           break;
         case 0xB0:  // Mode
           this->mode = determine_mode(this->rx_buffer_[currentIndex + 2]);
+          this->update_mode_select();
           break;
         case 0x31:  // Target temperature
           ESP_LOGV(TAG, "Received target temperature");
@@ -512,10 +517,12 @@ void PanasonicACWLAN::handle_packet() {
         case 0xA0:  // Fan speed
           ESP_LOGV(TAG, "Received fan speed");
           this->set_custom_fan_mode_(determine_fan_speed(this->rx_buffer_[currentIndex + 2]));
+          this->update_fan_mode_select(StringRef(determine_fan_speed(this->rx_buffer_[currentIndex + 2])));
           break;
         case 0xB2:  // Preset
           ESP_LOGV(TAG, "Received preset");
           this->set_custom_preset_(determine_preset(this->rx_buffer_[currentIndex + 2]));
+          this->update_preset_select(StringRef(determine_preset(this->rx_buffer_[currentIndex + 2])));
           break;
         case 0xA1:
           ESP_LOGV(TAG, "Received swing mode");
@@ -549,6 +556,7 @@ void PanasonicACWLAN::handle_packet() {
     climate::ClimateAction action = determine_action();  // Determine the current action of the AC
     this->action = action;
 
+    this->update_mode_select();
     this->publish_state();
   } else if (this->rx_buffer_[2] == 0x01 && this->rx_buffer_[3] == 0x80)  // Answer for handshake 16
   {

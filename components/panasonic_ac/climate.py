@@ -31,6 +31,9 @@ PanasonicACSelect = panasonic_ac_ns.class_(
 
 CONF_HORIZONTAL_SWING_SELECT = "horizontal_swing_select"
 CONF_VERTICAL_SWING_SELECT = "vertical_swing_select"
+CONF_MODE_SELECT = "mode_select"
+CONF_FAN_MODE_SELECT = "fan_mode_select"
+CONF_PRESET_SELECT = "preset_select"
 CONF_OUTSIDE_TEMPERATURE = "outside_temperature"
 CONF_INSIDE_TEMPERATURE = "inside_temperature"
 CONF_OUTSIDE_TEMPERATURE_OFFSET = "outside_temperature_offset"
@@ -49,6 +52,12 @@ HORIZONTAL_SWING_OPTIONS = ["Auto", "Left", "Left Center", "Center", "Right Cent
 
 VERTICAL_SWING_OPTIONS = ["Swing", "Auto", "Top", "Top Middle", "Middle", "Bottom Middle", "Bottom"]
 
+MODE_OPTIONS = ["Heat/Cool", "Heat", "Cool", "Dry", "Fan Only", "Off"]
+CNT_FAN_MODE_OPTIONS = ["Auto", "Quiet", "1 - Diffuse", "2 - Low", "3 - Medium", "4 - High", "5 - Focus"]
+WLAN_FAN_MODE_OPTIONS = ["Automatic", "1", "2", "3", "4", "5"]
+CNT_PRESET_OPTIONS = ["None", "Boost", "Eco"]
+WLAN_PRESET_OPTIONS = ["Normal", "Powerful", "Quiet"]
+
 SWITCH_SCHEMA = switch.switch_schema(PanasonicACSwitch).extend(cv.COMPONENT_SCHEMA)
 
 SELECT_SCHEMA = select.select_schema(PanasonicACSelect)
@@ -56,6 +65,9 @@ SELECT_SCHEMA = select.select_schema(PanasonicACSelect)
 PANASONIC_COMMON_SCHEMA = {
     cv.Optional(CONF_HORIZONTAL_SWING_SELECT): SELECT_SCHEMA,
     cv.Optional(CONF_VERTICAL_SWING_SELECT): SELECT_SCHEMA,
+    cv.Optional(CONF_MODE_SELECT): SELECT_SCHEMA,
+    cv.Optional(CONF_FAN_MODE_SELECT): SELECT_SCHEMA,
+    cv.Optional(CONF_PRESET_SELECT): SELECT_SCHEMA,
     cv.Optional(CONF_OUTSIDE_TEMPERATURE): sensor.sensor_schema(
         unit_of_measurement=UNIT_CELSIUS,
         accuracy_decimals=0,
@@ -111,6 +123,27 @@ async def to_code(config):
         swing_select = await select.new_select(conf, options=VERTICAL_SWING_OPTIONS)
         await cg.register_component(swing_select, conf)
         cg.add(var.set_vertical_swing_select(swing_select))
+
+    if CONF_MODE_SELECT in config:
+        conf = config[CONF_MODE_SELECT]
+        mode_select = await select.new_select(conf, options=MODE_OPTIONS)
+        await cg.register_component(mode_select, conf)
+        cg.add(var.set_mode_select(mode_select))
+
+    is_wlan = CONF_WLAN in config
+    if CONF_FAN_MODE_SELECT in config:
+        conf = config[CONF_FAN_MODE_SELECT]
+        options = WLAN_FAN_MODE_OPTIONS if is_wlan else CNT_FAN_MODE_OPTIONS
+        fan_mode_select = await select.new_select(conf, options=options)
+        await cg.register_component(fan_mode_select, conf)
+        cg.add(var.set_fan_mode_select(fan_mode_select, is_wlan))
+
+    if CONF_PRESET_SELECT in config:
+        conf = config[CONF_PRESET_SELECT]
+        options = WLAN_PRESET_OPTIONS if is_wlan else CNT_PRESET_OPTIONS
+        preset_select = await select.new_select(conf, options=options)
+        await cg.register_component(preset_select, conf)
+        cg.add(var.set_preset_select(preset_select, is_wlan))
 
     if CONF_OUTSIDE_TEMPERATURE in config:
         sens = await sensor.new_sensor(config[CONF_OUTSIDE_TEMPERATURE])

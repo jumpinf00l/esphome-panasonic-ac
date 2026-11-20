@@ -338,6 +338,7 @@ void PanasonicACCNT::control(const climate::ClimateCall &call) {
       this->preset_pending_confirmation_ = true;
       this->preset_request_time_ = millis();
       this->set_eco_state_optimistic(*call.get_preset() == climate::CLIMATE_PRESET_ECO, true);
+      this->update_preset_select();
       this->publish_state();
     }
   }
@@ -416,6 +417,10 @@ void PanasonicACCNT::set_data(bool set) {
       }
     }
   }
+
+  this->update_mode_select();
+  this->update_fan_mode_select();
+  this->update_preset_select();
 
   if (verticalSwing == "Auto" && horizontalSwing == "Auto")
     this->swing_mode = climate::CLIMATE_SWING_BOTH;
@@ -629,6 +634,7 @@ void PanasonicACCNT::on_nanoex_change(bool state) {
 
 void PanasonicACCNT::on_eco_change(bool state) {
   this->preset = state ? climate::CLIMATE_PRESET_ECO : climate::CLIMATE_PRESET_NONE;
+  this->update_preset_select();
   this->preset_pending_confirmation_ = true;
   this->preset_request_time_ = millis();
   this->publish_state();

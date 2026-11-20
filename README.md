@@ -114,6 +114,12 @@ This is jumpinf00l's super-dodgy hack to add a few nicer sensors and selects, it
 |                           | name       | Required    | [Text]            | [blank]        | The name of the horizontal swing select entity (will be used to generate the entity ID)                                  |
 |                           | icon       | Optional    | [mdi:icon format] | [blank]        | The icon to use for the horizontal swing mode select entity (used by Home Assistant and the web UI                       |
 |                           | id         | optional    | [Text]            | [blank]        | The ID to use in ESPHome (doesn't appear to influence the Home Assistant entity ID)                                      |
+| mode_select               |            | Optional    |                   |                | Enable a select entity for setting the climate mode                                                                      |
+|                           | name       | Required    | [Text]            | [blank]        | The name of the mode select entity                                                                                       |
+| fan_mode_select           |            | Optional    |                   |                | Enable a select entity for setting the fan mode                                                                         |
+|                           | name       | Required    | [Text]            | [blank]        | The name of the fan mode select entity                                                                                  |
+| preset_select             |            | Optional    |                   |                | Enable a select entity for setting the preset                                                                            |
+|                           | name       | Required    | [Text]            | [blank]        | The name of the preset select entity                                                                                    |
 | vertical_swing_select     |            | Optional    |                   |                | Enable the vertical swing select entity containing individual vertical swing modes                                       |
 |                           | name       | Required    | [Text]            | [blank]        | The name of the vertical swing select entity (will be used to generate the entity ID)                                    |
 |                           | icon       | Optional    | [mdi:icon format] | [blank]        | The icon to use for the vertical swing mode select entity (used by Home Assistant and the web UI                         |
@@ -175,6 +181,12 @@ climate:
     type: cnt
     horizontal_swing_enable: false
     vertical_swing_enable: true
+    mode_select:
+      name: "Mode"
+    fan_mode_select:
+      name: "Fan Mode"
+    preset_select:
+      name: "Preset"
     vertical_swing_select:
       name: "Vertical Swing Mode"
       icon: mdi:arrow-up-down
@@ -209,9 +221,7 @@ Below are some neat tweaks inside the ESPHome YAML which you can use to extend t
 <details>
 <summary>Select entities</summary>
 
- - Select entities for setting Mode, Fan mode, and Preset separate to the Climate entity
-   - These are useful for building custom cards or changing the fan mode via the ESPHome device's web UI
-   - These are currently achieved through super-dodgy invervals which run every 1 second. Awful for performance, awful for logging, awful for WiFi/API, but they work for now. See the [Wishlist](#wishlist) for a potential fix for this which will move them into the custom component as optional entries under the climate component
+Mode, fan mode, and preset can now be exposed directly by adding `mode_select`, `fan_mode_select`, and `preset_select` under the `panasonic_ac` climate platform. These native entities stay synchronized with the climate state. The example below is a legacy template-based alternative; it is not needed for the built-in selects.
 
 ```
 select:
@@ -470,9 +480,6 @@ There is no ETA on any item on this list, nor an guarantee that these items will
  - Add a fan entity which can be exposed to Apple Home and Google Home to allow controlling of all fan modes
    - Investigate presenting this as a percentage for better Apple Home and Google Home support, or research supported options for each platform
      - 0 - 14.28% = auto <> 28.57% = quiet <> 42.85% = diffuse <> 57.14% = low <> 71.42% = medium <> 85.71% = high <> 100% = focus
- - Incorporate Fan mode, Preset, and Mode select entities and Daily energy sensor as sub-entities under the Climate entity
-   - This will neaten the code up, neaten the logs up, reduce Wi-Fi/API activity, and improve performance
-   - Investigate an option for adding custom names to the fan speed sub-entity in the case that the user wants to customise these
  - Remove/hide unsupportable options in fan_only mode from Home Assistant
    - Example: Fan_only doesn't support Eco preset or temperature setpoint
    - This will be tricky with the climate sub-entities

@@ -148,6 +148,104 @@ void PanasonicAC::update_swing_vertical(const StringRef &swing) {
   }
 }
 
+void PanasonicAC::publish_select_state(select::Select *select, size_t &state, const StringRef &value) {
+  if (select == nullptr)
+    return;
+
+  size_t index = select->index_of(value).value_or(~0UL);
+  if (index == ~0UL)
+    return;
+
+  state = index;
+  if (index != select->active_index().value_or(~0UL))
+    select->publish_state(index);
+}
+
+void PanasonicAC::update_mode_select() {
+  switch (this->mode) {
+    case climate::CLIMATE_MODE_HEAT_COOL:
+      this->publish_select_state(this->mode_select_, this->mode_select_state_, "Heat/Cool");
+      break;
+    case climate::CLIMATE_MODE_HEAT:
+      this->publish_select_state(this->mode_select_, this->mode_select_state_, "Heat");
+      break;
+    case climate::CLIMATE_MODE_COOL:
+      this->publish_select_state(this->mode_select_, this->mode_select_state_, "Cool");
+      break;
+    case climate::CLIMATE_MODE_DRY:
+      this->publish_select_state(this->mode_select_, this->mode_select_state_, "Dry");
+      break;
+    case climate::CLIMATE_MODE_FAN_ONLY:
+      this->publish_select_state(this->mode_select_, this->mode_select_state_, "Fan Only");
+      break;
+    case climate::CLIMATE_MODE_OFF:
+      this->publish_select_state(this->mode_select_, this->mode_select_state_, "Off");
+      break;
+    default:
+      break;
+  }
+}
+
+void PanasonicAC::update_fan_mode_select() {
+  if (this->fan_mode_select_is_wlan_)
+    return;
+
+  switch (this->fan_mode) {
+    case climate::CLIMATE_FAN_AUTO:
+      this->publish_select_state(this->fan_mode_select_, this->fan_mode_select_state_, "Auto");
+      break;
+    case climate::CLIMATE_FAN_QUIET:
+      this->publish_select_state(this->fan_mode_select_, this->fan_mode_select_state_, "Quiet");
+      break;
+    case climate::CLIMATE_FAN_DIFFUSE:
+      this->publish_select_state(this->fan_mode_select_, this->fan_mode_select_state_, "1 - Diffuse");
+      break;
+    case climate::CLIMATE_FAN_LOW:
+      this->publish_select_state(this->fan_mode_select_, this->fan_mode_select_state_, "2 - Low");
+      break;
+    case climate::CLIMATE_FAN_MEDIUM:
+      this->publish_select_state(this->fan_mode_select_, this->fan_mode_select_state_, "3 - Medium");
+      break;
+    case climate::CLIMATE_FAN_HIGH:
+      this->publish_select_state(this->fan_mode_select_, this->fan_mode_select_state_, "4 - High");
+      break;
+    case climate::CLIMATE_FAN_FOCUS:
+      this->publish_select_state(this->fan_mode_select_, this->fan_mode_select_state_, "5 - Focus");
+      break;
+    default:
+      break;
+  }
+}
+
+void PanasonicAC::update_fan_mode_select(const StringRef &fan_mode) {
+  if (this->fan_mode_select_is_wlan_)
+    this->publish_select_state(this->fan_mode_select_, this->fan_mode_select_state_, fan_mode);
+}
+
+void PanasonicAC::update_preset_select() {
+  if (this->preset_select_is_wlan_)
+    return;
+
+  switch (this->preset) {
+    case climate::CLIMATE_PRESET_NONE:
+      this->publish_select_state(this->preset_select_, this->preset_select_state_, "None");
+      break;
+    case climate::CLIMATE_PRESET_BOOST:
+      this->publish_select_state(this->preset_select_, this->preset_select_state_, "Boost");
+      break;
+    case climate::CLIMATE_PRESET_ECO:
+      this->publish_select_state(this->preset_select_, this->preset_select_state_, "Eco");
+      break;
+    default:
+      break;
+  }
+}
+
+void PanasonicAC::update_preset_select(const StringRef &preset) {
+  if (this->preset_select_is_wlan_)
+    this->publish_select_state(this->preset_select_, this->preset_select_state_, preset);
+}
+
 void PanasonicAC::update_nanoex(bool nanoex) {
   if (this->nanoex_switch_ != nullptr) {
     this->nanoex_state_ = nanoex;
@@ -285,6 +383,93 @@ void PanasonicAC::set_horizontal_swing_select(select::Select *horizontal_swing_s
     if (index == this->horizontal_swing_state_)
       return;
     this->on_horizontal_swing_change(this->horizontal_swing_select_->current_option());
+  });
+}
+
+void PanasonicAC::set_mode_select(select::Select *mode_select) {
+  this->mode_select_ = mode_select;
+  this->mode_select_->add_on_state_callback([this](size_t index) {
+    if (index == this->mode_select_state_)
+      return;
+    this->mode_select_state_ = index;
+
+    auto call = this->make_call();
+    const std::string mode = this->mode_select_->current_option();
+    if (mode == "Heat/Cool")
+      call.set_mode(climate::CLIMATE_MODE_HEAT_COOL);
+    else if (mode == "Heat")
+      call.set_mode(climate::CLIMATE_MODE_HEAT);
+    else if (mode == "Cool")
+      call.set_mode(climate::CLIMATE_MODE_COOL);
+    else if (mode == "Dry")
+      call.set_mode(climate::CLIMATE_MODE_DRY);
+    else if (mode == "Fan Only")
+      call.set_mode(climate::CLIMATE_MODE_FAN_ONLY);
+    else if (mode == "Off")
+      call.set_mode(climate::CLIMATE_MODE_OFF);
+    else
+      return;
+    call.perform();
+  });
+}
+
+void PanasonicAC::set_fan_mode_select(select::Select *fan_mode_select, bool is_wlan) {
+  this->fan_mode_select_ = fan_mode_select;
+  this->fan_mode_select_is_wlan_ = is_wlan;
+  this->fan_mode_select_->add_on_state_callback([this](size_t index) {
+    if (index == this->fan_mode_select_state_)
+      return;
+    this->fan_mode_select_state_ = index;
+
+    auto call = this->make_call();
+    const std::string fan_mode_value = this->fan_mode_select_->current_option();
+    const StringRef fan_mode(fan_mode_value.c_str());
+    if (this->fan_mode_select_is_wlan_) {
+      call.set_custom_fan_mode(fan_mode);
+    } else if (fan_mode == "Auto") {
+      call.set_fan_mode(climate::CLIMATE_FAN_AUTO);
+    } else if (fan_mode == "Quiet") {
+      call.set_fan_mode(climate::CLIMATE_FAN_QUIET);
+    } else if (fan_mode == "1 - Diffuse") {
+      call.set_fan_mode(climate::CLIMATE_FAN_DIFFUSE);
+    } else if (fan_mode == "2 - Low") {
+      call.set_fan_mode(climate::CLIMATE_FAN_LOW);
+    } else if (fan_mode == "3 - Medium") {
+      call.set_fan_mode(climate::CLIMATE_FAN_MEDIUM);
+    } else if (fan_mode == "4 - High") {
+      call.set_fan_mode(climate::CLIMATE_FAN_HIGH);
+    } else if (fan_mode == "5 - Focus") {
+      call.set_fan_mode(climate::CLIMATE_FAN_FOCUS);
+    } else {
+      return;
+    }
+    call.perform();
+  });
+}
+
+void PanasonicAC::set_preset_select(select::Select *preset_select, bool is_wlan) {
+  this->preset_select_ = preset_select;
+  this->preset_select_is_wlan_ = is_wlan;
+  this->preset_select_->add_on_state_callback([this](size_t index) {
+    if (index == this->preset_select_state_)
+      return;
+    this->preset_select_state_ = index;
+
+    auto call = this->make_call();
+    const std::string preset_value = this->preset_select_->current_option();
+    const StringRef preset(preset_value.c_str());
+    if (this->preset_select_is_wlan_) {
+      call.set_custom_preset(preset);
+    } else if (preset == "None") {
+      call.set_preset(climate::CLIMATE_PRESET_NONE);
+    } else if (preset == "Boost") {
+      call.set_preset(climate::CLIMATE_PRESET_BOOST);
+    } else if (preset == "Eco") {
+      call.set_preset(climate::CLIMATE_PRESET_ECO);
+    } else {
+      return;
+    }
+    call.perform();
   });
 }
 
