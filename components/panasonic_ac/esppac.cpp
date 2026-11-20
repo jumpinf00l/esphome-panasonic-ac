@@ -190,7 +190,10 @@ void PanasonicAC::update_fan_mode_select() {
   if (this->fan_mode_select_is_wlan_)
     return;
 
-  switch (this->fan_mode) {
+  if (!this->fan_mode.has_value())
+    return;
+
+  switch (*this->fan_mode) {
     case climate::CLIMATE_FAN_AUTO:
       this->publish_select_state(this->fan_mode_select_, this->fan_mode_select_state_, StringRef("Auto"));
       break;
@@ -226,7 +229,10 @@ void PanasonicAC::update_preset_select() {
   if (this->preset_select_is_wlan_)
     return;
 
-  switch (this->preset) {
+  if (!this->preset.has_value())
+    return;
+
+  switch (*this->preset) {
     case climate::CLIMATE_PRESET_NONE:
       this->publish_select_state(this->preset_select_, this->preset_select_state_, StringRef("None"));
       break;
@@ -424,7 +430,7 @@ void PanasonicAC::set_fan_mode_select(select::Select *fan_mode_select, bool is_w
     auto call = this->make_call();
     const std::string fan_mode = this->fan_mode_select_->current_option();
     if (this->fan_mode_select_is_wlan_) {
-      call.set_custom_fan_mode(fan_mode);
+      call.set_fan_mode(StringRef(fan_mode.c_str()));
     } else if (fan_mode == "Auto") {
       call.set_fan_mode(climate::CLIMATE_FAN_AUTO);
     } else if (fan_mode == "Quiet") {
@@ -457,7 +463,7 @@ void PanasonicAC::set_preset_select(select::Select *preset_select, bool is_wlan)
     auto call = this->make_call();
     const std::string preset = this->preset_select_->current_option();
     if (this->preset_select_is_wlan_) {
-      call.set_custom_preset(preset);
+      call.set_preset(StringRef(preset.c_str()));
     } else if (preset == "None") {
       call.set_preset(climate::CLIMATE_PRESET_NONE);
     } else if (preset == "Boost") {
