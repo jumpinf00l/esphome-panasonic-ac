@@ -422,7 +422,7 @@ void PanasonicACCNT::set_data(bool set) {
   this->update_fan_mode_select();
   this->update_preset_select();
 
-  const bool verticalSwingActive = verticalSwing == "Auto" || verticalSwing == "Swing";
+  const bool verticalSwingActive = verticalSwing == "Swing";
   if (verticalSwingActive && horizontalSwing == "Auto")
     this->swing_mode = climate::CLIMATE_SWING_BOTH;
   else if (verticalSwingActive)
