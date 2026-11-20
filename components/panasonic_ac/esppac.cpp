@@ -164,22 +164,22 @@ void PanasonicAC::publish_select_state(select::Select *select, size_t &state, co
 void PanasonicAC::update_mode_select() {
   switch (this->mode) {
     case climate::CLIMATE_MODE_HEAT_COOL:
-      this->publish_select_state(this->mode_select_, this->mode_select_state_, "Heat/Cool");
+      this->publish_select_state(this->mode_select_, this->mode_select_state_, StringRef("Heat/Cool"));
       break;
     case climate::CLIMATE_MODE_HEAT:
-      this->publish_select_state(this->mode_select_, this->mode_select_state_, "Heat");
+      this->publish_select_state(this->mode_select_, this->mode_select_state_, StringRef("Heat"));
       break;
     case climate::CLIMATE_MODE_COOL:
-      this->publish_select_state(this->mode_select_, this->mode_select_state_, "Cool");
+      this->publish_select_state(this->mode_select_, this->mode_select_state_, StringRef("Cool"));
       break;
     case climate::CLIMATE_MODE_DRY:
-      this->publish_select_state(this->mode_select_, this->mode_select_state_, "Dry");
+      this->publish_select_state(this->mode_select_, this->mode_select_state_, StringRef("Dry"));
       break;
     case climate::CLIMATE_MODE_FAN_ONLY:
-      this->publish_select_state(this->mode_select_, this->mode_select_state_, "Fan Only");
+      this->publish_select_state(this->mode_select_, this->mode_select_state_, StringRef("Fan Only"));
       break;
     case climate::CLIMATE_MODE_OFF:
-      this->publish_select_state(this->mode_select_, this->mode_select_state_, "Off");
+      this->publish_select_state(this->mode_select_, this->mode_select_state_, StringRef("Off"));
       break;
     default:
       break;
@@ -192,25 +192,25 @@ void PanasonicAC::update_fan_mode_select() {
 
   switch (this->fan_mode) {
     case climate::CLIMATE_FAN_AUTO:
-      this->publish_select_state(this->fan_mode_select_, this->fan_mode_select_state_, "Auto");
+      this->publish_select_state(this->fan_mode_select_, this->fan_mode_select_state_, StringRef("Auto"));
       break;
     case climate::CLIMATE_FAN_QUIET:
-      this->publish_select_state(this->fan_mode_select_, this->fan_mode_select_state_, "Quiet");
+      this->publish_select_state(this->fan_mode_select_, this->fan_mode_select_state_, StringRef("Quiet"));
       break;
     case climate::CLIMATE_FAN_DIFFUSE:
-      this->publish_select_state(this->fan_mode_select_, this->fan_mode_select_state_, "1 - Diffuse");
+      this->publish_select_state(this->fan_mode_select_, this->fan_mode_select_state_, StringRef("1 - Diffuse"));
       break;
     case climate::CLIMATE_FAN_LOW:
-      this->publish_select_state(this->fan_mode_select_, this->fan_mode_select_state_, "2 - Low");
+      this->publish_select_state(this->fan_mode_select_, this->fan_mode_select_state_, StringRef("2 - Low"));
       break;
     case climate::CLIMATE_FAN_MEDIUM:
-      this->publish_select_state(this->fan_mode_select_, this->fan_mode_select_state_, "3 - Medium");
+      this->publish_select_state(this->fan_mode_select_, this->fan_mode_select_state_, StringRef("3 - Medium"));
       break;
     case climate::CLIMATE_FAN_HIGH:
-      this->publish_select_state(this->fan_mode_select_, this->fan_mode_select_state_, "4 - High");
+      this->publish_select_state(this->fan_mode_select_, this->fan_mode_select_state_, StringRef("4 - High"));
       break;
     case climate::CLIMATE_FAN_FOCUS:
-      this->publish_select_state(this->fan_mode_select_, this->fan_mode_select_state_, "5 - Focus");
+      this->publish_select_state(this->fan_mode_select_, this->fan_mode_select_state_, StringRef("5 - Focus"));
       break;
     default:
       break;
@@ -228,13 +228,13 @@ void PanasonicAC::update_preset_select() {
 
   switch (this->preset) {
     case climate::CLIMATE_PRESET_NONE:
-      this->publish_select_state(this->preset_select_, this->preset_select_state_, "None");
+      this->publish_select_state(this->preset_select_, this->preset_select_state_, StringRef("None"));
       break;
     case climate::CLIMATE_PRESET_BOOST:
-      this->publish_select_state(this->preset_select_, this->preset_select_state_, "Boost");
+      this->publish_select_state(this->preset_select_, this->preset_select_state_, StringRef("Boost"));
       break;
     case climate::CLIMATE_PRESET_ECO:
-      this->publish_select_state(this->preset_select_, this->preset_select_state_, "Eco");
+      this->publish_select_state(this->preset_select_, this->preset_select_state_, StringRef("Eco"));
       break;
     default:
       break;
@@ -422,8 +422,7 @@ void PanasonicAC::set_fan_mode_select(select::Select *fan_mode_select, bool is_w
     this->fan_mode_select_state_ = index;
 
     auto call = this->make_call();
-    const std::string fan_mode_value = this->fan_mode_select_->current_option();
-    const StringRef fan_mode(fan_mode_value.c_str());
+    const std::string fan_mode = this->fan_mode_select_->current_option();
     if (this->fan_mode_select_is_wlan_) {
       call.set_custom_fan_mode(fan_mode);
     } else if (fan_mode == "Auto") {
@@ -456,8 +455,7 @@ void PanasonicAC::set_preset_select(select::Select *preset_select, bool is_wlan)
     this->preset_select_state_ = index;
 
     auto call = this->make_call();
-    const std::string preset_value = this->preset_select_->current_option();
-    const StringRef preset(preset_value.c_str());
+    const std::string preset = this->preset_select_->current_option();
     if (this->preset_select_is_wlan_) {
       call.set_custom_preset(preset);
     } else if (preset == "None") {

@@ -114,11 +114,11 @@ This is jumpinf00l's super-dodgy hack to add a few nicer sensors and selects, it
 |                           | name       | Required    | [Text]            | [blank]        | The name of the horizontal swing select entity (will be used to generate the entity ID)                                  |
 |                           | icon       | Optional    | [mdi:icon format] | [blank]        | The icon to use for the horizontal swing mode select entity (used by Home Assistant and the web UI                       |
 |                           | id         | optional    | [Text]            | [blank]        | The ID to use in ESPHome (doesn't appear to influence the Home Assistant entity ID)                                      |
-| mode_select               |            | Optional    |                   |                | Enable a select entity for setting the climate mode                                                                      |
+| mode_select               |            | Optional    |                   |                | Enable a climate mode select with Heat/Cool, Heat, Cool, Dry, Fan Only, and Off                                           |
 |                           | name       | Required    | [Text]            | [blank]        | The name of the mode select entity                                                                                       |
-| fan_mode_select           |            | Optional    |                   |                | Enable a select entity for setting the fan mode                                                                         |
+| fan_mode_select           |            | Optional    |                   |                | Enable a fan mode select; options vary by type (CNT: Auto, Quiet, 1-5; WLAN: Automatic, 1-5)                             |
 |                           | name       | Required    | [Text]            | [blank]        | The name of the fan mode select entity                                                                                  |
-| preset_select             |            | Optional    |                   |                | Enable a select entity for setting the preset                                                                            |
+| preset_select             |            | Optional    |                   |                | Enable a preset select; options vary by type (CNT: None, Boost, Eco; WLAN: Normal, Powerful, Quiet)                      |
 |                           | name       | Required    | [Text]            | [blank]        | The name of the preset select entity                                                                                    |
 | vertical_swing_select     |            | Optional    |                   |                | Enable the vertical swing select entity containing individual vertical swing modes                                       |
 |                           | name       | Required    | [Text]            | [blank]        | The name of the vertical swing select entity (will be used to generate the entity ID)                                    |
@@ -221,7 +221,7 @@ Below are some neat tweaks inside the ESPHome YAML which you can use to extend t
 <details>
 <summary>Select entities</summary>
 
-Mode, fan mode, and preset can now be exposed directly by adding `mode_select`, `fan_mode_select`, and `preset_select` under the `panasonic_ac` climate platform. These native entities stay synchronized with the climate state. The example below is a legacy template-based alternative; it is not needed for the built-in selects.
+Mode, fan mode, and preset can now be exposed directly by adding `mode_select`, `fan_mode_select`, and `preset_select` under the `panasonic_ac` climate platform. These native entities stay synchronized with the climate state. The fan and preset options match the selected device type: CNT provides standard climate fan modes and presets, while WLAN uses its native `"Automatic"`/`"1"`-`"5"` fan options and `"Normal"`/`"Powerful"`/`"Quiet"` presets. The example below is a legacy template-based alternative; it is not needed for the built-in selects.
 
 ```
 select:

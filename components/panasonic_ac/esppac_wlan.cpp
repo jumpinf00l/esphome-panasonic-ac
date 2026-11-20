@@ -453,10 +453,12 @@ void PanasonicACWLAN::handle_packet() {
 
     update_nanoex(nanoex);
 
-    this->set_custom_fan_mode_(determine_fan_speed(this->rx_buffer_[26]));
-    this->update_fan_mode_select(StringRef(determine_fan_speed(this->rx_buffer_[26])));
-    this->set_custom_preset_(determine_preset(this->rx_buffer_[42]));
-    this->update_preset_select(StringRef(determine_preset(this->rx_buffer_[42])));
+    const char *fan_mode = determine_fan_speed(this->rx_buffer_[26]);
+    this->set_custom_fan_mode_(fan_mode);
+    this->update_fan_mode_select(StringRef(fan_mode));
+    const char *preset = determine_preset(this->rx_buffer_[42]);
+    this->set_custom_preset_(preset);
+    this->update_preset_select(StringRef(preset));
 
     this->swing_mode = determine_swing(this->rx_buffer_[30]);
     this->update_mode_select();
@@ -515,15 +517,21 @@ void PanasonicACWLAN::handle_packet() {
           update_target_temperature((int8_t) this->rx_buffer_[currentIndex + 2]);
           break;
         case 0xA0:  // Fan speed
+        {
           ESP_LOGV(TAG, "Received fan speed");
-          this->set_custom_fan_mode_(determine_fan_speed(this->rx_buffer_[currentIndex + 2]));
-          this->update_fan_mode_select(StringRef(determine_fan_speed(this->rx_buffer_[currentIndex + 2])));
+          const char *fan_mode = determine_fan_speed(this->rx_buffer_[currentIndex + 2]);
+          this->set_custom_fan_mode_(fan_mode);
+          this->update_fan_mode_select(StringRef(fan_mode));
           break;
+        }
         case 0xB2:  // Preset
+        {
           ESP_LOGV(TAG, "Received preset");
-          this->set_custom_preset_(determine_preset(this->rx_buffer_[currentIndex + 2]));
-          this->update_preset_select(StringRef(determine_preset(this->rx_buffer_[currentIndex + 2])));
+          const char *preset = determine_preset(this->rx_buffer_[currentIndex + 2]);
+          this->set_custom_preset_(preset);
+          this->update_preset_select(StringRef(preset));
           break;
+        }
         case 0xA1:
           ESP_LOGV(TAG, "Received swing mode");
           this->swing_mode = determine_swing(this->rx_buffer_[currentIndex + 2]);
