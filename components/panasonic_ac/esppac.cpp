@@ -1,7 +1,6 @@
 #include "esppac.h"
 
 #include "esphome/core/log.h"
-#include <set>
 
 namespace esphome {
 namespace panasonic_ac {
@@ -39,19 +38,26 @@ climate::ClimateTraits PanasonicAC::traits() {
       climate::CLIMATE_FAN_FOCUS
   });
 
-  std::set<climate::ClimateSwingMode> supported_swing_modes = {
-      climate::CLIMATE_SWING_OFF
-  };
-  if (this->vertical_swing_enable_) {
-    supported_swing_modes.insert(climate::CLIMATE_SWING_VERTICAL);
-  }
-  if (this->horizontal_swing_enable_) {
-    supported_swing_modes.insert(climate::CLIMATE_SWING_HORIZONTAL);
-  }
   if (this->vertical_swing_enable_ && this->horizontal_swing_enable_) {
-    supported_swing_modes.insert(climate::CLIMATE_SWING_BOTH);
+    traits.set_supported_swing_modes({
+        climate::CLIMATE_SWING_OFF,
+        climate::CLIMATE_SWING_BOTH,
+        climate::CLIMATE_SWING_VERTICAL,
+        climate::CLIMATE_SWING_HORIZONTAL
+    });
+  } else if (this->vertical_swing_enable_) {
+    traits.set_supported_swing_modes({
+        climate::CLIMATE_SWING_OFF,
+        climate::CLIMATE_SWING_VERTICAL
+    });
+  } else if (this->horizontal_swing_enable_) {
+    traits.set_supported_swing_modes({
+        climate::CLIMATE_SWING_OFF,
+        climate::CLIMATE_SWING_HORIZONTAL
+    });
+  } else {
+    traits.set_supported_swing_modes({climate::CLIMATE_SWING_OFF});
   }
-  traits.set_supported_swing_modes(supported_swing_modes);
 
   traits.set_supported_presets({
 	  climate::CLIMATE_PRESET_NONE,
