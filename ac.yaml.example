@@ -38,10 +38,18 @@ climate:
     # type: wlan
 
     name: Panasonic AC
+    mode_select:
+      name: Panasonic AC Mode
+    fan_mode_select:
+      name: Panasonic AC Fan Mode
+    preset_select:
+      name: Panasonic AC Preset
     horizontal_swing_select:
       name: Panasonic AC Horizontal Swing Mode
     vertical_swing_select:
       name: Panasonic AC Vertical Swing Mode
+    horizontal_swing_enable: true
+    vertical_swing_enable: true
     outside_temperature:
       name: Panasonic AC Outside Temperature
     defrost_sensor:

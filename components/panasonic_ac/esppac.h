@@ -35,9 +35,15 @@ enum class ACType {
 class PanasonicAC : public Component, public uart::UARTDevice, public climate::Climate {
  public:
   void set_outside_temperature_sensor(sensor::Sensor *outside_temperature_sensor);
+  void set_inside_temperature_sensor(sensor::Sensor *inside_temperature_sensor);
   void set_outside_temperature_offset(int8_t outside_temperature_offset);
   void set_vertical_swing_select(select::Select *vertical_swing_select);
   void set_horizontal_swing_select(select::Select *horizontal_swing_select);
+  void set_vertical_swing_enable(bool enable);
+  void set_horizontal_swing_enable(bool enable);
+  void set_mode_select(select::Select *mode_select);
+  void set_fan_mode_select(select::Select *fan_mode_select, bool is_wlan);
+  void set_preset_select(select::Select *preset_select, bool is_wlan);
   void set_nanoex_switch(switch_::Switch *nanoex_switch);
   void set_eco_switch(switch_::Switch *eco_switch);
   void set_econavi_switch(switch_::Switch *econavi_switch);
@@ -53,8 +59,16 @@ class PanasonicAC : public Component, public uart::UARTDevice, public climate::C
 
  protected:
   sensor::Sensor *outside_temperature_sensor_ = nullptr;        // Sensor to store outside temperature from queries
+  sensor::Sensor *inside_temperature_sensor_ = nullptr;         // Sensor to store current inside temperature
   select::Select *vertical_swing_select_ = nullptr;             // Select to store manual position of vertical swing
   select::Select *horizontal_swing_select_ = nullptr;           // Select to store manual position of horizontal swing
+  select::Select *mode_select_ = nullptr;
+  select::Select *fan_mode_select_ = nullptr;
+  select::Select *preset_select_ = nullptr;
+  bool vertical_swing_enable_ = true;
+  bool horizontal_swing_enable_ = true;
+  bool fan_mode_select_is_wlan_ = false;
+  bool preset_select_is_wlan_ = false;
   switch_::Switch *nanoex_switch_ = nullptr;                    // Switch to toggle nanoeX on/off
   switch_::Switch *eco_switch_ = nullptr;                       // Switch to toggle eco mode on/off
   switch_::Switch *econavi_switch_ = nullptr;                   // Switch to toggle econavi mode on/off
@@ -65,6 +79,9 @@ class PanasonicAC : public Component, public uart::UARTDevice, public climate::C
 
   size_t vertical_swing_state_;
   size_t horizontal_swing_state_;
+  size_t mode_select_state_ = ~0UL;
+  size_t fan_mode_select_state_ = ~0UL;
+  size_t preset_select_state_ = ~0UL;
 
   int8_t current_temperature_offset_ = 0;  // current temperature offset to compensate internal sensor values
   int8_t outside_temperature_offset_ = 0;  // outside temperature offset to compensate internal sensor values
@@ -93,9 +110,16 @@ class PanasonicAC : public Component, public uart::UARTDevice, public climate::C
 
   void update_outside_temperature(int8_t temperature);
   void update_current_temperature(int8_t temperature);
+  void publish_inside_temperature();
   void update_target_temperature(uint8_t raw_value);
   void update_swing_horizontal(const StringRef &swing);
   void update_swing_vertical(const StringRef &swing);
+  void update_mode_select();
+  void update_fan_mode_select();
+  void update_fan_mode_select(const StringRef &fan_mode);
+  void update_preset_select();
+  void update_preset_select(const StringRef &preset);
+  void publish_select_state(select::Select *select, size_t &state, const StringRef &value);
   void update_nanoex(bool nanoex);
   void update_eco(bool eco);
   void set_eco_state_optimistic(bool eco, bool publish_switch);

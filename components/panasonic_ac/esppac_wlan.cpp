@@ -107,6 +107,7 @@ void PanasonicACWLAN::control(const climate::ClimateCall &call) {
 
     this->mode =
         *call.get_mode();   // Set mode manually since we won't receive a report from the AC if its the same mode again
+    this->update_mode_select();
     this->publish_state();  // Send this state, will get updated once next poll is executed
   }
 
@@ -356,15 +357,15 @@ static const char *determine_preset(uint8_t preset) {
 static const char *determine_swing_vertical(uint8_t swing) {
   switch (swing) {
     case 0x42:  // Down
-      return "down";
+      return "Bottom";
     case 0x45:  // Down center
-      return "down_center";
+      return "Bottom Middle";
     case 0x43:  // Center
-      return "center";
+      return "Middle";
     case 0x44:  // Up Center
-      return "up_center";
+      return "Top Middle";
     case 0x41:  // Up
-      return "up";
+      return "Top";
     default:
       ESP_LOGW(TAG, "Received unknown vertical swing position");
       return "Unknown";
@@ -374,15 +375,15 @@ static const char *determine_swing_vertical(uint8_t swing) {
 static const char *determine_swing_horizontal(uint8_t swing) {
   switch (swing) {
     case 0x42:  // Left
-      return "left";
+      return "Left";
     case 0x5C:  // Left center
-      return "left_center";
+      return "Left Center";
     case 0x43:  // Center
-      return "center";
+      return "Center";
     case 0x56:  // Right center
-      return "right_center";
+      return "Right Center";
     case 0x41:  // Right
-      return "right";
+      return "Right";
     default:
       ESP_LOGW(TAG, "Received unknown horizontal swing position");
       return "Unknown";
@@ -452,10 +453,15 @@ void PanasonicACWLAN::handle_packet() {
 
     update_nanoex(nanoex);
 
-    this->set_custom_fan_mode_(determine_fan_speed(this->rx_buffer_[26]));
-    this->set_custom_preset_(determine_preset(this->rx_buffer_[42]));
+    const char *fan_mode = determine_fan_speed(this->rx_buffer_[26]);
+    this->set_custom_fan_mode_(fan_mode);
+    this->update_fan_mode_select(StringRef(fan_mode));
+    const char *preset = determine_preset(this->rx_buffer_[42]);
+    this->set_custom_preset_(preset);
+    this->update_preset_select(StringRef(preset));
 
     this->swing_mode = determine_swing(this->rx_buffer_[30]);
+    this->update_mode_select();
 
     // climate::ClimateAction action = determine_action(); // Determine the current action of the AC
     // this->action = action;
@@ -504,19 +510,28 @@ void PanasonicACWLAN::handle_packet() {
           break;
         case 0xB0:  // Mode
           this->mode = determine_mode(this->rx_buffer_[currentIndex + 2]);
+          this->update_mode_select();
           break;
         case 0x31:  // Target temperature
           ESP_LOGV(TAG, "Received target temperature");
           update_target_temperature((int8_t) this->rx_buffer_[currentIndex + 2]);
           break;
         case 0xA0:  // Fan speed
+        {
           ESP_LOGV(TAG, "Received fan speed");
-          this->set_custom_fan_mode_(determine_fan_speed(this->rx_buffer_[currentIndex + 2]));
+          const char *fan_mode = determine_fan_speed(this->rx_buffer_[currentIndex + 2]);
+          this->set_custom_fan_mode_(fan_mode);
+          this->update_fan_mode_select(StringRef(fan_mode));
           break;
+        }
         case 0xB2:  // Preset
+        {
           ESP_LOGV(TAG, "Received preset");
-          this->set_custom_preset_(determine_preset(this->rx_buffer_[currentIndex + 2]));
+          const char *preset = determine_preset(this->rx_buffer_[currentIndex + 2]);
+          this->set_custom_preset_(preset);
+          this->update_preset_select(StringRef(preset));
           break;
+        }
         case 0xA1:
           ESP_LOGV(TAG, "Received swing mode");
           this->swing_mode = determine_swing(this->rx_buffer_[currentIndex + 2]);
@@ -549,6 +564,7 @@ void PanasonicACWLAN::handle_packet() {
     climate::ClimateAction action = determine_action();  // Determine the current action of the AC
     this->action = action;
 
+    this->update_mode_select();
     this->publish_state();
   } else if (this->rx_buffer_[2] == 0x01 && this->rx_buffer_[3] == 0x80)  // Answer for handshake 16
   {
@@ -755,15 +771,15 @@ void PanasonicACWLAN::on_vertical_swing_change(const StringRef& swing) {
 
   ESP_LOGD(TAG, "Setting vertical swing position");
 
-  if (swing == "down")
+  if (swing == "Bottom")
     set_value(0xA4, 0x42);
-  else if (swing == "down_center")
+  else if (swing == "Bottom Middle")
     set_value(0xA4, 0x45);
-  else if (swing == "center")
+  else if (swing == "Middle")
     set_value(0xA4, 0x43);
-  else if (swing == "up_center")
+  else if (swing == "Top Middle")
     set_value(0xA4, 0x44);
-  else if (swing == "up")
+  else if (swing == "Top")
     set_value(0xA4, 0x41);
 
   send_set_command();
@@ -775,15 +791,15 @@ void PanasonicACWLAN::on_horizontal_swing_change(const StringRef &swing) {
 
   ESP_LOGD(TAG, "Setting horizontal swing position");
 
-  if (swing == "left")
+  if (swing == "Left")
     set_value(0xA5, 0x42);
-  else if (swing == "left_center")
+  else if (swing == "Left Center")
     set_value(0xA5, 0x5C);
-  else if (swing == "center")
+  else if (swing == "Center")
     set_value(0xA5, 0x43);
-  else if (swing == "right_center")
+  else if (swing == "Right Center")
     set_value(0xA5, 0x56);
-  else if (swing == "right")
+  else if (swing == "Right")
     set_value(0xA5, 0x41);
 
   send_set_command();

@@ -63,19 +63,19 @@ static const char *determine_vertical_swing(uint8_t swing) {
 
   switch (nib) {
     case 0x0E:
-      return "swing";
+      return "Swing";
     case 0x0F:
-      return "auto";
+      return "Auto";
     case 0x01:
-      return "up";
+      return "Top";
     case 0x02:
-      return "up_center";
+      return "Top Middle";
     case 0x03:
-      return "center";
+      return "Middle";
     case 0x04:
-      return "down_center";
+      return "Bottom Middle";
     case 0x05:
-      return "down";
+      return "Bottom";
     case 0x00:
       return "unsupported";
     default:
@@ -89,17 +89,17 @@ static const char *determine_horizontal_swing(uint8_t swing) {
 
   switch (nib) {
     case 0x0D:
-      return "auto";
+      return "Auto";
     case 0x09:
-      return "left";
+      return "Left";
     case 0x0A:
-      return "left_center";
+      return "Left Center";
     case 0x06:
-      return "center";
+      return "Center";
     case 0x0B:
-      return "right_center";
+      return "Right Center";
     case 0x0C:
-      return "right";
+      return "Right";
     case 0x00:
       return "unsupported";
     default:
@@ -291,13 +291,13 @@ void PanasonicACCNT::control(const climate::ClimateCall &call) {
 
     switch (*call.get_swing_mode()) {
       case climate::CLIMATE_SWING_BOTH:
-        this->cmd[4] = 0xFD;
+        this->cmd[4] = 0xED;
         break;
       case climate::CLIMATE_SWING_OFF:
         this->cmd[4] = 0x36;  // Reset both to center
         break;
       case climate::CLIMATE_SWING_VERTICAL:
-        this->cmd[4] = 0xF6;  // Swing vertical, horizontal center
+        this->cmd[4] = 0xE6;  // Swing vertical, horizontal center
         break;
       case climate::CLIMATE_SWING_HORIZONTAL:
         this->cmd[4] = 0x3D;  // Swing horizontal, vertical center
@@ -338,6 +338,7 @@ void PanasonicACCNT::control(const climate::ClimateCall &call) {
       this->preset_pending_confirmation_ = true;
       this->preset_request_time_ = millis();
       this->set_eco_state_optimistic(*call.get_preset() == climate::CLIMATE_PRESET_ECO, true);
+      this->update_preset_select();
       this->publish_state();
     }
   }
@@ -417,11 +418,16 @@ void PanasonicACCNT::set_data(bool set) {
     }
   }
 
-  if (verticalSwing == "auto" && horizontalSwing == "auto")
+  this->update_mode_select();
+  this->update_fan_mode_select();
+  this->update_preset_select();
+
+  const bool verticalSwingActive = verticalSwing == "Swing";
+  if (verticalSwingActive && horizontalSwing == "Auto")
     this->swing_mode = climate::CLIMATE_SWING_BOTH;
-  else if (verticalSwing == "auto")
+  else if (verticalSwingActive)
     this->swing_mode = climate::CLIMATE_SWING_VERTICAL;
-  else if (horizontalSwing == "auto")
+  else if (horizontalSwing == "Auto")
     this->swing_mode = climate::CLIMATE_SWING_HORIZONTAL;
   else
     this->swing_mode = climate::CLIMATE_SWING_OFF;
@@ -558,19 +564,19 @@ void PanasonicACCNT::on_vertical_swing_change(const StringRef &swing) {
     this->cmd = this->data;
   }
 
-  if (swing == "down")
+  if (swing == "Bottom")
     this->cmd[4] = (this->cmd[4] & 0x0F) + 0x50;
-  else if (swing == "down_center")
+  else if (swing == "Bottom Middle")
     this->cmd[4] = (this->cmd[4] & 0x0F) + 0x40;
-  else if (swing == "center")
+  else if (swing == "Middle")
     this->cmd[4] = (this->cmd[4] & 0x0F) + 0x30;
-  else if (swing == "up_center")
+  else if (swing == "Top Middle")
     this->cmd[4] = (this->cmd[4] & 0x0F) + 0x20;
-  else if (swing == "up")
+  else if (swing == "Top")
     this->cmd[4] = (this->cmd[4] & 0x0F) + 0x10;
-  else if (swing == "swing")
+  else if (swing == "Swing")
     this->cmd[4] = (this->cmd[4] & 0x0F) + 0xE0;
-  else if (swing == "auto")
+  else if (swing == "Auto")
     this->cmd[4] = (this->cmd[4] & 0x0F) + 0xF0;
   else {
     ESP_LOGW(TAG, "Unsupported vertical swing position received");
@@ -589,17 +595,17 @@ void PanasonicACCNT::on_horizontal_swing_change(const StringRef &swing) {
     this->cmd = this->data;
   }
 
-  if (swing == "left")
+  if (swing == "Left")
     this->cmd[4] = (this->cmd[4] & 0xF0) + 0x09;
-  else if (swing == "left_center")
+  else if (swing == "Left Center")
     this->cmd[4] = (this->cmd[4] & 0xF0) + 0x0A;
-  else if (swing == "center")
+  else if (swing == "Center")
     this->cmd[4] = (this->cmd[4] & 0xF0) + 0x06;
-  else if (swing == "right_center")
+  else if (swing == "Right Center")
     this->cmd[4] = (this->cmd[4] & 0xF0) + 0x0B;
-  else if (swing == "right")
+  else if (swing == "Right")
     this->cmd[4] = (this->cmd[4] & 0xF0) + 0x0C;
-  else if (swing == "auto")
+  else if (swing == "Auto")
     this->cmd[4] = (this->cmd[4] & 0xF0) + 0x0D;
   else {
     ESP_LOGW(TAG, "Unsupported horizontal swing position received");
@@ -629,6 +635,7 @@ void PanasonicACCNT::on_nanoex_change(bool state) {
 
 void PanasonicACCNT::on_eco_change(bool state) {
   this->preset = state ? climate::CLIMATE_PRESET_ECO : climate::CLIMATE_PRESET_NONE;
+  this->update_preset_select();
   this->preset_pending_confirmation_ = true;
   this->preset_request_time_ = millis();
   this->publish_state();
