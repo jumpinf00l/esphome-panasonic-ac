@@ -291,13 +291,13 @@ void PanasonicACCNT::control(const climate::ClimateCall &call) {
 
     switch (*call.get_swing_mode()) {
       case climate::CLIMATE_SWING_BOTH:
-        this->cmd[4] = 0xFD;
+        this->cmd[4] = 0xED;
         break;
       case climate::CLIMATE_SWING_OFF:
         this->cmd[4] = 0x36;  // Reset both to center
         break;
       case climate::CLIMATE_SWING_VERTICAL:
-        this->cmd[4] = 0xF6;  // Swing vertical, horizontal center
+        this->cmd[4] = 0xE6;  // Swing vertical, horizontal center
         break;
       case climate::CLIMATE_SWING_HORIZONTAL:
         this->cmd[4] = 0x3D;  // Swing horizontal, vertical center
@@ -422,9 +422,10 @@ void PanasonicACCNT::set_data(bool set) {
   this->update_fan_mode_select();
   this->update_preset_select();
 
-  if (verticalSwing == "Auto" && horizontalSwing == "Auto")
+  const bool verticalSwingActive = verticalSwing == "Auto" || verticalSwing == "Swing";
+  if (verticalSwingActive && horizontalSwing == "Auto")
     this->swing_mode = climate::CLIMATE_SWING_BOTH;
-  else if (verticalSwing == "Auto")
+  else if (verticalSwingActive)
     this->swing_mode = climate::CLIMATE_SWING_VERTICAL;
   else if (horizontalSwing == "Auto")
     this->swing_mode = climate::CLIMATE_SWING_HORIZONTAL;
