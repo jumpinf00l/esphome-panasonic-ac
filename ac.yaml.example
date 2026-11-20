@@ -48,6 +48,8 @@ climate:
       name: Panasonic AC Horizontal Swing Mode
     vertical_swing_select:
       name: Panasonic AC Vertical Swing Mode
+    horizontal_swing_enable: true
+    vertical_swing_enable: true
     outside_temperature:
       name: Panasonic AC Outside Temperature
     defrost_sensor:

@@ -1,6 +1,7 @@
 #include "esppac.h"
 
 #include "esphome/core/log.h"
+#include <set>
 
 namespace esphome {
 namespace panasonic_ac {
@@ -38,12 +39,19 @@ climate::ClimateTraits PanasonicAC::traits() {
       climate::CLIMATE_FAN_FOCUS
   });
 
-  traits.set_supported_swing_modes({
-	  climate::CLIMATE_SWING_OFF,
-	  climate::CLIMATE_SWING_BOTH,
-	  climate::CLIMATE_SWING_VERTICAL,
-	  climate::CLIMATE_SWING_HORIZONTAL
-  });
+  std::set<climate::ClimateSwingMode> supported_swing_modes = {
+      climate::CLIMATE_SWING_OFF
+  };
+  if (this->vertical_swing_enable_) {
+    supported_swing_modes.insert(climate::CLIMATE_SWING_VERTICAL);
+  }
+  if (this->horizontal_swing_enable_) {
+    supported_swing_modes.insert(climate::CLIMATE_SWING_HORIZONTAL);
+  }
+  if (this->vertical_swing_enable_ && this->horizontal_swing_enable_) {
+    supported_swing_modes.insert(climate::CLIMATE_SWING_BOTH);
+  }
+  traits.set_supported_swing_modes(supported_swing_modes);
 
   traits.set_supported_presets({
 	  climate::CLIMATE_PRESET_NONE,
@@ -383,6 +391,10 @@ void PanasonicAC::set_vertical_swing_select(select::Select *vertical_swing_selec
   });
 }
 
+void PanasonicAC::set_vertical_swing_enable(bool enable) {
+  this->vertical_swing_enable_ = enable;
+}
+
 void PanasonicAC::set_horizontal_swing_select(select::Select *horizontal_swing_select) {
   this->horizontal_swing_select_ = horizontal_swing_select;
   this->horizontal_swing_select_->add_on_state_callback([this](size_t index) {
@@ -390,6 +402,10 @@ void PanasonicAC::set_horizontal_swing_select(select::Select *horizontal_swing_s
       return;
     this->on_horizontal_swing_change(this->horizontal_swing_select_->current_option());
   });
+}
+
+void PanasonicAC::set_horizontal_swing_enable(bool enable) {
+  this->horizontal_swing_enable_ = enable;
 }
 
 void PanasonicAC::set_mode_select(select::Select *mode_select) {

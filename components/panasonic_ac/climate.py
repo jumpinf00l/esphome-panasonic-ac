@@ -31,6 +31,8 @@ PanasonicACSelect = panasonic_ac_ns.class_(
 
 CONF_HORIZONTAL_SWING_SELECT = "horizontal_swing_select"
 CONF_VERTICAL_SWING_SELECT = "vertical_swing_select"
+CONF_HORIZONTAL_SWING_ENABLE = "horizontal_swing_enable"
+CONF_VERTICAL_SWING_ENABLE = "vertical_swing_enable"
 CONF_MODE_SELECT = "mode_select"
 CONF_FAN_MODE_SELECT = "fan_mode_select"
 CONF_PRESET_SELECT = "preset_select"
@@ -65,6 +67,8 @@ SELECT_SCHEMA = select.select_schema(PanasonicACSelect)
 PANASONIC_COMMON_SCHEMA = {
     cv.Optional(CONF_HORIZONTAL_SWING_SELECT): SELECT_SCHEMA,
     cv.Optional(CONF_VERTICAL_SWING_SELECT): SELECT_SCHEMA,
+    cv.Optional(CONF_HORIZONTAL_SWING_ENABLE, default=True): cv.boolean,
+    cv.Optional(CONF_VERTICAL_SWING_ENABLE, default=True): cv.boolean,
     cv.Optional(CONF_MODE_SELECT): SELECT_SCHEMA,
     cv.Optional(CONF_FAN_MODE_SELECT): SELECT_SCHEMA,
     cv.Optional(CONF_PRESET_SELECT): SELECT_SCHEMA,
@@ -111,6 +115,9 @@ async def to_code(config):
     var = await climate.new_climate(config)
     await cg.register_component(var, config)
     await uart.register_uart_device(var, config)
+
+    cg.add(var.set_horizontal_swing_enable(config[CONF_HORIZONTAL_SWING_ENABLE]))
+    cg.add(var.set_vertical_swing_enable(config[CONF_VERTICAL_SWING_ENABLE]))
 
     if CONF_HORIZONTAL_SWING_SELECT in config:
         conf = config[CONF_HORIZONTAL_SWING_SELECT]

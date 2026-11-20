@@ -39,6 +39,8 @@ class PanasonicAC : public Component, public uart::UARTDevice, public climate::C
   void set_outside_temperature_offset(int8_t outside_temperature_offset);
   void set_vertical_swing_select(select::Select *vertical_swing_select);
   void set_horizontal_swing_select(select::Select *horizontal_swing_select);
+  void set_vertical_swing_enable(bool enable);
+  void set_horizontal_swing_enable(bool enable);
   void set_mode_select(select::Select *mode_select);
   void set_fan_mode_select(select::Select *fan_mode_select, bool is_wlan);
   void set_preset_select(select::Select *preset_select, bool is_wlan);
@@ -63,6 +65,8 @@ class PanasonicAC : public Component, public uart::UARTDevice, public climate::C
   select::Select *mode_select_ = nullptr;
   select::Select *fan_mode_select_ = nullptr;
   select::Select *preset_select_ = nullptr;
+  bool vertical_swing_enable_ = true;
+  bool horizontal_swing_enable_ = true;
   bool fan_mode_select_is_wlan_ = false;
   bool preset_select_is_wlan_ = false;
   switch_::Switch *nanoex_switch_ = nullptr;                    // Switch to toggle nanoeX on/off
